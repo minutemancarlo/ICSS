@@ -1,0 +1,22 @@
+﻿@inherits LayoutComponentBase
+<PageTitle>ICSS - Login</PageTitle>
+<MudThemeProvider />
+<MudSnackbarProvider />
+
+
+<MudGrid class="d-flex justify-center align-center" style="height: 100vh;background: #ecf0f1;">
+    <MudItem>
+        @Body
+    </MudItem>
+</MudGrid>
+
+@code {
+    // [Inject] NavigationManager navigation { get; set; }
+
+    // protected override Task OnInitializedAsync()
+    // {
+    //     navigation.NavigateTo("/404",true);
+    //     return base.OnInitializedAsync();
+    // }
+
+}

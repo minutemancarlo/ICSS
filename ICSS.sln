@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35707.178
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ICSS.Server", "Server\ICSS.Server.csproj", "{BFA09C58-B6E8-432F-BAC8-27090A1FF326}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ICSS.Client", "Client\ICSS.Client.csproj", "{BFC940A8-7236-4C9C-929D-C053A29F17D3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ICSS.Shared", "Shared\ICSS.Shared.csproj", "{58253672-3CDB-44F6-9E57-77F0E7DD8D00}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BFA09C58-B6E8-432F-BAC8-27090A1FF326}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BFA09C58-B6E8-432F-BAC8-27090A1FF326}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BFA09C58-B6E8-432F-BAC8-27090A1FF326}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BFA09C58-B6E8-432F-BAC8-27090A1FF326}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BFC940A8-7236-4C9C-929D-C053A29F17D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BFC940A8-7236-4C9C-929D-C053A29F17D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BFC940A8-7236-4C9C-929D-C053A29F17D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BFC940A8-7236-4C9C-929D-C053A29F17D3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{58253672-3CDB-44F6-9E57-77F0E7DD8D00}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58253672-3CDB-44F6-9E57-77F0E7DD8D00}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{58253672-3CDB-44F6-9E57-77F0E7DD8D00}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{58253672-3CDB-44F6-9E57-77F0E7DD8D00}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
