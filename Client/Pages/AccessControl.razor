@@ -1,71 +1,83 @@
-﻿@page "/authentication/{action}"
-@layout AuthLayout
-@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
-@using Microsoft.Extensions.Configuration
-
+﻿@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using System.Security.Claims
 @inject NavigationManager Navigation
-@inject IConfiguration Configuration
-@inject IJSRuntime JSRuntime
+@inject SignOutSessionStateManager SignOutManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+<AuthorizeView>
+    <Authorized>
+        <MudMenu Class="my-3" Dense AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.TopRight">
+            <ActivatorContent>
+                <MudAvatar>
+                    <ChildContent>
+                        <MudImage Src="@Picture" Width="25" Height="25" />
+                    </ChildContent>
+                </MudAvatar>
+            </ActivatorContent>
+            <ChildContent>
+                <MudMenuItem IconSize="Size.Medium" Icon="@Icons.Material.Filled.Person">Account</MudMenuItem>
+                <MudMenuItem IconSize="Size.Medium" Icon="@Icons.Material.Filled.Logout" OnTouch="BeginSignOut" OnClick="BeginSignOut">Sign Out</MudMenuItem>
+            </ChildContent>
+        </MudMenu>
+    </Authorized>
+    <NotAuthorized>
+        <MudHidden Breakpoint="Breakpoint.MdAndUp" Invert="true">
+            <MudButton Href="authentication/login" Class="my-2 mx-1" Variant="Variant.Filled" Color="Color.Success" StartIcon="fas fa-sign-in-alt">Login</MudButton>
+            <MudButton Href="authentication/register" Class="my-2 mx-1" Variant="Variant.Filled" Color="Color.Warning" StartIcon="fas fa-user-plus">Sign Up</MudButton>
+        </MudHidden>
+        <MudHidden Breakpoint="Breakpoint.MdAndDown" Invert="true">
 
-<div class="vh-100 vw-100 d-flex justify-content-center align-items-center" style="background-image: url('images/scattered-forcefields.jpg'); background-size: cover; background-position: center; background-repeat: no-repeat;">
-    <RemoteAuthenticatorView Action="@Action">
-        <LogOut>
-            <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center">
-                <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
-                <MudText Typo="Typo.body2" Class="fw-bolder">Logging you out, please wait...</MudText>
-            </MudStack>
-            @{
-                Logout();
-            }
-        </LogOut>
-        <LoggingIn>
-            @* <MudImage Src="images/logo.png" Width="50" Height="50" />
-        <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center">
+            <MudMenu Class="my-3" Dense AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.TopRight">
+                <ActivatorContent>
+                    <MudAvatar Variant="Variant.Filled">
+                        <ChildContent>
+                            <MudIcon Color="Color.Dark" Icon="@Icons.Material.Filled.Settings" Size="Size.Medium" />
+                        </ChildContent>
+                    </MudAvatar>
+                </ActivatorContent>
+                <ChildContent>
+                    <MudMenuItem IconSize="Size.Medium" Href="authentication/login" Icon="fas fa-sign-in-alt">Login</MudMenuItem>
+                    <MudMenuItem IconSize="Size.Medium" Href="authentication/register" Icon="fas fa-user-plus">Sign Up</MudMenuItem>
+                </ChildContent>
+            </MudMenu>
+            @* <MudButton Href="authentication/login" Class="my-2 mx-1" Size="Size.Small" Variant="Variant.Filled" Color="Color.Success" StartIcon="fas fa-sign-in-alt">Login</MudButton>
+            <MudButton Href="authentication/signup" Class="my-2 mx-1" Size="Size.Small" Variant="Variant.Filled" Color="Color.Warning" Disabled StartIcon="fas fa-user-plus">Sign Up</MudButton> *@
+        </MudHidden>
 
-            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
-            <MudText Typo="Typo.body2" Class="fw-bolder">Checking Session, please wait...</MudText>
-        </MudStack> *@        
-            <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center">
-                <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
-                <MudText Typo="Typo.body2" Class="fw-bolder">Checking Session, please wait...</MudText>
-            </MudStack>
-        </LoggingIn>
-        <CompletingLoggingIn>
-            <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center">
-                <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
-                <MudText Typo="Typo.body2" Class="fw-bolder">Logging in, please wait...</MudText>
-            </MudStack>
-        </CompletingLoggingIn>
-        <CompletingLogOut>
-            <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center">
-                <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
-                <MudText Typo="Typo.body2" Class="fw-bolder">Logging you out, please wait...</MudText>
-            </MudStack>
-        </CompletingLogOut>
-        <LogOutSucceeded>
-            <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center">
-                <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
-                <MudText Typo="Typo.body2" Class="fw-bolder">Logging you out, please wait...</MudText>
-            </MudStack>
-        </LogOutSucceeded>
-        <Registering>
-            @{
-                var authority = (string)Configuration["Auth0:Authority"];
-                var clientId = (string)Configuration["Auth0:ClientId"];
+    </NotAuthorized>
+</AuthorizeView>
 
-                Navigation.NavigateTo($"{authority}/authorize?client_id={clientId}&response_type=code&screen_hint=signup");
-            }
-        </Registering>
-
-    </RemoteAuthenticatorView>
-</div>
 @code {
-    [Parameter] public string Action { get; set; }
 
-    private void Logout()
+    public string Picture = "";
+    public bool isLoggedin = false;
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationState { get; set; }
+    public List<Claim> UserClaims { get; set; } = new List<Claim>();
+    protected override async Task OnInitializedAsync()
     {
-        var authority = Configuration["Auth0:Authority"];
-        var clientId = Configuration["Auth0:ClientId"];
-        Navigation.NavigateTo($"{authority}/v2/logout?client_id={clientId}");
+        if (authenticationState is not null)
+        {
+            var state = await authenticationState;
+
+            if (state.User.Identity.IsAuthenticated)
+            {
+                var user = authenticationState.Result.User;
+
+                Picture = state?.User.Claims
+                            .Where(c => c.Type.Equals("picture"))
+                            .Select(c => c.Value)
+                            .FirstOrDefault() ?? string.Empty;
+                // navigationManager.NavigateTo("login?redirectUri=/");
+            }
+        }
+
+
+
+        await base.OnInitializedAsync();
+    }
+    private async Task BeginSignOut()
+    {
+        await SignOutManager.SetSignOutState();
+        Navigation.NavigateTo("authentication/logout");
     }
 }

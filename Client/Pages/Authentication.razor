@@ -1,0 +1,71 @@
+﻿@page "/authentication/{action}"
+@layout AuthLayout
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using Microsoft.Extensions.Configuration
+
+@inject NavigationManager Navigation
+@inject IConfiguration Configuration
+@inject IJSRuntime JSRuntime
+
+<div class="vh-100 vw-100 d-flex justify-content-center align-items-center" style="background-image: url('images/scattered-forcefields.jpg'); background-size: cover; background-position: center; background-repeat: no-repeat;">
+<RemoteAuthenticatorView Action="@Action">
+    <LogOut>
+        <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center">
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+            <MudText Typo="Typo.body2" Class="fw-bolder">Logging you out, please wait...</MudText>
+        </MudStack>
+        @{
+            Logout();
+        }
+    </LogOut>
+    <LoggingIn>
+        @* <MudImage Src="images/logo.png" Width="50" Height="50" />
+        <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center">
+        
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+            <MudText Typo="Typo.body2" Class="fw-bolder">Checking Session, please wait...</MudText>
+        </MudStack> *@        
+            <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center">
+                <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+                <MudText Typo="Typo.body2" Class="fw-bolder">Checking Session, please wait...</MudText>
+            </MudStack>        
+    </LoggingIn>
+    <CompletingLoggingIn>
+        <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center">
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+            <MudText Typo="Typo.body2" Class="fw-bolder">Logging in, please wait...</MudText>
+        </MudStack>        
+    </CompletingLoggingIn>
+    <CompletingLogOut>
+        <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center">
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+            <MudText Typo="Typo.body2" Class="fw-bolder">Logging you out, please wait...</MudText>
+        </MudStack>
+    </CompletingLogOut>
+    <LogOutSucceeded>
+        <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center">
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+            <MudText Typo="Typo.body2" Class="fw-bolder">Logging you out, please wait...</MudText>
+        </MudStack>
+    </LogOutSucceeded>
+        <Registering>
+            @{
+                var authority = (string)Configuration["Auth0:Authority"];
+                var clientId = (string)Configuration["Auth0:ClientId"];
+
+                Navigation.NavigateTo($"{authority}/authorize?client_id={clientId}&response_type=code&screen_hint=signup");
+            }
+        </Registering>
+  
+</RemoteAuthenticatorView>
+</div>
+@code {
+    [Parameter] public string Action { get; set; }     
+
+    private void Logout()
+    {
+        var authority = Configuration["Auth0:Authority"];
+        var clientId = Configuration["Auth0:ClientId"];
+        Navigation.NavigateTo($"{authority}/v2/logout?client_id={clientId}");
+    }
+}

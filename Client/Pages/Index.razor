@@ -1,3 +1,82 @@
 ﻿@page "/"
+@* @layout NoLayout *@
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+@using System.Security.Claims
+<PageTitle>Index</PageTitle>
 
-<h1>Hello, world!</h1>
+
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationState { get; set; }
+
+    public List<Claim> UserClaims { get; set; } = new List<Claim>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await RedirectUser();
+        await base.OnInitializedAsync();
+    }
+
+    private async Task RedirectUser()
+    {
+        if (authenticationState is not null)
+        {
+            var state = await authenticationState;
+            // var returnUrl = await JSRuntime.InvokeAsync<string>("sessionStorage.getItem", "returnUrl");
+            if (state.User.Identity.IsAuthenticated)
+            {
+                var user = authenticationState.Result.User;
+
+                // if (user.IsInRole("Administrator"))
+                // {
+                //     Navigation.NavigateTo("/admin-dashboard");
+                // }
+                // else if (user.IsInRole("Front Desk"))
+                // {
+                //     if (returnUrl == "portal")
+                //     {
+                //         Navigation.NavigateTo("/portal");
+                //     }
+                //     else
+                //     {
+                //         Navigation.NavigateTo("/hotel-dashboard");
+                //     }
+                // }
+                // else if (user.IsInRole("Human Resource"))
+                // {
+                //     if (returnUrl == "portal")
+                //     {
+                //         Navigation.NavigateTo("/portal");
+                //     }
+                //     else
+                //     {
+                //         Navigation.NavigateTo("/hr-dashboard");
+                //     }
+                // }
+                // else if (user.IsInRole("Gas Employee"))
+                // {
+                //     if (returnUrl == "portal")
+                //     {
+                //         Navigation.NavigateTo("/portal");
+                //     }
+                //     else
+                //     {
+                //         Navigation.NavigateTo("/gas-dashboard");
+                //     }
+                // }
+                // else
+                // {
+                //     Navigation.NavigateTo("/Home");
+                // }
+            }
+            else
+            {
+                Navigation.NavigateTo("/login", true);
+                // Navigation.NavigateTo("/Home");
+            }
+        }
+    }
+
+}
