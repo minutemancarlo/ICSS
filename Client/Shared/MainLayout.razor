@@ -1,5 +1,5 @@
 ﻿@inherits LayoutComponentBase
-
+@using ICSS.Client.Pages
 <MudThemeProvider />
 <MudPopoverProvider />
 <MudDialogProvider />
@@ -9,7 +9,8 @@
 <MudLayout>
     <MudAppBar>
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-
+        <MudSpacer />
+        <AccessControl />
     </MudAppBar>
     <MudDrawer @bind-Open="@_drawerOpen" Elevation="1">
         <MudDrawerHeader Class="mud-theme-primary" Dense>
@@ -17,6 +18,7 @@
                 <MudImage Src="icon-512.png" Width="50" Height="50" />
                 <MudText Typo="Typo.h5" Class="pt-2">ICSS</MudText>               
             </MudStack>
+           
         </MudDrawerHeader>
         <NavMenu />
     </MudDrawer>

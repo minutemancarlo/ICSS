@@ -1,45 +1,19 @@
-﻿
-@* <Router AppAssembly="@typeof(App).Assembly">
-    <Found Context="routeData">
-        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
-        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
-    </Found>
-    <NotFound>
-        <PageTitle>Not found</PageTitle>
-        <LayoutView Layout="@typeof(MainLayout)">
-            <p role="alert">Sorry, there's nothing at this address.</p>
-        </LayoutView>
-    </NotFound>
-</Router>
- *@
-
-
-
-@inject NavigationManager Navigation
-
+﻿@inject NavigationManager Navigation
 
 <CascadingAuthenticationState>
     <Router AppAssembly="@typeof(App).Assembly">
         <Found Context="routeData">
             <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(AuthLayout)">
                 <Authorizing>
-                    <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center">
-                        <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
-                        <MudText Typo="Typo.body2" Class="fw-bolder">Determining session state...</MudText>
-                    </MudStack>                    
+                    <div class="vh-100 vw-100 d-flex justify-content-center align-items-center" style="background-image: url('background.jpg'); background-size: cover; background-position: center; background-repeat: no-repeat;">
+                        <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center">
+                            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+                            <MudText Typo="Typo.body2" Class="fw-bolder">Determining session state...</MudText>
+                        </MudStack>
+                    </div>
                 </Authorizing>
                 <NotAuthorized>
-                    @if (!context.User.Identity?.IsAuthenticated ?? true)
-                    {
-                        Navigation.NavigateTo("/login");
-                    }
-                    else
-                    {
-                        <MudStack>
-                            <h3>Sorry</h3>
-                            <p>You're not authorized to reach this page.</p>
-                        </MudStack>
-                    }
+                    @RedirectToLogin()
                 </NotAuthorized>
             </AuthorizeRouteView>
         </Found>
@@ -50,6 +24,17 @@
         </NotFound>
     </Router>
 </CascadingAuthenticationState>
+
+@code {
+    private RenderFragment RedirectToLogin() => builder =>
+    {
+        var uriHelper = NavigationManager ?? throw new InvalidOperationException("NavigationManager not found");
+        uriHelper.NavigateTo("authentication/login");
+    };
+
+    [Inject] private NavigationManager NavigationManager { get; set; }
+}
+
 
 
 

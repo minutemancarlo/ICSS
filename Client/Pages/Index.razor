@@ -31,7 +31,7 @@
 
                 // if (user.IsInRole("Administrator"))
                 // {
-                //     Navigation.NavigateTo("/admin-dashboard");
+                    Navigation.NavigateTo("/dashboard");
                 // }
                 // else if (user.IsInRole("Front Desk"))
                 // {
@@ -73,7 +73,7 @@
             }
             else
             {
-                Navigation.NavigateTo("/login", true);
+                Navigation.NavigateTo("authentication/login", true);
                 // Navigation.NavigateTo("/Home");
             }
         }
