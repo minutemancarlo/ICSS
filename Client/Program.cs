@@ -1,3 +1,4 @@
+using Blazored.LocalStorage;
 using ICSS.Client;
 using ICSS.Client.Shared;
 using Microsoft.AspNetCore.Components.Web;
@@ -12,10 +13,7 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddMudServices();
 
-builder.Services.AddHttpClient("Anonymous", client =>
-{
-    client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress);
-});
+
 builder.Services.AddHttpClient("API", client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress))
        .AddHttpMessageHandler<BaseAddressAuthorizationMessageHandler>();
 
@@ -37,5 +35,9 @@ builder.Services.AddOidcAuthentication(options =>
 builder.Services.AddMudServicesWithExtensions();
 // or this to add only the MudBlazor.Extensions but please ensure that this is added after mud servicdes are added. That means after `AddMudServices`
 builder.Services.AddMudExtensions();
+
+builder.Services.AddScoped<ApiRequestHelper>();
+builder.Services.AddBlazoredLocalStorage();
+
 
 await builder.Build().RunAsync();

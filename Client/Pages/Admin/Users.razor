@@ -1,0 +1,113 @@
+﻿@page "/users"
+@layout MainLayout
+@attribute [Authorize(Roles = "Admin")]
+@using ICSS.Shared
+@inject IJSRuntime JSRuntime
+
+<MudContainer Class="py-4 py-sm-8 py-md-12 py-lg-16 py-xl-20">
+    <MudGrid>
+        <MudItem xs="12">               
+            @if(!isOnline)
+            {
+                <MudAlert Severity="Severity.Error" Variant="Variant.Filled" Style="margin-bottom: 16px;" Visible="!isOnline">
+                    You are currently offline. Data may not be up-to-date.
+                </MudAlert>
+            }                                                
+            <MudButton OnClick="RefreshUserData" Variant="Variant.Filled" Color="Color.Primary" Disabled="!isOnline">
+                Refresh
+            </MudButton>
+        </MudItem>
+        <MudItem xs="12">
+            <MudDataGrid Items="userProperties" Loading="isLoading">
+                <Columns>
+                    <PropertyColumn Property="x => x.Picture" Title="Profile">
+                        <CellTemplate>
+                            <MudImage Src="@context.Item.Picture" Alt="profile" Height="50" Width="50" Elevation="25" Class="rounded-lg" />
+                        </CellTemplate>
+                    </PropertyColumn>
+                    <PropertyColumn Property="x => x.FirstName" Title="First Name" />
+                    <PropertyColumn Property="x => x.LastName" Title="Last Name" />
+                    <PropertyColumn Property="x => x.Provider" />
+                </Columns>
+            </MudDataGrid>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
+
+@code {
+    private List<UserProperties> userProperties = new();
+    private bool isLoading = false;
+    private bool isOnline = true;
+
+    [Inject] private ISnackbar Snackbar { get; set; }
+    [Inject] private ILocalStorageService LocalStorage { get; set; }
+    [Inject] private HttpClient HttpClient { get; set; }
+    [Inject] private ApiRequestHelper ApiHelper { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await JSRuntime.InvokeVoidAsync("networkStatus.registerOnlineOfflineEvents", DotNetObjectReference.Create(this));
+        isOnline = await JSRuntime.InvokeAsync<bool>("networkStatus.isOnline");
+        await LoadUserData();
+        await base.OnInitializedAsync();
+    }
+
+    private async Task LoadUserData()
+    {
+        try
+        {
+            isLoading = true;
+
+            if (isOnline)
+            {
+                userProperties = await ApiHelper.GetAsync<List<UserProperties>>("UserManagement/UsersList");
+                await LocalStorage.SetItemAsync("userProperties", userProperties);
+            }
+            else
+            {
+                var cachedData = await LocalStorage.GetItemAsync<List<UserProperties>>("userProperties");
+                userProperties = cachedData ?? new List<UserProperties>();
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error loading user data: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task RefreshUserData()
+    {
+        if (!isOnline)
+        {
+            Snackbar.Add("You are offline. Cannot refresh data.", Severity.Warning);
+            return;
+        }
+
+        try
+        {
+            isLoading = true;
+            userProperties = await ApiHelper.GetAsync<List<UserProperties>>("UserManagement/UsersList");
+            await LocalStorage.SetItemAsync("userProperties", userProperties);
+            Snackbar.Add("User data refreshed successfully.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error refreshing data: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    [JSInvokable]
+    public void SetNetworkStatus(bool status)
+    {
+        isOnline = status;
+        InvokeAsync(StateHasChanged);
+    }
+}

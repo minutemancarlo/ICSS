@@ -1,0 +1,82 @@
+﻿@page "/admin-dashboard"
+@* @attribute [Authorize(Roles ="Admin")] *@
+@layout MainLayout
+@using System.Security.Claims
+<MudContainer Class="py-4 py-sm-8 py-md-12 py-lg-16 py-xl-20">
+    <MudGrid Style="--icon-opacity: 0.1">
+        <MudItem xs="12">
+            <MudGrid Class="mb-8">
+                <MudItem xs="12">
+                    <MudText Align="Align.Center" Typo="Typo.h2" Class="mud-typography-h4 mb-2">Hello @FirstName @LastName</MudText>
+                    <MudText Align="Align.Center" Typo="Typo.h6">Integrated Class Scheduling System &copy; @DateTime.Now.Year</MudText>
+                </MudItem>
+            </MudGrid>
+        </MudItem>
+        <MudItem xs="12" sm="6" md="4">
+            <MudCard>
+                <MudCardContent>
+                    <MudStack Row AlignItems="AlignItems.Baseline">
+                        <MudIconButton Icon="fa-solid fa-users" Color="Color.Primary" Size="Size.Medium" Ripple="false" Class="rounded-circle mb-2" Style="background-color: rgba(var(--mud-palette-primary-rgb), var(--icon-opacity)) !important; cursor: default;" />
+                        <MudText Typo="Typo.h6" Class="mb-2">Total Users</MudText>
+                    </MudStack>
+                    <MudText Typo="Typo.h3">1</MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+        <MudItem xs="12" sm="6" md="4">
+            <MudCard>
+                <MudCardContent>
+                    <MudStack Row AlignItems="AlignItems.Baseline">
+                        <MudIconButton Icon="@Icons.Material.Outlined.MonitorHeart" Color="Color.Primary" Size="Size.Medium" Ripple="false" Class="rounded-circle mb-2" Style="background-color: rgba(var(--mud-palette-primary-rgb), var(--icon-opacity)) !important; cursor: default;" />
+                        <MudText Typo="Typo.h6" Class="mb-2">Shooting Stars</MudText>
+                    </MudStack>
+                    <MudText Typo="Typo.body2">Fingerstache flexitarian street art 8-bit waist co, subway tile poke farm.</MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+        <MudItem xs="12" sm="6" md="4">
+            <MudCard>
+                <MudCardContent>
+                    <MudStack Row AlignItems="AlignItems.Baseline">
+                        <MudIconButton Icon="@Icons.Material.Outlined.MonitorHeart" Color="Color.Primary" Size="Size.Medium" Ripple="false" Class="rounded-circle mb-2" Style="background-color: rgba(var(--mud-palette-primary-rgb), var(--icon-opacity)) !important; cursor: default;" />
+                        <MudText Typo="Typo.h6" Class="mb-2">Shooting Stars</MudText>
+                    </MudStack>
+                    <MudText Typo="Typo.body2">Fingerstache flexitarian street art 8-bit waist co, subway tile poke farm.</MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+
+    </MudGrid>
+</MudContainer>
+
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationState { get; set; }
+    public List<Claim> UserClaims { get; set; } = new List<Claim>();
+    private string FirstName, LastName;
+    protected override async Task OnInitializedAsync()
+    {
+        if (authenticationState is not null)
+        {
+            var state = await authenticationState;
+
+            if (state.User.Identity.IsAuthenticated)
+            {
+                var user = authenticationState.Result.User;
+
+                FirstName = state?.User.Claims
+                      .Where(c => c.Type.Equals("given_name"))
+                      .Select(c => c.Value)
+                      .FirstOrDefault() ?? string.Empty;
+
+                LastName = state?.User.Claims
+                             .Where(c => c.Type.Equals("family_name"))
+                             .Select(c => c.Value)
+                             .FirstOrDefault() ?? string.Empty;
+            }
+        }
+        await base.OnInitializedAsync();
+    }
+
+}

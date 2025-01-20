@@ -4,8 +4,9 @@
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
-<MudTypographyProvider />
 
+
+<CascadingValue Value="this">
 <MudLayout>
     <MudAppBar>
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
@@ -26,7 +27,7 @@
         @Body
     </MudMainContent>
 </MudLayout>
-
+</CascadingValue>
 @code {
     bool _drawerOpen = true;
 

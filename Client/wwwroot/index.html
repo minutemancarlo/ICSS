@@ -51,7 +51,21 @@
     <script src="bootstrap/js/bootstrap.min.js"></script>
     <script src="font-awesome/js/all.min.js"></script>
     <script src="_content/MudBlazor.Extensions/js/components/MudExAppLoader.min.js"></script>
-
+    <script>
+        window.networkStatus = {
+            isOnline: function () {
+                return navigator.onLine;
+            },
+            registerOnlineOfflineEvents: function (dotnetHelper) {
+                window.addEventListener("online", () => {
+                    dotnetHelper.invokeMethodAsync("SetNetworkStatus", true);
+                });
+                window.addEventListener("offline", () => {
+                    dotnetHelper.invokeMethodAsync("SetNetworkStatus", false);
+                });
+            }
+        };
+    </script>
 
 </body>
 

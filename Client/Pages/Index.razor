@@ -29,10 +29,10 @@
             {
                 var user = authenticationState.Result.User;
 
-                // if (user.IsInRole("Administrator"))
-                // {
-                    Navigation.NavigateTo("/dashboard");
-                // }
+                if (user.IsInRole("Admin"))
+                {
+                    Navigation.NavigateTo("/admin-dashboard");
+                }
                 // else if (user.IsInRole("Front Desk"))
                 // {
                 //     if (returnUrl == "portal")
