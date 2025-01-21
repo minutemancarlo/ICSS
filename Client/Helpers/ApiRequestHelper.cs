@@ -1,5 +1,6 @@
 ﻿using System.Net.Http;
 using System.Net.Http.Json;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -35,6 +36,21 @@ public class ApiRequestHelper
     public async Task DeleteAsync(string url)
     {
         var response = await _httpClient.DeleteAsync(url);
+        response.EnsureSuccessStatusCode();
+    }
+
+    public async Task<TResponse> PatchAsync<TRequest, TResponse>(string url, TRequest payload)
+    {
+        var requestContent = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+        var response = await _httpClient.PatchAsync(url, requestContent);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<TResponse>();
+    }
+
+    public async Task PatchAsync<TRequest>(string url, TRequest payload)
+    {
+        var requestContent = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+        var response = await _httpClient.PatchAsync(url, requestContent);
         response.EnsureSuccessStatusCode();
     }
 }

@@ -72,5 +72,10 @@ h1:focus {
 }
 
 .data-grid {
-    background-color: #e67e22;    
+    background-color: #2980b9;
 }
+
+.column-options {
+    color: white; 
+}
+

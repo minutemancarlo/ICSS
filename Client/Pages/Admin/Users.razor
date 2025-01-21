@@ -2,12 +2,14 @@
 @layout MainLayout
 @attribute [Authorize(Roles = "Admin")]
 @using ICSS.Shared
+@using ICSS.Client.Helpers
+@using ICSS.Client.Pages.Admin.Components
 @inject IJSRuntime JSRuntime
 
 <MudContainer Class="py-4 py-sm-8 py-md-12 py-lg-16 py-xl-20">
     <MudGrid>
         <MudItem xs="12">               
-            @if(!isOnline)
+            @if (!isOnline)
             {
                 <MudAlert Severity="Severity.Error" Variant="Variant.Filled" Style="margin-bottom: 16px;" Visible="!isOnline">
                     You are currently offline. Data may not be up-to-date.
@@ -16,7 +18,7 @@
 
         </MudItem>
         <MudItem xs="12">
-            <MudDataGrid Items="userPropertiesTemp" Loading="isLoading"  Dense Hover Filterable>
+            <MudDataGrid Items="userPropertiesTemp" Loading="isLoading"  Dense Hover Filterable Striped>
                 <ToolBarContent>
                     <MudButton OnClick="RefreshUserData" Size="Size.Small" StartIcon="fa-solid fa-refresh" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Primary"  Disabled="!isOnline">
                         Refresh
@@ -25,27 +27,41 @@
                     <MudTextField ValueChanged="@(s=>Onsearch(s))" T="string" Immediate Placeholder="Search here.." Adornment="Adornment.Start" IconSize="Size.Small" AdornmentIcon="fa-solid fa-search" Margin="Margin.Dense" Variant="Variant.Text"></MudTextField>
                 </ToolBarContent>
                 <Columns>
-                    <PropertyColumn Property="x => x.Picture" Title="Profile" HeaderClass="data-grid text-nowrap">
+                    <PropertyColumn Property="x => x.Picture" Title="Profile" HeaderClass="data-grid text-nowrap text-white">
                         <CellTemplate>
                             <MudImage Src="@context.Item.Picture" Alt="profile" Height="50" Width="50" Elevation="25" Class="rounded-lg" />
                         </CellTemplate>
                     </PropertyColumn>
-                    <PropertyColumn Property="x => x.FirstName" Title="First Name" Sortable="true" HeaderClass="data-grid text-nowrap" />
-                    <PropertyColumn Property="x => x.LastName" Title="Last Name" Sortable="true" HeaderClass="data-grid text-nowrap" />
-                    <PropertyColumn Property="x => x.Provider" Sortable="true" HeaderClass="data-grid text-nowrap" />
-                    <PropertyColumn Property="x => x.Role" Sortable="true" HeaderClass="data-grid text-nowrap" />
-                    <TemplateColumn Title="Actions" HeaderClass="data-grid text-nowrap">
+                    <PropertyColumn Property="x => x.FirstName" Title="Name" Sortable="true" HeaderClass="data-grid text-nowrap text-white" CellClass="text-nowrap">
+                        <CellTemplate>
+                            <MudText Typo="Typo.body2">@StringHelper.ToSentenceCase(context.Item.FirstName) @StringHelper.ToSentenceCase(context.Item.LastName)</MudText>
+                        </CellTemplate>
+                    </PropertyColumn>                    
+                    <PropertyColumn Property="x => x.Email" Title="Email Address" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
+                    <PropertyColumn Property="x => x.Provider" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
+                    <PropertyColumn Property="x => x.Role" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
+                    <PropertyColumn Property="x => x.Blocked" Title="Access Status" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
+                        <CellTemplate>
+                            @if (context.Item.Blocked)
+                            {
+                                    <MudChip T="string" Color="Color.Error" Size="Size.Small">Disabled</MudChip>
+                            }else
+                            {
+                                    <MudChip T="string" Color="Color.Success" Size="Size.Small">Enabled</MudChip>
+                            }
+                        </CellTemplate>
+                     </PropertyColumn>
+                    <PropertyColumn Property="x => x.Last_Login" Title="Last Login" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
+                    <TemplateColumn Title="Actions" HeaderClass="data-grid text-nowrap text-white">
                         <CellTemplate>                   
                             <MudStack Row>
-                                <MudMenu Color="Color.Success" Icon="fa-solid fa-user-shield" Variant="Variant.Filled" Disabled="@(context.Item.User_Id==MainLayout.CurrentUserId||!isOnline)" Dense>
-                                    <MudMenuItem Label="Admin" />
-                                    <MudMenuItem Label="Student" />
-                                    <MudMenuItem Label="Faculty" />
-                                    <MudMenuItem Label="End User" />
-                                </MudMenu>
-                                <MudIconButton Icon="fa-solid fa-user-slash" Size="Size.Medium" Color="Color.Error" Variant="Variant.Filled" Disabled="@(context.Item.User_Id==MainLayout.CurrentUserId||!isOnline)" />
+                                <MudTooltip Text="Update Role">
+                                    <MudIconButton Icon="fa-solid fa-user-shield" Size="Size.Medium" Color="Color.Info" Variant="Variant.Filled" Disabled="@(context.Item.User_Id==MainLayout.CurrentUserId||!isOnline)" OnClick="@(() => OnShowUpdateRole(context.Item.Role))"/>    
+                                </MudTooltip>
+                                <MudTooltip Text="@(!context.Item.Blocked?"Enable Access":"Disable Access")">
+                                    <MudIconButton Icon="@(context.Item.Blocked?"fa-solid fa-user-slash":"fa-solid fa-user")" Size="Size.Medium" Color="@(!context.Item.Blocked?Color.Success:Color.Error)" Variant="Variant.Filled" Disabled="@(context.Item.User_Id==MainLayout.CurrentUserId||!isOnline)" />
+                                </MudTooltip>                                
                             </MudStack>
-
                         </CellTemplate>
                     </TemplateColumn>
                 </Columns>
@@ -79,9 +95,11 @@
     [Inject] private ILocalStorageService LocalStorage { get; set; }
     [Inject] private HttpClient HttpClient { get; set; }
     [Inject] private ApiRequestHelper ApiHelper { get; set; }
+    [Inject] IDialogService? DialogService { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
+        MainLayout.SubTitle = "User Management";
         await JSRuntime.InvokeVoidAsync("networkStatus.registerOnlineOfflineEvents", DotNetObjectReference.Create(this));
         isOnline = await JSRuntime.InvokeAsync<bool>("networkStatus.isOnline");
         await OnGetRoles();
@@ -91,7 +109,7 @@
 
     private async Task Onsearch(string query)
     {
-        
+
         userPropertiesTemp = userProperties.Where(data =>
            {
                if (string.IsNullOrWhiteSpace(query))
@@ -99,9 +117,29 @@
                if (data.FirstName.Contains(query, StringComparison.OrdinalIgnoreCase))
                    return true;
                if (data.LastName.Contains(query, StringComparison.OrdinalIgnoreCase))
-                   return true;               
+                   return true;
                return false;
            }).ToList();
+    }
+
+    private async Task OnShowUpdateRole(string role)
+    {
+        var options = new DialogOptions
+            {
+                CloseOnEscapeKey = false,
+                FullWidth = true,
+                MaxWidth = MaxWidth.Small,
+                BackdropClick = false,
+                CloseButton = false
+
+            };
+        var parameters = new DialogParameters<UpdateRoleDialog>
+            {
+                { x => x.CurrentRole, role },
+                {x => x.Roles, rolesProperty}
+            };
+
+        var dialog = await DialogService.ShowAsync<UpdateRoleDialog>("",parameters, options);
     }
 
     private async Task LoadUserData()
@@ -147,7 +185,8 @@
                 var cachedData = await LocalStorage.GetItemAsync<List<RolesProperty>>("rolesProperty");
                 rolesProperty = cachedData ?? new List<RolesProperty>();
             }
-        }catch(Exception ex)
+        }
+        catch (Exception ex)
         {
             Snackbar.Add($"Error getting roles data: {ex.Message}", Severity.Error);
         }
@@ -167,7 +206,6 @@
             userProperties = await ApiHelper.GetAsync<List<UserProperties>>("UserManagement/UsersList");
             userPropertiesTemp = userProperties;
             await LocalStorage.SetItemAsync("userProperties", userProperties);
-            Snackbar.Add("User data refreshed successfully.", Severity.Success);
         }
         catch (Exception ex)
         {

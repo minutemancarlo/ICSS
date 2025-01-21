@@ -13,28 +13,15 @@
                     </div>
                 </Authorizing>
                 <NotAuthorized>
-                    @RedirectToLogin()
+                  
                 </NotAuthorized>
             </AuthorizeRouteView>
         </Found>
         <NotFound>
             <PageTitle>Not found</PageTitle>
             <LayoutView Layout="@typeof(AuthLayout)">
+                <MudText Typo="Typo.h5" Class="text-center">Page not found</MudText>
             </LayoutView>
         </NotFound>
     </Router>
 </CascadingAuthenticationState>
-
-@code {
-    private RenderFragment RedirectToLogin() => builder =>
-    {
-        var uriHelper = NavigationManager ?? throw new InvalidOperationException("NavigationManager not found");
-        uriHelper.NavigateTo("authentication/login");
-    };
-
-    [Inject] private NavigationManager NavigationManager { get; set; }
-}
-
-
-
-

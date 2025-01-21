@@ -82,6 +82,30 @@ namespace ICSS.Server.Controllers
             }
         }
 
+        [HttpPatch("update-block-status/{userId}")]
+        public async Task<IActionResult> UpdateBlockStatus(string userId, [FromQuery] bool block)
+        {
+            if (string.IsNullOrEmpty(userId))
+                return BadRequest("User ID is required.");
+
+            try
+            {
+                var updateRequest = new UserUpdateRequest
+                {
+                    Blocked = block
+                };
+
+                await _managementApiClient.Users.UpdateAsync(userId, updateRequest);
+
+                var status = block ? "blocked" : "unblocked";
+                return Ok(new { Message = $"User with ID '{userId}' has been successfully {status}." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = "An error occurred while updating the user's block status.", Error = ex.Message });
+            }
+        }
+
 
     }
 }
