@@ -18,7 +18,7 @@
 
         </MudItem>
         <MudItem xs="12">
-            <MudDataGrid Items="userPropertiesTemp" Loading="isLoading"  Dense Hover Filterable Striped>
+            <MudDataGrid Items="userPropertiesTemp" Loading="isLoading"  Dense Hover Filterable Striped Virtualize>
                 <ToolBarContent>
                     <MudButton OnClick="RefreshUserData" Size="Size.Small" StartIcon="fa-solid fa-refresh" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Primary"  Disabled="!isOnline">
                         Refresh
@@ -44,13 +44,13 @@
                         <CellTemplate>
                             @if (context.Item.Blocked)
                             {
-                                    <MudChip T="string" Color="Color.Error" Size="Size.Small">Disabled</MudChip>
+                                <MudChip T="string" Color="Color.Error" Size="Size.Small">Disabled</MudChip>
                             }else
                             {
-                                    <MudChip T="string" Color="Color.Success" Size="Size.Small">Enabled</MudChip>
+                                <MudChip T="string" Color="Color.Success" Size="Size.Small">Enabled</MudChip>
                             }
                         </CellTemplate>
-                     </PropertyColumn>
+                    </PropertyColumn>
                     <PropertyColumn Property="x => x.Last_Login" Title="Last Login" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
                     <TemplateColumn Title="Actions" HeaderClass="data-grid text-nowrap text-white">
                         <CellTemplate>                   
@@ -58,8 +58,8 @@
                                 <MudTooltip Text="Update Role">
                                     <MudIconButton Icon="fa-solid fa-user-shield" Size="Size.Medium" Color="Color.Info" Variant="Variant.Filled" Disabled="@(context.Item.User_Id==MainLayout.CurrentUserId||!isOnline)" OnClick="@(() => OnShowUpdateRole(context.Item.Role))"/>    
                                 </MudTooltip>
-                                <MudTooltip Text="@(!context.Item.Blocked?"Enable Access":"Disable Access")">
-                                    <MudIconButton Icon="@(context.Item.Blocked?"fa-solid fa-user-slash":"fa-solid fa-user")" Size="Size.Medium" Color="@(!context.Item.Blocked?Color.Success:Color.Error)" Variant="Variant.Filled" Disabled="@(context.Item.User_Id==MainLayout.CurrentUserId||!isOnline)" />
+                                <MudTooltip Text="@(context.Item.Blocked?"Enable Access":"Disable Access")">
+                                    <MudIconButton Icon="@(!context.Item.Blocked?"fa-solid fa-user-slash":"fa-solid fa-user")" Size="Size.Medium" Color="@(context.Item.Blocked?Color.Success:Color.Error)" Variant="Variant.Filled" Disabled="@(context.Item.User_Id==MainLayout.CurrentUserId||!isOnline)" OnClick="@(() => OnUpdateUserAccess(context.Item.User_Id,context.Item.Blocked?"enable":"disable"))" />
                                 </MudTooltip>                                
                             </MudStack>
                         </CellTemplate>
@@ -130,7 +130,8 @@
                 FullWidth = true,
                 MaxWidth = MaxWidth.Small,
                 BackdropClick = false,
-                CloseButton = false
+                CloseButton = false,
+                BackgroundClass = "blurred"
 
             };
         var parameters = new DialogParameters<UpdateRoleDialog>
@@ -142,6 +143,55 @@
         var dialog = await DialogService.ShowAsync<UpdateRoleDialog>("",parameters, options);
     }
 
+    private async Task OnUpdateUserAccess(string userId,string access)
+    {
+        try
+        {
+            var options = new DialogOptions
+                {
+                    CloseOnEscapeKey = false,
+                    FullWidth = true,
+                    MaxWidth = MaxWidth.Small,
+                    BackdropClick = false,
+                    CloseButton = false,
+                    BackgroundClass = "blurred"
+
+                };
+
+            var parameters = new DialogParameters<ConfirmationDialog>
+            {
+                { x => x.Action, "Update User Access" },
+                {x => x.Message, $"Are you sure you want to {access} access for this user?"}
+            };
+
+            var dialog = await DialogService.ShowAsync<ConfirmationDialog>("", parameters, options);
+            var result = await dialog.Result;
+            if (!result.Canceled)
+            {
+                var confirmed = (bool)result.Data;
+                if (confirmed == true)
+                {                    
+                    var blockStatus = new { block = access == "enable" ? false : true };
+                    // var response = await ApiHelper.PatchAsync(object,< ApiResponse >, $"UserManagement/update-block-status/{userId}", blockStatus);
+                    var response = await ApiHelper.PatchAsync<object, ApiResponse>($"UserManagement/update-block-status/{userId}?block={blockStatus.block}", blockStatus);
+                    if (response.IsSuccess)
+                    {
+                        StateHasChanged();
+                        await LoadUserData();                        
+                        Snackbar.Add($"User successfully {access}d access.",Severity.Success);                        
+                    }
+                    else
+                    {
+                        Snackbar.Add($"Error: {response.Message}", Severity.Error);                        
+                    }
+                }
+            }
+        }catch(Exception ex)
+        {
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+        }
+    }
+
     private async Task LoadUserData()
     {
         try
@@ -150,9 +200,18 @@
 
             if (isOnline)
             {
-                userProperties = await ApiHelper.GetAsync<List<UserProperties>>("UserManagement/UsersList");
-                userPropertiesTemp = userProperties;
-                await LocalStorage.SetItemAsync("userProperties", userProperties);
+                var response = await ApiHelper.GetAsync<List<UserProperties>>("UserManagement/UsersList");
+
+                if (response.IsSuccess)
+                {
+                    userProperties = response.Data;
+                    userPropertiesTemp = userProperties;
+                    await LocalStorage.SetItemAsync("userProperties", userProperties);
+                }
+                else
+                {                    
+                    Snackbar.Add($"Error: {response.Message}",Severity.Error);
+                }                
             }
             else
             {
@@ -177,8 +236,17 @@
         {
             if (isOnline)
             {
-                rolesProperty = await ApiHelper.GetAsync<List<RolesProperty>>("UserManagement/GetAllRoles");
-                await LocalStorage.SetItemAsync("rolesProperty", rolesProperty);
+                var response = await ApiHelper.GetAsync<List<RolesProperty>>("UserManagement/GetAllRoles");
+
+                if (response.IsSuccess)
+                {
+                    rolesProperty = response.Data;
+                    await LocalStorage.SetItemAsync("rolesProperty", rolesProperty);
+                }
+                else
+                {                    
+                    Snackbar.Add($"Error: {response.Message}",Severity.Error);
+                }                
             }
             else
             {
@@ -203,9 +271,18 @@
         try
         {
             isLoading = true;
-            userProperties = await ApiHelper.GetAsync<List<UserProperties>>("UserManagement/UsersList");
-            userPropertiesTemp = userProperties;
-            await LocalStorage.SetItemAsync("userProperties", userProperties);
+            var response = await ApiHelper.GetAsync<List<UserProperties>>("UserManagement/UsersList");
+
+            if (response.IsSuccess)
+            {
+                userProperties = response.Data;
+                userPropertiesTemp = userProperties;
+                await LocalStorage.SetItemAsync("userProperties", userProperties);
+            }
+            else
+            {                
+                Snackbar.Add($"Error: {response.Message}", Severity.Error);
+            }
         }
         catch (Exception ex)
         {

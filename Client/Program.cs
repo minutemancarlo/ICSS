@@ -37,6 +37,7 @@ builder.Services.AddMudServicesWithExtensions();
 builder.Services.AddMudExtensions();
 
 builder.Services.AddScoped<ApiRequestHelper>();
+builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 builder.Services.AddBlazoredLocalStorage();
 
 

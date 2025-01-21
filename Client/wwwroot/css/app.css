@@ -75,7 +75,7 @@ h1:focus {
     background-color: #2980b9;
 }
 
-.column-options {
-    color: white; 
+.blurred {
+    backdrop-filter: blur(10px);
 }
 
