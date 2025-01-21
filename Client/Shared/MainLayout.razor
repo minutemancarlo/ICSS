@@ -1,5 +1,5 @@
 ﻿@inherits LayoutComponentBase
-@using ICSS.Client.Pages
+@using ICSS.Client.Shared
 <MudThemeProvider />
 <MudPopoverProvider />
 <MudDialogProvider />
@@ -7,29 +7,65 @@
 
 
 <CascadingValue Value="this">
-<MudLayout>
-    <MudAppBar>
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-        <MudSpacer />
-        <AccessControl />
-    </MudAppBar>
-    <MudDrawer @bind-Open="@_drawerOpen" Elevation="1">
-        <MudDrawerHeader Class="mud-theme-primary" Dense>
-            <MudStack Row Spacing="0" Class="w-100" Justify="Justify.SpaceEvenly">
-                <MudImage Src="icon-512.png" Width="50" Height="50" />
-                <MudText Typo="Typo.h5" Class="pt-2">ICSS</MudText>               
-            </MudStack>
-           
-        </MudDrawerHeader>
-        <NavMenu />
-    </MudDrawer>
-    <MudMainContent>
-        @Body
-    </MudMainContent>
-</MudLayout>
+    <MudLayout>
+        <MudAppBar>
+            <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+            <MudSpacer />
+            <AccessControl/>
+        </MudAppBar>
+        <MudDrawer @bind-Open="@_drawerOpen" Elevation="1">
+            <MudDrawerHeader Class="mud-theme-primary" Dense>
+                <MudStack Row Spacing="0" Class="w-100" Justify="Justify.SpaceEvenly">
+                    <MudImage Src="icon-512.png" Width="50" Height="50" />
+                    <MudText Typo="Typo.h5" Class="pt-2">ICSS</MudText>               
+                </MudStack>
+
+            </MudDrawerHeader>
+            <NavMenu />
+        </MudDrawer>
+        <MudMainContent>
+            @Body
+        </MudMainContent>
+    </MudLayout>
 </CascadingValue>
 @code {
+    [Inject] AuthenticationStateProvider AuthenticationStateProvider { get; set; }
     bool _drawerOpen = true;
+    private string currentUserId;
+    private string subTitle;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        if (user.Identity.IsAuthenticated)
+        {
+            CurrentUserId = user.FindFirst(c => c.Type == "sub")?.Value;
+        }
+
+        await base.OnInitializedAsync();
+    }
+
+    public string SubTitle
+    {
+        get => subTitle;
+        set
+        {
+            subTitle = value;
+            InvokeAsync(() => StateHasChanged());
+        }
+    }
+
+    public string CurrentUserId
+    {
+        get => currentUserId;
+        set
+        {
+            currentUserId = value;
+            InvokeAsync(() => StateHasChanged());
+        }
+
+    }
 
     void DrawerToggle()
     {

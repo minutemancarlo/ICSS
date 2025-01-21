@@ -1,6 +1,10 @@
 ﻿@page "/501"
 @layout NoRoleLayout
 @attribute [Authorize]
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@inject SignOutSessionStateManager SignOutManager
+@inject NavigationManager Navigation
+
 
 <MudStack Class="w-100 vh-100" Justify="Justify.Center" AlignItems="AlignItems.Center">
     <section class="py-3 py-md-5 min-vh-100 d-flex justify-content-center align-items-center">
@@ -11,9 +15,18 @@
                         <MudImage Src="images/undraw_warning_qn4r.svg" ObjectFit="ObjectFit.ScaleDown" Height="150" />
                         <h3 class="h2 mb-2">Oops! Your account is not activated yet.</h3>
                         <p class="mb-5">Please contact administrator to activate your account.</p>
+                        <MudButton Variant="Variant.Filled" StartIcon="fa-solid fa-right-from-bracket" OnTouch="BeginSignOut" OnClick="BeginSignOut" Color="Color.Error">Logout</MudButton>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 </MudStack>
+
+@code{
+    private async Task BeginSignOut()
+    {
+        await SignOutManager.SetSignOutState();
+        Navigation.NavigateTo("authentication/logout");
+    }
+}

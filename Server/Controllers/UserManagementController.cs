@@ -27,30 +27,61 @@ namespace ICSS.Server.Controllers
             {
                 var users = await _managementApiClient.Users.GetAllAsync(new GetUsersRequest(), new PaginationInfo());
 
-                List<UserProperties> userslist = users.Select(x => new UserProperties
+                List<UserProperties> userslist = new List<UserProperties>();
+
+                foreach (var user in users)
                 {
-                    Email = x.Email,
-                    FirstName = x.FirstName,
-                    LastName = x.LastName,
-                    Blocked = x.Blocked ?? false,
-                    User_Id = x.UserId,
-                    Verified = x.EmailVerified,
-                    Last_Login = x.LastLogin,
-                    Provider = x.UserId.ToLower().Contains("auth0") ? "Email-Password Auth" :
-                               x.UserId.ToLower().Contains("facebook") ? "Facebook" :
-                               x.UserId.ToLower().Contains("google-oauth2") ? "Google" :
-                               "Unknown Provider",
-                    Picture = x.Picture
+                    var roles = await _managementApiClient.Users.GetRolesAsync(user.UserId, new PaginationInfo());
+                    var role = roles.FirstOrDefault()?.Name; 
+
+                    userslist.Add(new UserProperties
+                    {
+                        Email = user.Email,
+                        FirstName = user.FirstName,
+                        LastName = user.LastName,
+                        Blocked = user.Blocked ?? false,
+                        User_Id = user.UserId,
+                        Verified = user.EmailVerified,
+                        Last_Login = user.LastLogin,
+                        Provider = user.UserId.ToLower().Contains("auth0") ? "Email-Password Auth" :
+                                   user.UserId.ToLower().Contains("facebook") ? "Facebook" :
+                                   user.UserId.ToLower().Contains("google-oauth2") ? "Google" :
+                                   "Unknown Provider",
+                        Picture = user.Picture,
+                        Role = role 
+                    });
+                }
+
+                return Ok(userslist);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Exception Occurred: {ex.Message}");
+            }
+        }
+
+        [HttpGet("GetAllRoles")]
+        public async Task<ActionResult<List<RolesProperty>>> GetAllRoles()
+        {
+            try
+            {
+                var roles = await _managementApiClient.Roles.GetAllAsync(new GetRolesRequest());
+                List<RolesProperty> rolesList = roles.Select(x => new RolesProperty
+                {
+                    Id = x.Id,
+                    Name = x.Name,
+                    Description = x.Description
                 }).ToList();
                 
-                return Ok(userslist);
+                return Ok(rolesList);
+
             }
             catch (Exception ex)
             {                
                 return BadRequest($"Exception Occured: {ex.Message}");
             }
-
         }
+
 
     }
 }

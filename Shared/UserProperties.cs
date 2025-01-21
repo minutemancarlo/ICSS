@@ -9,14 +9,22 @@ namespace ICSS.Shared
     public class UserProperties
     {
         public string User_Id { get; set; }
-        public string Email { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
+        public string? Email { get; set; }
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
         public bool Blocked { get; set; }
         public bool? Verified { get; set; }
         public DateTime? Last_Login { get; set; }
         public string Provider { get; set; }
-        public string Picture { get; set; }
+        public string? Picture { get; set; }
         public bool isBinded { get; set; } = false;
+        public string? Role { get; set; }
+    }
+
+    public partial class RolesProperty
+    {
+        public string? Id { get; set; }
+        public string? Name { get; set; }
+        public string? Description { get; set; }
     }
 }

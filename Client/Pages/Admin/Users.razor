@@ -13,31 +13,67 @@
                     You are currently offline. Data may not be up-to-date.
                 </MudAlert>
             }                                                
-            <MudButton OnClick="RefreshUserData" Variant="Variant.Filled" Color="Color.Primary" Disabled="!isOnline">
-                Refresh
-            </MudButton>
+
         </MudItem>
         <MudItem xs="12">
-            <MudDataGrid Items="userProperties" Loading="isLoading">
+            <MudDataGrid Items="userPropertiesTemp" Loading="isLoading"  Dense Hover Filterable>
+                <ToolBarContent>
+                    <MudButton OnClick="RefreshUserData" Size="Size.Small" StartIcon="fa-solid fa-refresh" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Primary"  Disabled="!isOnline">
+                        Refresh
+                    </MudButton>
+                    <MudSpacer />
+                    <MudTextField ValueChanged="@(s=>Onsearch(s))" T="string" Immediate Placeholder="Search here.." Adornment="Adornment.Start" IconSize="Size.Small" AdornmentIcon="fa-solid fa-search" Margin="Margin.Dense" Variant="Variant.Text"></MudTextField>
+                </ToolBarContent>
                 <Columns>
-                    <PropertyColumn Property="x => x.Picture" Title="Profile">
+                    <PropertyColumn Property="x => x.Picture" Title="Profile" HeaderClass="data-grid text-nowrap">
                         <CellTemplate>
                             <MudImage Src="@context.Item.Picture" Alt="profile" Height="50" Width="50" Elevation="25" Class="rounded-lg" />
                         </CellTemplate>
                     </PropertyColumn>
-                    <PropertyColumn Property="x => x.FirstName" Title="First Name" />
-                    <PropertyColumn Property="x => x.LastName" Title="Last Name" />
-                    <PropertyColumn Property="x => x.Provider" />
+                    <PropertyColumn Property="x => x.FirstName" Title="First Name" Sortable="true" HeaderClass="data-grid text-nowrap" />
+                    <PropertyColumn Property="x => x.LastName" Title="Last Name" Sortable="true" HeaderClass="data-grid text-nowrap" />
+                    <PropertyColumn Property="x => x.Provider" Sortable="true" HeaderClass="data-grid text-nowrap" />
+                    <PropertyColumn Property="x => x.Role" Sortable="true" HeaderClass="data-grid text-nowrap" />
+                    <TemplateColumn Title="Actions" HeaderClass="data-grid text-nowrap">
+                        <CellTemplate>                   
+                            <MudStack Row>
+                                <MudMenu Color="Color.Success" Icon="fa-solid fa-user-shield" Variant="Variant.Filled" Disabled="@(context.Item.User_Id==MainLayout.CurrentUserId||!isOnline)" Dense>
+                                    <MudMenuItem Label="Admin" />
+                                    <MudMenuItem Label="Student" />
+                                    <MudMenuItem Label="Faculty" />
+                                    <MudMenuItem Label="End User" />
+                                </MudMenu>
+                                <MudIconButton Icon="fa-solid fa-user-slash" Size="Size.Medium" Color="Color.Error" Variant="Variant.Filled" Disabled="@(context.Item.User_Id==MainLayout.CurrentUserId||!isOnline)" />
+                            </MudStack>
+
+                        </CellTemplate>
+                    </TemplateColumn>
                 </Columns>
+                <NoRecordsContent>
+                    <MudText>No Records to show</MudText>
+                </NoRecordsContent>
+                <LoadingContent>
+                    <MudText>Loading Content...</MudText>
+                </LoadingContent>
+                <PagerContent>
+                    <MudDataGridPager T="UserProperties" />
+                </PagerContent>
             </MudDataGrid>
         </MudItem>
     </MudGrid>
 </MudContainer>
 
 @code {
+    [CascadingParameter]
+    public MainLayout MainLayout { get; private set; }
+
     private List<UserProperties> userProperties = new();
-    private bool isLoading = false;
+    private List<UserProperties> userPropertiesTemp = new();
+    private List<RolesProperty> rolesProperty = new();
+    private bool isLoading = true;
     private bool isOnline = true;
+    private string? roleId;
+    private string? searchText;
 
     [Inject] private ISnackbar Snackbar { get; set; }
     [Inject] private ILocalStorageService LocalStorage { get; set; }
@@ -48,8 +84,24 @@
     {
         await JSRuntime.InvokeVoidAsync("networkStatus.registerOnlineOfflineEvents", DotNetObjectReference.Create(this));
         isOnline = await JSRuntime.InvokeAsync<bool>("networkStatus.isOnline");
+        await OnGetRoles();
         await LoadUserData();
         await base.OnInitializedAsync();
+    }
+
+    private async Task Onsearch(string query)
+    {
+        
+        userPropertiesTemp = userProperties.Where(data =>
+           {
+               if (string.IsNullOrWhiteSpace(query))
+                   return true;
+               if (data.FirstName.Contains(query, StringComparison.OrdinalIgnoreCase))
+                   return true;
+               if (data.LastName.Contains(query, StringComparison.OrdinalIgnoreCase))
+                   return true;               
+               return false;
+           }).ToList();
     }
 
     private async Task LoadUserData()
@@ -61,12 +113,14 @@
             if (isOnline)
             {
                 userProperties = await ApiHelper.GetAsync<List<UserProperties>>("UserManagement/UsersList");
+                userPropertiesTemp = userProperties;
                 await LocalStorage.SetItemAsync("userProperties", userProperties);
             }
             else
             {
                 var cachedData = await LocalStorage.GetItemAsync<List<UserProperties>>("userProperties");
                 userProperties = cachedData ?? new List<UserProperties>();
+                userPropertiesTemp = userProperties;
             }
         }
         catch (Exception ex)
@@ -76,6 +130,26 @@
         finally
         {
             isLoading = false;
+        }
+    }
+
+    private async Task OnGetRoles()
+    {
+        try
+        {
+            if (isOnline)
+            {
+                rolesProperty = await ApiHelper.GetAsync<List<RolesProperty>>("UserManagement/GetAllRoles");
+                await LocalStorage.SetItemAsync("rolesProperty", rolesProperty);
+            }
+            else
+            {
+                var cachedData = await LocalStorage.GetItemAsync<List<RolesProperty>>("rolesProperty");
+                rolesProperty = cachedData ?? new List<RolesProperty>();
+            }
+        }catch(Exception ex)
+        {
+            Snackbar.Add($"Error getting roles data: {ex.Message}", Severity.Error);
         }
     }
 
@@ -91,6 +165,7 @@
         {
             isLoading = true;
             userProperties = await ApiHelper.GetAsync<List<UserProperties>>("UserManagement/UsersList");
+            userPropertiesTemp = userProperties;
             await LocalStorage.SetItemAsync("userProperties", userProperties);
             Snackbar.Add("User data refreshed successfully.", Severity.Success);
         }

@@ -70,3 +70,7 @@ h1:focus {
     background-color: #d4af37;
     border: none;
 }
+
+.data-grid {
+    background-color: #e67e22;    
+}
