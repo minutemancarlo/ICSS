@@ -66,6 +66,29 @@
             }
         };
     </script>
+    <script>
+        let deferredPrompt;
+
+        window.installPromptHelper = {
+            registerPrompt: function () {
+                window.addEventListener('beforeinstallprompt', (e) => {
+                    e.preventDefault();
+                    deferredPrompt = e;
+                });
+            },
+            showInstallPrompt: async function () {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const choiceResult = await deferredPrompt.userChoice;
+                    deferredPrompt = null; // Reset after use
+                    return choiceResult.outcome;
+                } else {
+                    return "not available";
+                }
+            }
+        };
+    </script>
+
 
 </body>
 

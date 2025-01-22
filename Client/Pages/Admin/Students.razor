@@ -199,7 +199,8 @@
                 { x => x.Action, "Update" },
                 { x => x.Icon, "edit" },
                 {x => x.studentModel, studentModel},
-                { x => x.currentUserId, MainLayout.CurrentUserId }
+                { x => x.currentUserId, MainLayout.CurrentUserId },
+                { x => x.Id, studentModel.Id},
             };
 
             var dialog = await DialogService.ShowAsync<StudentDialog>("", parameters, options);

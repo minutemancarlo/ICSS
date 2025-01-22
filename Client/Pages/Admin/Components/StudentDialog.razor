@@ -40,7 +40,7 @@
 
     [Parameter] public string? Action { get; set; }
     [Parameter] public string? Icon { get; set; }
-    [Parameter] public string? Id { get; set; }
+    [Parameter] public int? Id { get; set; }
     [Parameter] public StudentModel? studentModel { get; set; }
     [Parameter] public string currentUserId { get; set; }
 
@@ -62,7 +62,7 @@
 
                 try
                 {
-                    if (string.IsNullOrEmpty(Id))
+                    if (!Id.HasValue)
                     {
                         studentModel.CreatedBy = currentUserId;
                         // Insert operation

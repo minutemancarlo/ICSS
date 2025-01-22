@@ -37,6 +37,20 @@
     private string subTitle;
     private bool isOnline;
 
+    private async Task ShowInstallPrompt()
+    {
+        var result = await JSRuntime.InvokeAsync<string>("installPromptHelper.showInstallPrompt");
+        Console.WriteLine($"Install prompt result: {result}");
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("installPromptHelper.registerPrompt");
+        }
+    }
+
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
