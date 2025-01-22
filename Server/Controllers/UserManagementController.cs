@@ -45,6 +45,7 @@ namespace ICSS.Server.Controllers
                         Last_Login = user.LastLogin,
                         Provider = user.UserId.ToLower().Contains("auth0") ? "Email-Password Auth" :
                                    user.UserId.ToLower().Contains("facebook") ? "Facebook" :
+                                   user.UserId.ToLower().Contains("windows") ? "Microsoft" :
                                    user.UserId.ToLower().Contains("google-oauth2") ? "Google" :
                                    "Unknown Provider",
                         Picture = user.Picture,

@@ -8,28 +8,47 @@
 
 <MudContainer Class="py-4 py-sm-8 py-md-12 py-lg-16 py-xl-20">
     <MudGrid>
+        
         <MudItem xs="12">               
-            @if (!isOnline)
+            @if (!MainLayout.IsOnline)
             {
                 <MudAlert Severity="Severity.Error" Variant="Variant.Filled" Style="margin-bottom: 16px;" Visible="!isOnline">
                     You are currently offline. Data may not be up-to-date.
                 </MudAlert>
             }                                                
-
         </MudItem>
         <MudItem xs="12">
-            <MudDataGrid Items="userPropertiesTemp" Loading="isLoading"  Dense Hover Filterable Striped Virtualize>
+            <MudText Typo="Typo.h6" Class="fw-bold">Users List</MudText>
+            <MudDivider />
+        </MudItem>
+        <MudItem xs="12">
+            <MudDataGrid @ref="_table" T="UserProperties" Items="@userPropertiesTemp" Loading="@isLoading"  Dense Hover Filterable Striped Virtualize>
                 <ToolBarContent>
-                    <MudButton OnClick="RefreshUserData" Size="Size.Small" StartIcon="fa-solid fa-refresh" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Primary"  Disabled="!isOnline">
-                        Refresh
-                    </MudButton>
+                    <MudBreakpointProvider>
+                        <MudHidden Breakpoint="Breakpoint.MdAndUp" Invert="true">
+                            <MudButton OnClick="RefreshUserData" Size="Size.Small" StartIcon="fa-solid fa-refresh" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Primary" Disabled="!MainLayout.IsOnline">
+                                Refresh
+                            </MudButton>
+                        </MudHidden>
+                        <MudHidden Breakpoint="Breakpoint.MdAndDown" Invert="true">
+                            <MudIconButton ButtonType="ButtonType.Button" OnClick="RefreshUserData" Size="Size.Small" Icon="fa-solid fa-refresh" Variant="Variant.Filled" Color="Color.Primary" Disabled="!MainLayout.IsOnline"/>                            
+                        </MudHidden>
+                    </MudBreakpointProvider>
+                    
                     <MudSpacer />
                     <MudTextField ValueChanged="@(s=>Onsearch(s))" T="string" Immediate Placeholder="Search here.." Adornment="Adornment.Start" IconSize="Size.Small" AdornmentIcon="fa-solid fa-search" Margin="Margin.Dense" Variant="Variant.Text"></MudTextField>
                 </ToolBarContent>
                 <Columns>
-                    <PropertyColumn Property="x => x.Picture" Title="Profile" HeaderClass="data-grid text-nowrap text-white">
+                    <PropertyColumn Property="x => x.Picture" Title="Profile" HeaderClass="data-grid text-nowrap text-white" Filterable="false" Sortable="false">
                         <CellTemplate>
-                            <MudImage Src="@context.Item.Picture" Alt="profile" Height="50" Width="50" Elevation="25" Class="rounded-lg" />
+                            @if (context.Item.Picture.Contains("apis.live.net"))
+                            {
+                                <MudAvatar Rounded="true" Variant="Variant.Filled" Style="height:50px; width:50px; font-size: 1.5rem;" Color="Color.Primary">@($"{context.Item.FirstName.Substring(0, 1)}{context.Item.LastName.Substring(0, 1)}")</MudAvatar>
+                            }
+                            else
+                            {
+                                <MudImage Src="@context.Item.Picture" Alt="profile" Height="50" Width="50" Elevation="25" Class="rounded-lg" />                                
+                            }
                         </CellTemplate>
                     </PropertyColumn>
                     <PropertyColumn Property="x => x.FirstName" Title="Name" Sortable="true" HeaderClass="data-grid text-nowrap text-white" CellClass="text-nowrap">
@@ -56,10 +75,10 @@
                         <CellTemplate>                   
                             <MudStack Row>
                                 <MudTooltip Text="Update Role">
-                                    <MudIconButton Icon="fa-solid fa-user-shield" Size="Size.Medium" Color="Color.Info" Variant="Variant.Filled" Disabled="@(context.Item.User_Id==MainLayout.CurrentUserId||!isOnline)" OnClick="@(() => OnShowUpdateRole(context.Item.Role))"/>    
+                                    <MudIconButton Icon="fa-solid fa-user-shield" Size="Size.Medium" Color="Color.Info" Variant="Variant.Filled" Disabled="@(context.Item.User_Id==MainLayout.CurrentUserId||!MainLayout.IsOnline)" OnClick="@(() => OnShowUpdateRole(context.Item.Role))" />
                                 </MudTooltip>
                                 <MudTooltip Text="@(context.Item.Blocked?"Enable Access":"Disable Access")">
-                                    <MudIconButton Icon="@(!context.Item.Blocked?"fa-solid fa-user-slash":"fa-solid fa-user")" Size="Size.Medium" Color="@(context.Item.Blocked?Color.Success:Color.Error)" Variant="Variant.Filled" Disabled="@(context.Item.User_Id==MainLayout.CurrentUserId||!isOnline)" OnClick="@(() => OnUpdateUserAccess(context.Item.User_Id,context.Item.Blocked?"enable":"disable"))" />
+                                    <MudIconButton Icon="@(!context.Item.Blocked?"fa-solid fa-user-slash":"fa-solid fa-user")" Size="Size.Medium" Color="@(context.Item.Blocked?Color.Success:Color.Error)" Variant="Variant.Filled" Disabled="@(context.Item.User_Id==MainLayout.CurrentUserId||!MainLayout.IsOnline)" OnClick="@(() => OnUpdateUserAccess(context.Item.User_Id,context.Item.Blocked?"enable":"disable"))" />
                                 </MudTooltip>                                
                             </MudStack>
                         </CellTemplate>
@@ -87,10 +106,10 @@
     private List<UserProperties> userPropertiesTemp = new();
     private List<RolesProperty> rolesProperty = new();
     private bool isLoading = true;
-    private bool isOnline = true;
+    
     private string? roleId;
     private string? searchText;
-
+    private MudDataGrid<UserProperties> _table = default!;
     [Inject] private ISnackbar Snackbar { get; set; }
     [Inject] private ILocalStorageService LocalStorage { get; set; }
     [Inject] private HttpClient HttpClient { get; set; }
@@ -99,9 +118,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        MainLayout.SubTitle = "User Management";
-        await JSRuntime.InvokeVoidAsync("networkStatus.registerOnlineOfflineEvents", DotNetObjectReference.Create(this));
-        isOnline = await JSRuntime.InvokeAsync<bool>("networkStatus.isOnline");
+        MainLayout.SubTitle = "User Management";        
         await OnGetRoles();
         await LoadUserData();
         await base.OnInitializedAsync();
@@ -170,26 +187,33 @@
             {
                 var confirmed = (bool)result.Data;
                 if (confirmed == true)
-                {                    
+                {
+                    isLoading = true;
                     var blockStatus = new { block = access == "enable" ? false : true };
                     // var response = await ApiHelper.PatchAsync(object,< ApiResponse >, $"UserManagement/update-block-status/{userId}", blockStatus);
                     var response = await ApiHelper.PatchAsync<object, ApiResponse>($"UserManagement/update-block-status/{userId}?block={blockStatus.block}", blockStatus);
                     if (response.IsSuccess)
-                    {
-                        StateHasChanged();
-                        await LoadUserData();                        
+                    {                                             
                         Snackbar.Add($"User successfully {access}d access.",Severity.Success);                        
+                        await LoadUserData();
+                        StateHasChanged();    
                     }
                     else
                     {
                         Snackbar.Add($"Error: {response.Message}", Severity.Error);                        
                     }
-                }
+                    
+                }                                
             }
         }catch(Exception ex)
         {
             Snackbar.Add($"Error: {ex.Message}", Severity.Error);
         }
+        finally
+        {
+            isLoading = false;
+        }
+
     }
 
     private async Task LoadUserData()
@@ -198,7 +222,7 @@
         {
             isLoading = true;
 
-            if (isOnline)
+            if (MainLayout.IsOnline)
             {
                 var response = await ApiHelper.GetAsync<List<UserProperties>>("UserManagement/UsersList");
 
@@ -206,7 +230,8 @@
                 {
                     userProperties = response.Data;
                     userPropertiesTemp = userProperties;
-                    await LocalStorage.SetItemAsync("userProperties", userProperties);
+                    await LocalStorage.SetItemAsync("userProperties", userProperties);                    
+                    StateHasChanged();
                 }
                 else
                 {                    
@@ -234,7 +259,7 @@
     {
         try
         {
-            if (isOnline)
+            if (MainLayout.IsOnline)
             {
                 var response = await ApiHelper.GetAsync<List<RolesProperty>>("UserManagement/GetAllRoles");
 
@@ -262,7 +287,7 @@
 
     private async Task RefreshUserData()
     {
-        if (!isOnline)
+        if (!MainLayout.IsOnline)
         {
             Snackbar.Add("You are offline. Cannot refresh data.", Severity.Warning);
             return;
@@ -294,10 +319,5 @@
         }
     }
 
-    [JSInvokable]
-    public void SetNetworkStatus(bool status)
-    {
-        isOnline = status;
-        InvokeAsync(StateHasChanged);
-    }
+   
 }

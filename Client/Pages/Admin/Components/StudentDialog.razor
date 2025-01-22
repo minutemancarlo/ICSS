@@ -1,0 +1,112 @@
+﻿@using ICSS.Shared
+
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@($"fa-solid fa-user-{Icon}")"></MudIcon>
+            @Action Student Information
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudForm @ref="_form" Model="studentModel">
+            <MudStack>
+                <MudTextField @bind-Value="studentModel.IdNumber" Label="ID Number" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
+                <MudTextField @bind-Value="studentModel.Name" Label="Name" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
+                <MudTextField @bind-Value="studentModel.Email" Label="Email" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
+                <MudSwitch @bind-Value="studentModel.IsActive" Label="Is Active" Color="Color.Success" />
+            </MudStack>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Disabled="_loading" Size="Size.Medium" OnClick="Cancel">Cancel</MudButton>
+        <MudLoadingButton Variant="Variant.Filled"
+        Color="Color.Success"
+        Size="Size.Medium"
+        Loading="@(_loading)"
+        OnClick="@(async => OnSubmit())"
+        ButtonType="ButtonType.Button">
+            <LoadingContent>Submitting...</LoadingContent>
+            <ChildContent>Submit</ChildContent>
+        </MudLoadingButton>
+    </DialogActions>
+</MudDialog>
+
+@code
+{
+    [CascadingParameter] MudDialogInstance? MudDialog { get; set; }
+    [Inject] HttpClient? httpClient { get; set; }
+    [Inject] ISnackbar Snackbar { get; set; }
+
+    [Parameter] public string? Action { get; set; }
+    [Parameter] public string? Icon { get; set; }
+    [Parameter] public string? Id { get; set; }
+    [Parameter] public StudentModel? studentModel { get; set; }
+    [Parameter] public string currentUserId { get; set; }
+
+    MudForm? _form;
+    private bool _loading = false;
+
+    void Cancel() => MudDialog.Cancel();
+
+
+    private async Task OnSubmit()
+    {
+        if (_form is not null)
+        {
+            await _form.Validate();
+
+            if (_form.IsValid)
+            {
+                _loading = true;
+
+                try
+                {
+                    if (string.IsNullOrEmpty(Id))
+                    {
+                        studentModel.CreatedBy = currentUserId;
+                        // Insert operation
+                        var response = await new ApiRequestHelper(httpClient).PostAsync<StudentModel, ApiResponse<int>>("StudentManagement/Add", studentModel);
+
+                        if (response.IsSuccess)
+                        {
+                            Snackbar.Add("Student added successfully.", Severity.Success);
+                            MudDialog.Close(DialogResult.Ok(true));
+                        }
+                        else
+                        {
+                            Snackbar.Add($"Error: {response.Message}", Severity.Error);
+                        }
+                    }
+                    else
+                    {
+                        studentModel.UpdatedBy = currentUserId;
+                        // Update operation
+                        var response = await new ApiRequestHelper(httpClient).PutAsync($"StudentManagement/Update/{Id}", studentModel);
+
+                        if (response.IsSuccess)
+                        {
+                            Snackbar.Add("Student updated successfully.", Severity.Success);
+                            MudDialog.Close(DialogResult.Ok(true));
+                        }
+                        else
+                        {
+                            Snackbar.Add($"Error: {response.Message}", Severity.Error);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
+                }
+                finally
+                {
+                    _loading = false;
+                }
+            }
+        }
+    }
+
+
+
+}

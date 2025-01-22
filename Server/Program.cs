@@ -1,5 +1,6 @@
 using Auth0Net.DependencyInjection;
 using ICSS.Server.Logger;
+using ICSS.Server.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.ResponseCompression;
 using System.Data;
@@ -47,6 +48,7 @@ builder.Services.AddAuth0AuthenticationClient(config =>
     config.ClientSecret = builder.Configuration["Auth0:ClientSecret"];
 });
 builder.Services.AddSingleton<FileLogger>();
+builder.Services.AddTransient<StudentRepository>();
 
 
 builder.Services.AddHttpContextAccessor();

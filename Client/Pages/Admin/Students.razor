@@ -1,0 +1,259 @@
+﻿@page "/manage-students"
+@attribute [Authorize]
+@layout MainLayout
+@using ICSS.Shared
+@using ICSS.Client.Pages.Admin.Components
+@using ICSS.Client.Helpers
+@inject IJSRuntime JSRuntime
+
+<MudContainer Class="py-4 py-sm-8 py-md-12 py-lg-16 py-xl-20">
+    <MudGrid>
+        <MudItem xs="12">
+            @if (!MainLayout.IsOnline)
+            {
+                <MudAlert Severity="Severity.Error" Variant="Variant.Filled" Style="margin-bottom: 16px;" Visible="!isOnline">
+                    You are currently offline. Data may not be up-to-date.
+                </MudAlert>
+            }
+        </MudItem>
+        <MudItem xs="12">
+            <MudTabs Elevation="2" Rounded="true" Outlined="true">
+                <MudTabPanel Text="Students List" Icon="fa-solid fa-user-graduate">                    
+                    <MudItem xs="12">
+                        <MudPaper Elevation="4">
+                            <MudDataGrid Items="studentsTemp" Loading="isLoading" Dense Hover Filterable Striped Virtualize>
+                                <ToolBarContent>
+                                    <MudBreakpointProvider>
+                                    <MudHidden Breakpoint="Breakpoint.MdAndUp" Invert="true">
+                                            <MudButton OnClick="ShowAddStudentDialog" Size="Size.Small" StartIcon="fa-solid fa-user-plus" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Success" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
+                                                Add Student
+                                            </MudButton>
+                                            <MudButton OnClick="LoadStudents" Size="Size.Small" StartIcon="fa-solid fa-refresh" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Primary" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
+                                                Refresh
+                                            </MudButton>
+                                     </MudHidden>
+                                        <MudHidden Breakpoint="Breakpoint.MdAndDown" Invert="true">
+                                            <MudIconButton ButtonType="ButtonType.Button" Variant="Variant.Filled" OnClick="ShowAddStudentDialog" Class="my-2 mx-1" Size="Size.Small" Icon="fa-solid fa-user-plus" Color="Color.Success" Disabled="!MainLayout.IsOnline" />
+                                            <MudIconButton ButtonType="ButtonType.Button" Variant="Variant.Filled" OnClick="LoadStudents" Class="my-2 mx-1" Size="Size.Small" Icon="fa-solid fa-refresh" Color="Color.Primary" Disabled="!MainLayout.IsOnline" />
+                                        </MudHidden>
+                                    </MudBreakpointProvider>
+                                    
+                                    <MudSpacer />
+                                    <MudTextField ValueChanged="@(s=>Onsearch(s))" T="string" Immediate Placeholder="Search here.." Adornment="Adornment.Start" IconSize="Size.Small" AdornmentIcon="fa-solid fa-search" Margin="Margin.Dense" Variant="Variant.Text"></MudTextField>
+                                </ToolBarContent>
+                                <Columns>
+                                    <PropertyColumn Property="x => x.Id" Title="No." Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
+                                    <PropertyColumn Property="x => x.IdNumber" Title="ID Number" Sortable="true" HeaderClass="data-grid text-nowrap text-white"/>                                        
+                                    <PropertyColumn Property="x => x.Name" Title="Name" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
+                                    <PropertyColumn Property="x => x.IsActive" Title="Status" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
+                                        <CellTemplate>
+                                            <MudChip Variant="Variant.Filled" Size="Size.Small" Color="@(context.Item.IsActive?Color.Success:Color.Error)">@(context.Item.IsActive ? "Active" : "InActive")</MudChip>
+                                        </CellTemplate>
+                                    </PropertyColumn>
+                                    <PropertyColumn Property="x => x.CreatedBy" Title="Created By" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
+                                        <CellTemplate>
+                                            <MudStack Spacing="0">
+                                                <MudText Typo="Typo.body2" Class="fw-bold">@context.Item.CreatedBy</MudText>
+                                                <MudText Typo="Typo.body2" Class="fw-italic">@context.Item.CreatedOn</MudText>
+                                            </MudStack>
+                                        </CellTemplate>
+                                    </PropertyColumn>
+                                    <PropertyColumn Property="x => x.UpdatedBy" Title="Updated By" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
+                                        <CellTemplate>
+                                            <MudStack Spacing="0">
+                                                <MudText Typo="Typo.body2" Class="fw-bold">@context.Item.UpdatedBy</MudText>
+                                                <MudText Typo="Typo.body2" Class="fw-italic">@context.Item.UpdatedOn</MudText>
+                                            </MudStack>
+                                        </CellTemplate>
+                                    </PropertyColumn>
+                                    <TemplateColumn Title="Actions" HeaderClass="data-grid text-nowrap text-white">
+                                        <CellTemplate>
+                                            <MudTooltip Text="Update Student Information">
+                                                <MudIconButton Icon="fa-solid fa-user-edit" Size="Size.Medium" Color="Color.Info" Variant="Variant.Filled" Disabled="@(!MainLayout.IsOnline)" OnClick="@(() => OnShowUpdateStudentDialog(context.Item))" />
+                                            </MudTooltip>
+                                        </CellTemplate>
+                                    </TemplateColumn>
+                                </Columns>
+                                <NoRecordsContent>
+                                    <MudText>No Records to show</MudText>
+                                </NoRecordsContent>
+                                <LoadingContent>
+                                    <MudText>Loading Content...</MudText>
+                                </LoadingContent>
+                                <PagerContent>
+                                    <MudDataGridPager T="StudentModel" />
+                                </PagerContent>
+                            </MudDataGrid>
+                        </MudPaper>
+                    </MudItem>
+                </MudTabPanel>
+                <MudTabPanel Text="Uploads" Icon="fa-solid fa-upload">
+
+                </MudTabPanel>
+            </MudTabs>
+        </MudItem>
+
+    </MudGrid>
+</MudContainer>
+
+@code{
+    [CascadingParameter]
+    public MainLayout MainLayout { get; private set; }
+
+    private List<StudentModel> students = new();
+    private List<StudentModel> studentsTemp = new();
+
+    private bool isLoading = true;
+    
+
+
+    [Inject] private ISnackbar Snackbar { get; set; }
+    [Inject] private ILocalStorageService LocalStorage { get; set; }
+    [Inject] private HttpClient HttpClient { get; set; }
+    [Inject] private ApiRequestHelper ApiHelper { get; set; }
+
+
+    [Inject] IDialogService? DialogService { get; set; }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        MainLayout.SubTitle = "Student Management";       
+        await LoadStudents();
+        await base.OnInitializedAsync();
+    }
+
+    private async Task Onsearch(string query)
+    {
+
+        studentsTemp = students.Where(data =>
+           {
+               if (string.IsNullOrWhiteSpace(query))
+                   return true;
+               if (data.Name.Contains(query, StringComparison.OrdinalIgnoreCase))
+                   return true;
+               if (data.Email.Contains(query, StringComparison.OrdinalIgnoreCase))
+                   return true;
+               if (data.IdNumber.Contains(query, StringComparison.OrdinalIgnoreCase))
+                   return true;
+               return false;
+           }).ToList();
+    }
+
+
+
+    private async Task ShowAddStudentDialog()
+    {
+        try
+        {
+            var options = new DialogOptions
+                {
+                    CloseOnEscapeKey = false,
+                    FullWidth = true,
+                    MaxWidth = MaxWidth.Small,
+                    BackdropClick = false,
+                    CloseButton = false,
+                    BackgroundClass = "blurred"
+
+                };
+
+            var parameters = new DialogParameters<StudentDialog>
+            {
+                { x => x.Action, "Add" },
+                { x => x.Icon, "plus" },
+                {x => x.studentModel, new StudentModel()},
+                { x => x.currentUserId, MainLayout.CurrentUserId }
+            };
+
+            var dialog = await DialogService.ShowAsync<StudentDialog>("", parameters, options);
+            var result = await dialog.Result;
+            if (!result.Canceled)
+            {
+                await LoadStudents();
+                StateHasChanged();
+            }
+        }catch(Exception ex)
+        {
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task OnShowUpdateStudentDialog(StudentModel studentModel)
+    {
+        try
+        {
+            var options = new DialogOptions
+                {
+                    CloseOnEscapeKey = false,
+                    FullWidth = true,
+                    MaxWidth = MaxWidth.Small,
+                    BackdropClick = false,
+                    CloseButton = false,
+                    BackgroundClass = "blurred"
+
+                };
+
+            var parameters = new DialogParameters<StudentDialog>
+            {
+                { x => x.Action, "Update" },
+                { x => x.Icon, "edit" },
+                {x => x.studentModel, studentModel},
+                { x => x.currentUserId, MainLayout.CurrentUserId }
+            };
+
+            var dialog = await DialogService.ShowAsync<StudentDialog>("", parameters, options);
+            var result = await dialog.Result;
+            if (!result.Canceled)
+            {
+                await LoadStudents();
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task LoadStudents()
+    {
+        isLoading = true;
+
+        try
+        {            
+            if (MainLayout.IsOnline)
+            {
+                var response = await ApiHelper.GetAsync<List<StudentModel>>("StudentManagement/GetAll");
+                if (response.IsSuccess)
+                {
+                    students = response.Data;
+                    studentsTemp = students;
+                    await LocalStorage.SetItemAsync("studentModel", students);
+                    StateHasChanged();
+                }
+                else
+                {
+                    Snackbar.Add($"Failed to load students: {response.Message}", Severity.Error);
+                }
+            }
+            else
+            {
+                var cachedData = await LocalStorage.GetItemAsync<List<StudentModel>>("studentModel");
+                students = cachedData ?? new List<StudentModel>();
+                studentsTemp = students;
+                StateHasChanged();
+            }
+           
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}
+

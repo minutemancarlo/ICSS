@@ -31,9 +31,11 @@
 </CascadingValue>
 @code {
     [Inject] AuthenticationStateProvider AuthenticationStateProvider { get; set; }
+    [Inject] IJSRuntime JSRuntime { get; set; }
     bool _drawerOpen = true;
     private string currentUserId;
     private string subTitle;
+    private bool isOnline;
 
     protected override async Task OnInitializedAsync()
     {
@@ -43,6 +45,9 @@
         {
             CurrentUserId = user.FindFirst(c => c.Type == "sub")?.Value;
         }
+
+        await JSRuntime.InvokeVoidAsync("networkStatus.registerOnlineOfflineEvents", DotNetObjectReference.Create(this));
+        IsOnline = await JSRuntime.InvokeAsync<bool>("networkStatus.isOnline");
 
         await base.OnInitializedAsync();
     }
@@ -66,6 +71,24 @@
             InvokeAsync(() => StateHasChanged());
         }
 
+    }
+
+    public bool IsOnline
+    {
+        get => isOnline;
+        set
+        {
+            isOnline = value;
+            InvokeAsync(() => StateHasChanged());
+        }
+
+    }
+
+    [JSInvokable]
+    public void SetNetworkStatus(bool status)
+    {
+        isOnline = status;
+        InvokeAsync(StateHasChanged);
     }
 
     void DrawerToggle()
