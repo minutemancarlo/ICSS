@@ -2,6 +2,7 @@
 using Auth0.ManagementApi.Models;
 using Auth0.ManagementApi.Paging;
 using ICSS.Server.Logger;
+using ICSS.Server.Repository;
 using ICSS.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,10 +14,12 @@ namespace ICSS.Server.Controllers
     public class UserManagementController : ControllerBase
     {
         private readonly IManagementApiClient _managementApiClient;
+        private readonly UserRepository _userRepository;
 
-        public UserManagementController(IManagementApiClient managementApiClient)
+        public UserManagementController(IManagementApiClient managementApiClient,UserRepository userRepository)
         {
-            _managementApiClient = managementApiClient;            
+            _managementApiClient = managementApiClient;
+            _userRepository = userRepository;
         }
 
         [HttpGet("UsersList")]
@@ -105,6 +108,16 @@ namespace ICSS.Server.Controllers
             {
                 return StatusCode(500, new { Message = "An error occurred while updating the user's block status.", Error = ex.Message });
             }
+        }
+
+        [HttpPost("check-and-insert")]
+        public async Task<IActionResult> CheckAndInsertSystemId([FromBody] InternalUser model)
+        {
+            if (model == null || string.IsNullOrEmpty(model.SystemId))
+                return BadRequest("SystemId is required.");
+
+            await _userRepository.CheckAndInsertSystemIdAsync(model.SystemId, model.Name ?? string.Empty);
+            return Ok(new { Message = "Operation completed successfully." });
         }
 
 

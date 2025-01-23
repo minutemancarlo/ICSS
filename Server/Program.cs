@@ -49,6 +49,7 @@ builder.Services.AddAuth0AuthenticationClient(config =>
 });
 builder.Services.AddSingleton<FileLogger>();
 builder.Services.AddTransient<StudentRepository>();
+builder.Services.AddTransient<UserRepository>();
 
 
 builder.Services.AddHttpContextAccessor();

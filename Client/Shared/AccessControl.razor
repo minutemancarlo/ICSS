@@ -1,5 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @using System.Security.Claims
+@using ICSS.Shared
+@using ICSS.Client
 @inject NavigationManager Navigation
 @inject SignOutSessionStateManager SignOutManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
@@ -53,6 +55,7 @@
     [CascadingParameter]
     private Task<AuthenticationState>? authenticationState { get; set; }
     public List<Claim> UserClaims { get; set; } = new List<Claim>();
+    [Inject] private ApiRequestHelper ApiHelper { get; set; }
     protected override async Task OnInitializedAsync()
     {
         if (authenticationState is not null)
@@ -67,7 +70,15 @@
                             .Where(c => c.Type.Equals("picture"))
                             .Select(c => c.Value)
                             .FirstOrDefault() ?? string.Empty;
-                // navigationManager.NavigateTo("login?redirectUri=/");
+                var internalUser = new InternalUser
+                    {
+                        Name = user.Claims
+                        .Where(c => c.Type.Equals("name"))
+                        .Select(c => c.Value)
+                        .FirstOrDefault() ?? string.Empty,
+                        SystemId = user.FindFirst(c => c.Type == "sub")?.Value
+                    };
+                await ApiHelper.PostAsync<InternalUser, object>("UserManagement/check-and-insert", internalUser);
             }
         }
 
