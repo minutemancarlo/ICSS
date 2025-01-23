@@ -1,5 +1,5 @@
 ﻿@using ICSS.Shared
-
+@using ICSS.Client.Pages.Validations
 
 <MudDialog>
     <TitleContent>
@@ -9,11 +9,11 @@
         </MudText>
     </TitleContent>
     <DialogContent>
-        <MudForm @ref="_form" Model="studentModel">
+        <MudForm @ref="_form" Model="studentModel" Validation="@(modelValidator.ValidateValue)" ValidationDelay="0">
             <MudStack>
-                <MudTextField @bind-Value="studentModel.IdNumber" Label="ID Number" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
-                <MudTextField @bind-Value="studentModel.Name" Label="Name" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
-                <MudTextField @bind-Value="studentModel.Email" Label="Email" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
+                <MudNumericField @bind-Value="studentModel.IdNumber" For="@(() => studentModel.IdNumber)" Label="ID Number" Variant="Variant.Outlined" Margin="Margin.Dense" HideSpinButtons />
+                <MudTextField @bind-Value="studentModel.Name" For="@(() => studentModel.Name)" Label="Name" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
+                <MudTextField @bind-Value="studentModel.Email" InputType="InputType.Email" For="@(() => studentModel.Email)" Label="Email" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
                 <MudSwitch @bind-Value="studentModel.IsActive" Label="Is Active" Color="Color.Success" />
             </MudStack>
         </MudForm>
@@ -21,11 +21,11 @@
     <DialogActions>
         <MudButton Disabled="_loading" Size="Size.Medium" OnClick="Cancel">Cancel</MudButton>
         <MudLoadingButton Variant="Variant.Filled"
-        Color="Color.Success"
-        Size="Size.Medium"
-        Loading="@(_loading)"
-        OnClick="@(async => OnSubmit())"
-        ButtonType="ButtonType.Button">
+                          Color="Color.Success"
+                          Size="Size.Medium"
+                          Loading="@(_loading)"
+                          OnClick="@(async => OnSubmit())"
+                          ButtonType="ButtonType.Button">
             <LoadingContent>Submitting...</LoadingContent>
             <ChildContent>Submit</ChildContent>
         </MudLoadingButton>
@@ -43,7 +43,8 @@
     [Parameter] public int? Id { get; set; }
     [Parameter] public StudentModel? studentModel { get; set; }
     [Parameter] public string currentUserId { get; set; }
-
+    StudentModelValidator modelValidator = new StudentModelValidator();
+    [Inject] private ApiRequestHelper ApiHelper { get; set; }
     MudForm? _form;
     private bool _loading = false;
 
@@ -65,34 +66,62 @@
                     if (!Id.HasValue)
                     {
                         studentModel.CreatedBy = currentUserId;
-                        // Insert operation
-                        var response = await new ApiRequestHelper(httpClient).PostAsync<StudentModel, ApiResponse<int>>("StudentManagement/Add", studentModel);
-
-                        if (response.IsSuccess)
+                        var responseExist = await ApiHelper.GetAsync<bool>($"StudentManagement/verify?email={studentModel.Email}&idNumber={studentModel.IdNumber}&id={0}");
+                        if (responseExist.IsSuccess)
                         {
-                            Snackbar.Add("Student added successfully.", Severity.Success);
-                            MudDialog.Close(DialogResult.Ok(true));
+                            if (!responseExist.Data)
+                            {
+                                var response = await ApiHelper.PostAsync<StudentModel, ApiResponse<int>>("StudentManagement/Add", studentModel);
+
+                                if (response.IsSuccess)
+                                {
+                                    Snackbar.Add("Student added successfully.", Severity.Success);
+                                    MudDialog.Close(DialogResult.Ok(true));
+                                }
+                                else
+                                {
+                                    Snackbar.Add($"Error: {response.Message}", Severity.Error);
+                                }
+                            }
+                            else
+                            {
+                                Snackbar.Add($"ID Number/Email already exist",Severity.Error);
+                            }
                         }
                         else
                         {
-                            Snackbar.Add($"Error: {response.Message}", Severity.Error);
+                            Snackbar.Add($"Error: {responseExist.Message}", Severity.Error);
                         }
+
+
+
                     }
                     else
                     {
                         studentModel.UpdatedBy = currentUserId;
-                        // Update operation
-                        var response = await new ApiRequestHelper(httpClient).PutAsync($"StudentManagement/Update/{Id}", studentModel);
+                        var responseExist = await ApiHelper.GetAsync<bool>($"StudentManagement/verify?email={studentModel.Email}&idNumber={studentModel.IdNumber}&id={studentModel.Id}");
+                        if (responseExist.IsSuccess)
+                        {
+                            if (!responseExist.Data)
+                            {
+                                // Update operation
+                                var response = await ApiHelper.PutAsync($"StudentManagement/Update/{Id}", studentModel);
 
-                        if (response.IsSuccess)
-                        {
-                            Snackbar.Add("Student updated successfully.", Severity.Success);
-                            MudDialog.Close(DialogResult.Ok(true));
+                                if (response.IsSuccess)
+                                {
+                                    Snackbar.Add("Student updated successfully.", Severity.Success);
+                                    MudDialog.Close(DialogResult.Ok(true));
+                                }
+                                else
+                                {
+                                    Snackbar.Add($"Error: {response.Message}", Severity.Error);
+                                }
+                            }else
+                            {
+                                Snackbar.Add($"ID Number/Email already exist", Severity.Error);
+                            }
                         }
-                        else
-                        {
-                            Snackbar.Add($"Error: {response.Message}", Severity.Error);
-                        }
+                       
                     }
                 }
                 catch (Exception ex)

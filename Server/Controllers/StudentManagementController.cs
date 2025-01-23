@@ -69,5 +69,19 @@ namespace ICSS.Server.Controllers
                 return StatusCode(500, new { Message = ex.Message });
             }
         }
+
+        [HttpGet("verify")]
+        public async Task<IActionResult> VerifyStudentAsync([FromQuery] string email, [FromQuery] string idNumber, [FromQuery] int id)
+        {
+            try
+            {
+                var exists = await _studentRepository.VerifyStudentAsync(email, idNumber, id);
+                return Ok(exists);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
     }
 }

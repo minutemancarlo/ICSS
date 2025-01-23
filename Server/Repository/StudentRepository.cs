@@ -45,5 +45,32 @@ namespace ICSS.Server.Repository
         {
             return await _dbConnection.QueryAsync<StudentModel>("GetStudents", commandType: CommandType.StoredProcedure);
         }
+
+        public async Task<bool> VerifyStudentAsync(string email, string idNumber, int id)
+        { 
+            var query = string.Empty;
+            if (id == 0)
+            {
+                query = @"
+                SELECT COUNT(1) 
+                    FROM Students 
+                    WHERE Email = @Email 
+                        OR IdNumber = @IdNumber";
+            }
+            else
+            {
+                query = @"
+                SELECT COUNT(1) 
+                    FROM Students 
+                    WHERE (Email = @Email 
+                        OR IdNumber = @IdNumber )
+                        AND Id != @Id";
+            }
+            
+
+            var result = await _dbConnection.ExecuteScalarAsync<int>(query, new { Email = email, IdNumber = idNumber, Id = id });
+            return result > 0;
+        }
+
     }
 }
