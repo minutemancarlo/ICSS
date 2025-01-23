@@ -24,20 +24,20 @@
                             <MudDataGrid Items="studentsTemp" Loading="isLoading" Dense Hover Filterable Striped Virtualize>
                                 <ToolBarContent>
                                     <MudBreakpointProvider>
-                                    <MudHidden Breakpoint="Breakpoint.MdAndUp" Invert="true">
+                                        <MudHidden Breakpoint="Breakpoint.MdAndUp" Invert="true">
                                             <MudButton OnClick="ShowAddStudentDialog" Size="Size.Small" StartIcon="fa-solid fa-user-plus" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Success" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
                                                 Add Student
                                             </MudButton>
                                             <MudButton OnClick="LoadStudents" Size="Size.Small" StartIcon="fa-solid fa-refresh" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Primary" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
                                                 Refresh
                                             </MudButton>
-                                     </MudHidden>
+                                        </MudHidden>
                                         <MudHidden Breakpoint="Breakpoint.MdAndDown" Invert="true">
                                             <MudIconButton ButtonType="ButtonType.Button" Variant="Variant.Filled" OnClick="ShowAddStudentDialog" Class="my-2 mx-1" Size="Size.Small" Icon="fa-solid fa-user-plus" Color="Color.Success" Disabled="!MainLayout.IsOnline" />
                                             <MudIconButton ButtonType="ButtonType.Button" Variant="Variant.Filled" OnClick="LoadStudents" Class="my-2 mx-1" Size="Size.Small" Icon="fa-solid fa-refresh" Color="Color.Primary" Disabled="!MainLayout.IsOnline" />
                                         </MudHidden>
                                     </MudBreakpointProvider>
-                                    
+
                                     <MudSpacer />
                                     <MudTextField ValueChanged="@(s=>Onsearch(s))" T="string" Immediate Placeholder="Search here.." Adornment="Adornment.Start" IconSize="Size.Small" AdornmentIcon="fa-solid fa-search" Margin="Margin.Dense" Variant="Variant.Text"></MudTextField>
                                 </ToolBarContent>
@@ -88,7 +88,131 @@
                     </MudItem>
                 </MudTabPanel>
                 <MudTabPanel Text="Uploads" Icon="fa-solid fa-upload">
+                    <MudItem xs="12">
+                        <MudAlert Severity="Severity.Info" Class="m-2" Variant="Variant.Filled">
 
+                            Download the template and fill up student information. Click                         
+                            <MudLink Class="fw-bold" Color="Color.Inherit" Underline="Underline.Always" Typo="Typo.body2" Href="#">here</MudLink>                                
+
+                        </MudAlert>
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudPaper Elevation="4">
+                            <MudDataGrid Items="tasksTemp" Loading="isLoading" Dense Hover Filterable Striped Virtualize>
+                                <ToolBarContent>
+                                    <MudBreakpointProvider>
+                                        <MudHidden Breakpoint="Breakpoint.MdAndUp" Invert="true">
+                                            <MudFileUpload T="IBrowserFile" FilesChanged="OnFilesChanged">
+                                                <ActivatorContent>                                                    
+                                                    <MudLoadingButton Variant="Variant.Filled"
+                                                    Color="Color.Success"
+                                                    Size="Size.Small"
+                                                    Class="my-2 mx-1" Disabled="!MainLayout.IsOnline"
+                                                    StartIcon="fa-solid fa-file-excel"
+                                                    Loading="@(uploading)"
+                                                    ButtonType="ButtonType.Button">
+                                                        <LoadingContent>Uploading...</LoadingContent>
+                                                        <ChildContent>Upload File</ChildContent>
+                                                    </MudLoadingButton>
+                                                </ActivatorContent>
+                                            </MudFileUpload>                                                                                      
+                                            <MudButton OnClick="OnGetTasks" Size="Size.Small" StartIcon="fa-solid fa-refresh" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Primary" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
+                                                Refresh
+                                            </MudButton>
+                                        </MudHidden>
+                                        <MudHidden Breakpoint="Breakpoint.MdAndDown" Invert="true">
+                                            <MudFileUpload T="IBrowserFile" FilesChanged="OnFilesChanged">
+                                                <ActivatorContent>
+                                                    <MudLoadingButton Variant="Variant.Filled"
+                                                    ButtonVariant="ButtonVariant.IconButton"
+                                                    Color="Color.Success"
+                                                    Size="Size.Small"
+                                                    Class="my-2 mx-1" Disabled="!MainLayout.IsOnline"
+                                                    Icon="fa-solid fa-file-excel"
+                                                    Loading="@(uploading)"
+                                                    ButtonType="ButtonType.Button">                                                       
+                                                    </MudLoadingButton>
+                                                </ActivatorContent>
+                                            </MudFileUpload>                                            
+                                            <MudIconButton ButtonType="ButtonType.Button" Variant="Variant.Filled" OnClick="OnGetTasks" Class="my-2 mx-1" Size="Size.Small" Icon="fa-solid fa-refresh" Color="Color.Primary" Disabled="!MainLayout.IsOnline" />
+                                        </MudHidden>
+                                    </MudBreakpointProvider>
+
+                                    <MudSpacer />
+                                    <MudTextField ValueChanged="@(s=>OnsearchTasks(s))" T="string" Immediate Placeholder="Search here.." Adornment="Adornment.Start" IconSize="Size.Small" AdornmentIcon="fa-solid fa-search" Margin="Margin.Dense" Variant="Variant.Text"></MudTextField>
+                                </ToolBarContent>
+                                <Columns>
+                                    <PropertyColumn Property="x => x.TaskId" Title="Task Id" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
+                                    <PropertyColumn Property="x => x.TaskType" Title="Type" Sortable="true" HeaderClass="data-grid text-nowrap text-white" >
+                                        <CellTemplate>
+                                            <MudText Typo="Typo.body2">@context.Item.TaskType.ToString().Replace("_"," ")</MudText>
+                                        </CellTemplate>
+                                    </PropertyColumn>
+                                    <PropertyColumn Property="x => x.Status" Title="Status" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
+                                        <CellTemplate>
+                                            @if(context.Item.Status == ICSS.Shared.TaskStatus.On_Queue)
+                                            {
+                                                <MudChip Variant="Variant.Filled" Size="Size.Medium" Color="Color.Default">On Queue</MudChip>
+                                            }
+                                            else if (context.Item.Status == ICSS.Shared.TaskStatus.Processing)
+                                            {
+                                                <MudChip Variant="Variant.Filled" Size="Size.Medium" Color="Color.Info">Processing</MudChip>
+                                            }
+                                            else if (context.Item.Status == ICSS.Shared.TaskStatus.Success)
+                                            {
+                                                <MudChip Variant="Variant.Filled" Size="Size.Medium" Color="Color.Success">Success</MudChip>
+                                            }
+                                            else if (context.Item.Status == ICSS.Shared.TaskStatus.Failed)
+                                            {
+                                                <MudChip Variant="Variant.Filled" Size="Size.Medium" Color="Color.Error">Failed</MudChip>
+                                            }
+                                            else if (context.Item.Status == ICSS.Shared.TaskStatus.Cancelled)
+                                            {
+                                                <MudChip Variant="Variant.Filled" Size="Size.Medium" Color="Color.Warning">Cancelled</MudChip>
+                                            }
+                                        </CellTemplate>
+                                    </PropertyColumn>
+                                    <PropertyColumn Property="x => x.LogPath" Title="Log File" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
+                                        <CellTemplate>
+                                            <MudLink Underline="Underline.Hover" Typo="Typo.body2">@context.Item.FileName</MudLink>
+                                        </CellTemplate>
+                                    </PropertyColumn>
+                                    <PropertyColumn Property="x => x.CreatedBy" Title="Created By" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
+                                        <CellTemplate>
+                                            <MudStack Spacing="0">
+                                                <MudText Typo="Typo.body2" Class="fw-bold">@context.Item.CreatedBy</MudText>
+                                                <MudText Typo="Typo.body2" Class="fw-italic">@context.Item.CreatedOn</MudText>
+                                            </MudStack>
+                                        </CellTemplate>
+                                    </PropertyColumn>
+                                    <PropertyColumn Property="x => x.UpdatedBy" Title="Updated By" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
+                                        <CellTemplate>
+                                            <MudStack Spacing="0">
+                                                <MudText Typo="Typo.body2" Class="fw-bold">@context.Item.UpdatedBy</MudText>
+                                                <MudText Typo="Typo.body2" Class="fw-italic">@context.Item.UpdatedOn</MudText>
+                                            </MudStack>
+                                        </CellTemplate>
+                                    </PropertyColumn>
+                                    <TemplateColumn Title="Actions" HeaderClass="data-grid text-nowrap text-white">
+                                        <CellTemplate>
+                                            <MudTooltip Text="Remove from Queue">
+                                                <MudIconButton Icon="fa-solid fa-circle-stop" Size="Size.Medium" Color="Color.Error" Variant="Variant.Filled" Disabled="@(!MainLayout.IsOnline)"/>
+                                            </MudTooltip>
+                                        </CellTemplate>
+                                    </TemplateColumn>
+                                </Columns>
+                                <NoRecordsContent>
+                                    <MudText>No Records to show</MudText>
+                                </NoRecordsContent>
+                                <LoadingContent>
+                                    <MudText>Loading Content...</MudText>
+                                </LoadingContent>
+                                <PagerContent>
+                                    <MudDataGridPager T="Tasks" />
+                                </PagerContent>
+                            </MudDataGrid>
+                        </MudPaper>
+                    </MudItem>
                 </MudTabPanel>
             </MudTabs>
         </MudItem>
@@ -103,8 +227,11 @@
     private List<StudentModel> students = new();
     private List<StudentModel> studentsTemp = new();
 
+    private List<Tasks> tasks = new();
+    private List<Tasks> tasksTemp = new();
+
     private bool isLoading = true;
-    
+    private bool uploading = false;
 
 
     [Inject] private ISnackbar Snackbar { get; set; }
@@ -121,6 +248,7 @@
 
         MainLayout.SubTitle = "Student Management";       
         await LoadStudents();
+        await OnGetTasks();
         await base.OnInitializedAsync();
     }
 
@@ -140,6 +268,109 @@
                return false;
            }).ToList();
     }
+
+    private async Task OnsearchTasks(string query)
+    {
+
+        tasksTemp = tasks.Where(data =>
+           {
+               if (string.IsNullOrWhiteSpace(query))
+                   return true;
+               if (data.FileName.Contains(query, StringComparison.OrdinalIgnoreCase))
+                   return true;
+               if (data.TaskType.ToString().Contains(query, StringComparison.OrdinalIgnoreCase))
+                   return true;               
+               return false;
+           }).ToList();
+    }
+
+    private async Task OnGetTasks()
+    {
+        try
+        {
+            isLoading = true;
+            if (MainLayout.IsOnline)
+            {
+                var response = await ApiHelper.GetAsync<List<Tasks>>("FileUpload/GetStudentImports");
+                if (response.IsSuccess)
+                {
+                    tasks = response.Data;
+                    tasksTemp = tasks.OrderByDescending(task => task.TaskId).ToList();
+                    await LocalStorage.SetItemAsync("Tasks", tasks);
+                    StateHasChanged();
+                }
+                else
+                {
+                    Snackbar.Add($"Failed to load students: {response.Message}", Severity.Error);
+                }
+            }
+            else
+            {
+                var cachedData = await LocalStorage.GetItemAsync<List<Tasks>>("Tasks");
+                tasks = cachedData ?? new List<Tasks>();
+                tasksTemp = tasks.OrderByDescending(task => task.TaskId).ToList();
+                StateHasChanged();
+            }
+
+        }catch(Exception ex)
+        {
+            Snackbar.Add($"Error fetching tasks: {ex.Message}", Severity.Error);
+        }finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task OnFilesChanged(IBrowserFile file)
+    {
+        try
+        {
+            uploading = true;
+
+            if (file is null || file.Size == 0)
+            {
+                Snackbar.Add("File is missing or empty.", Severity.Error);
+                return;
+            }
+
+            var maxAllowedSize = 25 * 1024 * 1024; // 25 MB limit
+            if (file.Size > maxAllowedSize)
+            {
+                Snackbar.Add($"File size exceeds the 25 MB limit.", Severity.Error);
+                return;
+            }
+
+            var createdBy = MainLayout.CurrentUserId;
+
+            var content = new MultipartFormDataContent();
+            var streamContent = new StreamContent(file.OpenReadStream(maxAllowedSize: maxAllowedSize));
+            content.Add(streamContent, "file", file.Name);
+            content.Add(new StringContent(createdBy), "createdBy");
+
+            var response = await HttpClient.PostAsync("FileUpload/SaveFile", content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add("File uploaded successfully!", Severity.Success);
+            }
+            else
+            {
+                var errorResponse = await response.Content.ReadAsStringAsync();
+                Snackbar.Add($"Failed to upload file: {errorResponse}", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            uploading = false;
+        }
+    }
+
+
+
 
 
 

@@ -31,7 +31,7 @@ namespace ICSS.Server.Logger
             }
         }
 
-        private string GetLogFilePath(string fileName, string moduleName)
+        public string GetLogFilePath(string fileName, string moduleName)
         {
             var year = DateTime.Now.Year.ToString();
             var month = DateTime.Now.ToString("MMMM");
