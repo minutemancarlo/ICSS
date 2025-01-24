@@ -37,6 +37,22 @@ namespace ICSS.Server.Repository
             var tasks = await _dbConnection.QueryAsync<Tasks>(query);
             return tasks;
         }
+
+        public async Task<bool> UpdateTaskStatusAsync(int taskId, int status)
+        {
+            var timeZone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Manila");
+            var manilaTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZone);
+
+            var query = "UPDATE Tasks SET Status = @Status, UpdatedOn = @UpdatedOn WHERE TaskId = @TaskId";
+
+            var parameters = new DynamicParameters();
+            parameters.Add("@TaskId", taskId);
+            parameters.Add("@Status", status);
+            parameters.Add("@UpdatedOn", manilaTime);
+            var result = await _dbConnection.ExecuteAsync(query, parameters);
+            return result > 0;
+        }
+
     }
 
 }

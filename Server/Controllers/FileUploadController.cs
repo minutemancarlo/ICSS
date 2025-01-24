@@ -56,7 +56,7 @@ namespace ICSS.Server.Controllers
                 {
                     Status = TaskStatus.On_Queue,
                     FileName = fileName,
-                    LogPath = _fileLogger.GetLogFilePath($"Log_{timestamp}" + ".txt", ModuleName),
+                    LogPath = Path.Combine(_fileLogger.GetLogFilePath($"Log_{timestamp}.txt", ModuleName)),
                     CreatedBy = createdBy,
                     TaskType = TaskType.Student
 
@@ -98,6 +98,20 @@ namespace ICSS.Server.Controllers
             {
                 return StatusCode(500, new { Message = ex.Message });
             }
+        }
+
+        [HttpPut("update-status/{taskId}")]
+        public async Task<IActionResult> UpdateStatus(int taskId, [FromBody] int status)
+        {
+            if (taskId <= 0)
+                return BadRequest("Invalid TaskId.");
+
+            var success = await _tasksRepository.UpdateTaskStatusAsync(taskId, status);
+
+            if (success)
+                return Ok("Task status updated successfully.");
+            else
+                return NotFound("Task not found or could not update status.");
         }
 
 

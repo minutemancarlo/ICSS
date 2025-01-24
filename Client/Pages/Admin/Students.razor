@@ -4,6 +4,7 @@
 @using ICSS.Shared
 @using ICSS.Client.Pages.Admin.Components
 @using ICSS.Client.Helpers
+@using TaskStatus = ICSS.Shared.TaskStatus
 @inject IJSRuntime JSRuntime
 
 <MudContainer Class="py-4 py-sm-8 py-md-12 py-lg-16 py-xl-20">
@@ -145,7 +146,7 @@
                                     <PropertyColumn Property="x => x.TaskId" Title="Task Id" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
                                     <PropertyColumn Property="x => x.TaskType" Title="Type" Sortable="true" HeaderClass="data-grid text-nowrap text-white" >
                                         <CellTemplate>
-                                            <MudText Typo="Typo.body2">@context.Item.TaskType.ToString().Replace("_"," ")</MudText>
+                                            <MudText Typo="Typo.body2">@context.Item.TaskType.ToString().Replace("_"," ") Import</MudText>
                                         </CellTemplate>
                                     </PropertyColumn>
                                     <PropertyColumn Property="x => x.Status" Title="Status" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
@@ -174,7 +175,7 @@
                                     </PropertyColumn>
                                     <PropertyColumn Property="x => x.LogPath" Title="Log File" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
                                         <CellTemplate>
-                                            <MudLink Underline="Underline.Hover" Typo="Typo.body2">@context.Item.FileName</MudLink>
+                                            <MudLink Underline="Underline.Hover" Class="cursor-pointer" OnClick="@(() => DownloadFile(context.Item.LogPath))" Typo="Typo.body2">@context.Item.LogPath.Replace("/", "\\").Split('\\').Last()</MudLink>
                                         </CellTemplate>
                                     </PropertyColumn>
                                     <PropertyColumn Property="x => x.CreatedBy" Title="Created By" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
@@ -196,7 +197,7 @@
                                     <TemplateColumn Title="Actions" HeaderClass="data-grid text-nowrap text-white">
                                         <CellTemplate>
                                             <MudTooltip Text="Remove from Queue">
-                                                <MudIconButton Icon="fa-solid fa-circle-stop" Size="Size.Medium" Color="Color.Error" Variant="Variant.Filled" Disabled="@(!MainLayout.IsOnline)"/>
+                                                <MudIconButton Icon="fa-solid fa-circle-stop" Size="Size.Medium" Color="Color.Error" OnClick="@(() => OnShowRemoveFromQueue(context.Item.TaskId))" Variant="Variant.Filled" Disabled="@(!MainLayout.IsOnline)" />
                                             </MudTooltip>
                                         </CellTemplate>
                                     </TemplateColumn>
@@ -365,11 +366,63 @@
         }
         finally
         {
+            await OnGetTasks();
             uploading = false;
         }
     }
 
+    private async Task OnShowRemoveFromQueue(int? taskId)
+    {
+        try
+        {
 
+            var options = new DialogOptions
+                {
+                    CloseOnEscapeKey = false,
+                    FullWidth = true,
+                    MaxWidth = MaxWidth.Small,
+                    BackdropClick = false,
+                    CloseButton = false,
+                    BackgroundClass = "blurred"
+
+                };
+
+            var parameters = new DialogParameters<ConfirmationDialog>
+            {
+                { x => x.Action, "Remove Task from Queue" },
+                {x => x.Message, $"Are you sure you want to remove this task from queue?"}
+            };
+
+
+            var dialog = await DialogService.ShowAsync<ConfirmationDialog>("", parameters, options);
+            var result = await dialog.Result;
+            if (!result.Canceled)
+            {
+                var confirmed = (bool)result.Data;
+                if (confirmed == true)
+                {
+                    var response = await ApiHelper.PutAsync($"FileUpload/update-status/{taskId}", TaskStatus.Cancelled);
+
+                    if (response.IsSuccess)
+                    {
+                        Snackbar.Add("Task status updated successfully.", Severity.Success);
+                        await OnGetTasks();
+                    }
+                    else
+                    {
+                        Snackbar.Add($"Failed to update task status: {response.Message}",Severity.Error);
+                    }
+
+                }
+            }
+            
+           
+        }
+        catch(Exception ex)
+        {
+            Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
+        }
+    }
 
 
 
@@ -487,5 +540,40 @@
             isLoading = false;
         }
     }
+
+    private async Task DownloadFile(string filePath)
+    {
+        try
+        {
+            var response = await HttpClient.GetAsync($"Logs/download?filePath={Uri.EscapeDataString(filePath)}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                var fileName = Path.GetFileName(filePath);
+                var fileBytes = await response.Content.ReadAsByteArrayAsync();
+                var base64 = Convert.ToBase64String(fileBytes);
+                var mimeType = response.Content.Headers.ContentType?.MediaType ?? "application/octet-stream";
+
+                await JSRuntime.InvokeVoidAsync(
+                    "downloadFile",
+                    fileName,
+                    mimeType,
+                    base64
+                );
+
+                Snackbar.Add("File downloaded successfully!", Severity.Success);
+            }
+            else
+            {
+                Snackbar.Add($"Failed to download file: {response.ReasonPhrase}", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
+        }
+    }
+
+
 }
 
