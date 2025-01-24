@@ -185,18 +185,10 @@
                                                 <MudText Typo="Typo.body2" Class="fw-italic">@context.Item.CreatedOn</MudText>
                                             </MudStack>
                                         </CellTemplate>
-                                    </PropertyColumn>
-                                    <PropertyColumn Property="x => x.UpdatedBy" Title="Updated By" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
-                                        <CellTemplate>
-                                            <MudStack Spacing="0">
-                                                <MudText Typo="Typo.body2" Class="fw-bold">@context.Item.UpdatedBy</MudText>
-                                                <MudText Typo="Typo.body2" Class="fw-italic">@context.Item.UpdatedOn</MudText>
-                                            </MudStack>
-                                        </CellTemplate>
-                                    </PropertyColumn>
+                                    </PropertyColumn>                                 
                                     <TemplateColumn Title="Actions" HeaderClass="data-grid text-nowrap text-white">
                                         <CellTemplate>
-                                            @if(context.Item.Status != TaskStatus.Cancelled){
+                                            @if(context.Item.Status == TaskStatus.On_Queue){
                                             <MudTooltip Text="Remove from Queue">
                                                 <MudIconButton Icon="fa-solid fa-circle-stop" Size="Size.Medium" Color="Color.Error" OnClick="@(() => OnShowRemoveFromQueue(context.Item.TaskId))" Variant="Variant.Filled" Disabled="@(!MainLayout.IsOnline)" />
                                             </MudTooltip>

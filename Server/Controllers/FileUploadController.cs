@@ -101,7 +101,7 @@ namespace ICSS.Server.Controllers
         }
 
         [HttpPut("update-status/{taskId}")]
-        public async Task<IActionResult> UpdateStatus(int taskId, [FromBody] int status)
+        public async Task<IActionResult> UpdateStatus(int? taskId, [FromBody] TaskStatus status)
         {
             if (taskId <= 0)
                 return BadRequest("Invalid TaskId.");

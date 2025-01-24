@@ -1,4 +1,5 @@
 using Auth0Net.DependencyInjection;
+using ICSS.Server.HostedServices;
 using ICSS.Server.Logger;
 using ICSS.Server.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -52,6 +53,7 @@ builder.Services.AddTransient<StudentRepository>();
 builder.Services.AddTransient<UserRepository>();
 builder.Services.AddTransient<TasksRepository>();
 
+builder.Services.AddHostedService<StudentInfoUploader>();
 
 builder.Services.AddHttpContextAccessor();
 

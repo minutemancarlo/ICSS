@@ -38,7 +38,29 @@ namespace ICSS.Server.Repository
             return tasks;
         }
 
-        public async Task<bool> UpdateTaskStatusAsync(int taskId, int status)
+        public async Task<IEnumerable<Tasks>> GetOnQueueTasksAsync()
+        {
+            var query = "SELECT * FROM Tasks WHERE status = @Status";
+            var parameters = new DynamicParameters();
+            parameters.Add("Status", TaskStatus.On_Queue);
+
+            var tasks = await _dbConnection.QueryAsync<Tasks>(query, parameters);
+            return tasks;
+        }
+
+
+        public async Task<bool> VerifyStudentExistenceAsync(string? IdNumber)
+        {
+            var query = "SELECT COUNT(*) FROM Students WHERE IdNumber = @IdNumber";
+            var parameters = new DynamicParameters();
+            parameters.Add("@IdNumber", IdNumber);
+
+            var exist = await _dbConnection.QuerySingleAsync<int>(query, parameters);
+            return exist > 0;
+        }
+
+
+        public async Task<bool> UpdateTaskStatusAsync(int? taskId, TaskStatus status)
         {
             var timeZone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Manila");
             var manilaTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZone);

@@ -12,6 +12,7 @@
     <PackageReference Include="Auth0.ManagementApi" Version="7.31.0" />
     <PackageReference Include="Auth0Net.DependencyInjection" Version="4.0.0" />
     <PackageReference Include="Dapper" Version="2.1.35" />
+    <PackageReference Include="EPPlus" Version="7.5.3" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.20" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="7.0.20" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
@@ -21,6 +22,10 @@
   <ItemGroup>
     <ProjectReference Include="..\Client\ICSS.Client.csproj" />
     <ProjectReference Include="..\Shared\ICSS.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\Templates\" />
   </ItemGroup>
 
 </Project>
