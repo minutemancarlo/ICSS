@@ -37,16 +37,17 @@ namespace ICSS.Server.HostedServices
                     try
                     {
                         var filePath = Path.Combine(_baseDumpDirectory, "Student Import", task.FileName);
+                        await _tasksRepository.UpdateTaskStatusAsync(task.TaskId, TaskStatus.Processing);
+                        await AppendLog(task.LogPath, $"File {task.FileName} status changed to Processing");
                         if (!File.Exists(filePath))
-                        {
+                        {                            
                             await AppendLog(task.LogPath, $"File not found: {filePath}");
                             await AppendLog(task.LogPath, $"File {task.FileName} status changed to Failed");
                             await _tasksRepository.UpdateTaskStatusAsync(task.TaskId, TaskStatus.Failed);
                             continue;
                         }
 
-                        int totalRows = 0, insertedRows = 0;
-                        var logBuilder = new StringBuilder();
+                        int totalRows = 0, insertedRows = 0;                        
                         ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
                         using (var package = new ExcelPackage(new FileInfo(filePath)))
@@ -84,14 +85,14 @@ namespace ICSS.Server.HostedServices
 
                                     if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(email))
                                     {
-                                        logBuilder.AppendLine($"Invalid data at row {row}: {idNumber}, {name}, {email}");
+                                        await AppendLog(task.LogPath, $"Invalid data at row {row}: {idNumber}, {name}, {email}");
                                         continue;
                                     }
 
                                     var exists = await _tasksRepository.VerifyStudentExistenceAsync(idNumber);
                                     if (exists)
                                     {
-                                        logBuilder.AppendLine($"ID {idNumber} already exists. Skipping row {row}.");
+                                        await AppendLog(task.LogPath, $"ID {idNumber} already exists. Skipping row {row}.");
                                         continue;
                                     }
 
@@ -115,12 +116,13 @@ namespace ICSS.Server.HostedServices
                         }
 
                         await _tasksRepository.UpdateTaskStatusAsync(task.TaskId, TaskStatus.Success);
-                        logBuilder.AppendLine($"{insertedRows} out of {totalRows} students inserted.");
-                        await AppendLog(task.LogPath, logBuilder.ToString());
+                        await AppendLog(task.LogPath, $"[Result]:{insertedRows} out of {totalRows} students imported.");
+                        await AppendLog(task.LogPath, $"File {task.FileName} status changed to Success");                                                
                     }
                     catch (Exception taskEx)
                     {
                         await AppendLog(task.LogPath, $"Error processing task {task.TaskId}: {taskEx.Message}");
+                        await AppendLog(task.LogPath, $"File {task.FileName} status changed to Failed");
                         await _tasksRepository.UpdateTaskStatusAsync(task.TaskId, TaskStatus.Failed);
                     }
                 }
@@ -146,7 +148,7 @@ namespace ICSS.Server.HostedServices
 
         private async Task AppendLog(string logPath, string message)
         {
-            var logMessage = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {message}{Environment.NewLine}";
+            var logMessage = $"{DateTime.Now}: {message}{Environment.NewLine}";
             await File.AppendAllTextAsync(logPath, logMessage);
         }
     }

@@ -12,9 +12,9 @@
         <MudItem xs="12">
             @if (!MainLayout.IsOnline)
             {
-                <MudAlert Severity="Severity.Error" Variant="Variant.Filled" Style="margin-bottom: 16px;" Visible="!isOnline">
-                    You are currently offline. Data may not be up-to-date.
-                </MudAlert>
+                    <MudAlert Severity="Severity.Error" Variant="Variant.Filled" Style="margin-bottom: 16px;" Visible="!isOnline">
+                        You are currently offline. Data may not be up-to-date.
+                    </MudAlert>
             }
         </MudItem>
         <MudItem xs="12">
@@ -146,30 +146,30 @@
                                     <PropertyColumn Property="x => x.TaskId" Title="Task Id" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
                                     <PropertyColumn Property="x => x.TaskType" Title="Type" Sortable="true" HeaderClass="data-grid text-nowrap text-white" >
                                         <CellTemplate>
-                                            <MudText Typo="Typo.body2">@context.Item.TaskType.ToString().Replace("_"," ") Import</MudText>
+                                            <MudText Typo="Typo.body2">@context.Item.TaskType.ToString().Replace("_", " ") Import</MudText>
                                         </CellTemplate>
                                     </PropertyColumn>
                                     <PropertyColumn Property="x => x.Status" Title="Status" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
                                         <CellTemplate>
-                                            @if(context.Item.Status == ICSS.Shared.TaskStatus.On_Queue)
+                                            @if (context.Item.Status == ICSS.Shared.TaskStatus.On_Queue)
                                             {
-                                                <MudChip Variant="Variant.Filled" Size="Size.Medium" Color="Color.Default">On Queue</MudChip>
+                                                    <MudChip Variant="Variant.Filled" Size="Size.Small" Color="Color.Default">On Queue</MudChip>
                                             }
                                             else if (context.Item.Status == ICSS.Shared.TaskStatus.Processing)
                                             {
-                                                <MudChip Variant="Variant.Filled" Size="Size.Medium" Color="Color.Info">Processing</MudChip>
+                                                    <MudChip Variant="Variant.Filled" Size="Size.Small" Color="Color.Info">Processing</MudChip>
                                             }
                                             else if (context.Item.Status == ICSS.Shared.TaskStatus.Success)
                                             {
-                                                <MudChip Variant="Variant.Filled" Size="Size.Medium" Color="Color.Success">Success</MudChip>
+                                                    <MudChip Variant="Variant.Filled" Size="Size.Small" Color="Color.Success">Success</MudChip>
                                             }
                                             else if (context.Item.Status == ICSS.Shared.TaskStatus.Failed)
                                             {
-                                                <MudChip Variant="Variant.Filled" Size="Size.Medium" Color="Color.Error">Failed</MudChip>
+                                                    <MudChip Variant="Variant.Filled" Size="Size.Small" Color="Color.Error">Failed</MudChip>
                                             }
                                             else if (context.Item.Status == ICSS.Shared.TaskStatus.Cancelled)
                                             {
-                                                <MudChip Variant="Variant.Filled" Size="Size.Medium" Color="Color.Warning">Cancelled</MudChip>
+                                                    <MudChip Variant="Variant.Filled" Size="Size.Small" Color="Color.Warning">Cancelled</MudChip>
                                             }
                                         </CellTemplate>
                                     </PropertyColumn>
@@ -188,10 +188,11 @@
                                     </PropertyColumn>                                 
                                     <TemplateColumn Title="Actions" HeaderClass="data-grid text-nowrap text-white">
                                         <CellTemplate>
-                                            @if(context.Item.Status == TaskStatus.On_Queue){
-                                            <MudTooltip Text="Remove from Queue">
-                                                <MudIconButton Icon="fa-solid fa-circle-stop" Size="Size.Medium" Color="Color.Error" OnClick="@(() => OnShowRemoveFromQueue(context.Item.TaskId))" Variant="Variant.Filled" Disabled="@(!MainLayout.IsOnline)" />
-                                            </MudTooltip>
+                                            @if (context.Item.Status == TaskStatus.On_Queue)
+                                            {
+                                                <MudTooltip Text="Remove from Queue">
+                                                    <MudIconButton Icon="fa-solid fa-circle-stop" Size="Size.Medium" Color="Color.Error" OnClick="@(() => OnShowRemoveFromQueue(context.Item.TaskId))" Variant="Variant.Filled" Disabled="@(!MainLayout.IsOnline)" />
+                                                </MudTooltip>
                                             }
                                         </CellTemplate>
                                     </TemplateColumn>
@@ -215,7 +216,7 @@
     </MudGrid>
 </MudContainer>
 
-@code{
+@code {
     [CascadingParameter]
     public MainLayout MainLayout { get; private set; }
 
@@ -241,7 +242,7 @@
     protected override async Task OnInitializedAsync()
     {
 
-        MainLayout.SubTitle = "Student Management";       
+        MainLayout.SubTitle = "Student Management";
         await LoadStudents();
         await OnGetTasks();
         await base.OnInitializedAsync();
@@ -274,7 +275,7 @@
                if (data.FileName.Contains(query, StringComparison.OrdinalIgnoreCase))
                    return true;
                if (data.TaskType.ToString().Contains(query, StringComparison.OrdinalIgnoreCase))
-                   return true;               
+                   return true;
                return false;
            }).ToList();
     }
@@ -307,10 +308,12 @@
                 StateHasChanged();
             }
 
-        }catch(Exception ex)
+        }
+        catch (Exception ex)
         {
             Snackbar.Add($"Error fetching tasks: {ex.Message}", Severity.Error);
-        }finally
+        }
+        finally
         {
             isLoading = false;
         }
@@ -404,15 +407,15 @@
                     }
                     else
                     {
-                        Snackbar.Add($"Failed to update task status: {response.Message}",Severity.Error);
+                        Snackbar.Add($"Failed to update task status: {response.Message}", Severity.Error);
                     }
 
                 }
             }
-            
-           
+
+
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
         }
@@ -451,7 +454,8 @@
                 await LoadStudents();
                 StateHasChanged();
             }
-        }catch(Exception ex)
+        }
+        catch (Exception ex)
         {
             Snackbar.Add($"Error: {ex.Message}", Severity.Error);
         }
@@ -500,7 +504,7 @@
         isLoading = true;
 
         try
-        {            
+        {
             if (MainLayout.IsOnline)
             {
                 var response = await ApiHelper.GetAsync<List<StudentModel>>("StudentManagement/GetAll");
@@ -523,7 +527,7 @@
                 studentsTemp = students;
                 StateHasChanged();
             }
-           
+
         }
         catch (Exception ex)
         {
@@ -543,7 +547,7 @@
 
             if (response.IsSuccessStatusCode)
             {
-                var fileName = Path.GetFileName(filePath);
+                var fileName = filePath.Substring(filePath.LastIndexOf('\\') + 1);
                 var fileBytes = await response.Content.ReadAsByteArrayAsync();
                 var base64 = Convert.ToBase64String(fileBytes);
                 var mimeType = response.Content.Headers.ContentType?.MediaType ?? "application/octet-stream";
