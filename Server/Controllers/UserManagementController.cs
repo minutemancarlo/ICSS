@@ -120,6 +120,20 @@ namespace ICSS.Server.Controllers
             return Ok(new { Message = "Operation completed successfully." });
         }
 
+        [HttpGet("active-users-count")]
+        public async Task<ActionResult<int>> GetActiveUsersCount()
+        {
+            try
+            {              
+                var activeUsersCount = await _managementApiClient.Stats.GetActiveUsersAsync();             
+                return Ok(activeUsersCount);
+            }
+            catch (Exception ex)
+            {                
+                return BadRequest(ex.Message);
+            }
+        }
+
 
     }
 }
