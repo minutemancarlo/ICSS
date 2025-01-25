@@ -13,7 +13,7 @@ namespace ICSS.Client.Pages.Validations
 
             RuleFor(x => x.IdNumber)
                 .NotEmpty().WithMessage("ID Number is required.")
-                .Length(5, 20).WithMessage("ID Number must be between 5 and 20 characters.");
+                .Length(4, 20).WithMessage("ID Number must be between 4 and 20 characters.");
 
             RuleFor(x => x.Email)
                 .NotEmpty().WithMessage("Email is required.")

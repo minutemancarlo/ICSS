@@ -1,7 +1,8 @@
 ﻿@page "/admin-dashboard"
-@* @attribute [Authorize(Roles ="Admin")] *@
+@attribute [Authorize(Roles ="Admin")]
 @layout MainLayout
 @using System.Security.Claims
+@using ICSS.Shared
 <MudContainer Class="py-4 py-sm-8 py-md-12 py-lg-16 py-xl-20">
     <MudGrid Style="--icon-opacity: 0.1">
         <MudItem xs="12">
@@ -13,35 +14,38 @@
             </MudGrid>
         </MudItem>
         <MudItem xs="12" sm="6" md="4">
-            <MudCard>
+            <MudCard Style="background-color: #ecf0f1;">
                 <MudCardContent>
                     <MudStack Row AlignItems="AlignItems.Baseline">
                         <MudIconButton Icon="fa-solid fa-users" Color="Color.Primary" Size="Size.Medium" Ripple="false" Class="rounded-circle mb-2" Style="background-color: rgba(var(--mud-palette-primary-rgb), var(--icon-opacity)) !important; cursor: default;" />
-                        <MudText Typo="Typo.h6" Class="mb-2">Total Users</MudText>
+                        <MudText Typo="Typo.h6" Class="mb-2">Users</MudText>
                     </MudStack>
-                    <MudText Typo="Typo.h3">1</MudText>
+                    <MudAlert Severity="Severity.Success" Variant="Variant.Outlined" NoIcon="true" Class="my-2 fw-bold text-nowrap">Active: 100</MudAlert>
+                    <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" NoIcon="true" Class="my-2 fw-bold text-nowrap">Registered: 100</MudAlert>
                 </MudCardContent>
             </MudCard>
         </MudItem>
         <MudItem xs="12" sm="6" md="4">
-            <MudCard>
+            <MudCard Style="background-color: #ecf0f1;">
                 <MudCardContent>
                     <MudStack Row AlignItems="AlignItems.Baseline">
-                        <MudIconButton Icon="@Icons.Material.Outlined.MonitorHeart" Color="Color.Primary" Size="Size.Medium" Ripple="false" Class="rounded-circle mb-2" Style="background-color: rgba(var(--mud-palette-primary-rgb), var(--icon-opacity)) !important; cursor: default;" />
-                        <MudText Typo="Typo.h6" Class="mb-2">Shooting Stars</MudText>
+                        <MudIconButton Icon="fa-solid fa-user-graduate" Color="Color.Primary" Size="Size.Medium" Ripple="false" Class="rounded-circle mb-2" Style="background-color: rgba(var(--mud-palette-primary-rgb), var(--icon-opacity)) !important; cursor: default;" />
+                        <MudText Typo="Typo.h6" Class="mb-2">Students</MudText>
                     </MudStack>
-                    <MudText Typo="Typo.body2">Fingerstache flexitarian street art 8-bit waist co, subway tile poke farm.</MudText>
+                    <MudAlert Severity="Severity.Success" Variant="Variant.Outlined" NoIcon="true" Class="my-2 fw-bold text-nowrap">Active: 100</MudAlert>
+                    <MudAlert Severity="Severity.Error" Variant="Variant.Outlined" NoIcon="true" Class="my-2 fw-bold text-nowrap">Not Active: 100</MudAlert>
                 </MudCardContent>
             </MudCard>
         </MudItem>
         <MudItem xs="12" sm="6" md="4">
-            <MudCard>
+            <MudCard Style="background-color: #ecf0f1;">
                 <MudCardContent>
                     <MudStack Row AlignItems="AlignItems.Baseline">
-                        <MudIconButton Icon="@Icons.Material.Outlined.MonitorHeart" Color="Color.Primary" Size="Size.Medium" Ripple="false" Class="rounded-circle mb-2" Style="background-color: rgba(var(--mud-palette-primary-rgb), var(--icon-opacity)) !important; cursor: default;" />
-                        <MudText Typo="Typo.h6" Class="mb-2">Shooting Stars</MudText>
+                        <MudIconButton Icon="fa-solid fa-building-user" Color="Color.Primary" Size="Size.Medium" Ripple="false" Class="rounded-circle mb-2" Style="background-color: rgba(var(--mud-palette-primary-rgb), var(--icon-opacity)) !important; cursor: default;" />
+                        <MudText Typo="Typo.h6" Class="mb-2">Faculty</MudText>
                     </MudStack>
-                    <MudText Typo="Typo.body2">Fingerstache flexitarian street art 8-bit waist co, subway tile poke farm.</MudText>
+                    <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" NoIcon="true" Class="my-2 fw-bold text-nowrap">With Schedule: 100</MudAlert>
+                    <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" NoIcon="true" Class="my-2 fw-bold text-nowrap">Without Schedule: 0</MudAlert>
                 </MudCardContent>
             </MudCard>
         </MudItem>
@@ -53,6 +57,10 @@
 @code {
     [CascadingParameter]
     private Task<AuthenticationState>? authenticationState { get; set; }
+    [CascadingParameter]
+    public MainLayout MainLayout { get; private set; }
+    [Inject] private HttpClient HttpClient { get; set; }
+    [Inject] private ApiRequestHelper ApiHelper { get; set; }
     public List<Claim> UserClaims { get; set; } = new List<Claim>();
     private string FirstName, LastName;
     protected override async Task OnInitializedAsync()
@@ -76,7 +84,21 @@
                              .FirstOrDefault() ?? string.Empty;
             }
         }
+        MainLayout.SubTitle = "Admin Dashboard";
         await base.OnInitializedAsync();
+    }
+
+
+
+    private async Task OnLoadData()
+    {
+        try
+        {
+
+        }catch(Exception ex)
+        {
+
+        }
     }
 
 }

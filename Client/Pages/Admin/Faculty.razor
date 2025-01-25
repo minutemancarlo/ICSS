@@ -1,4 +1,4 @@
-﻿@page "/logs"
+﻿@page "/manage-faculty"
 @attribute [Authorize]
 @layout MainLayout
 
@@ -25,7 +25,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        MainLayout.SubTitle = "Schedule Management";
+        MainLayout.SubTitle = "Faculty Management";
         await base.OnInitializedAsync();
     }
 
