@@ -10,7 +10,7 @@ namespace ICSS.Shared
     {
         public int? CourseId { get; set; }
         public string? CourseName { get; set; }
-        public string? CourseAcronym { get; set; }
+        public string? CourseCode { get; set; }
         public bool IsDeleted { get; set; } = false;
 
     }
@@ -19,9 +19,13 @@ namespace ICSS.Shared
     {
         public int? SubjectId { get; set; }
         public string? SubjectCode { get; set; }
-        public int? CourseId { get; set; }
         public string? SubjectName { get; set; }
-        public int Units { get; set; } = 0;        
+        public decimal LectureHour { get; set; } = 0.0M;
+        public decimal LabHour { get; set; } = 0.0M;
+        public int MaxStudent { get; set; } = 0;
+        public decimal Units { get; set; } = 0.0M;        
+        public int? CourseId { get; set; }
+        public bool IsActive { get; set; }
 
     }
 }
