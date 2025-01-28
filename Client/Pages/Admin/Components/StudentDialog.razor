@@ -90,7 +90,7 @@
                         }
                         else
                         {
-                            Snackbar.Add($"Error: {responseExist.Message}", Severity.Error);
+                            Snackbar.Add($"Error: {responseExist.Message}", Severity.Error); 
                         }
 
 
@@ -103,8 +103,7 @@
                         if (responseExist.IsSuccess)
                         {
                             if (!responseExist.Data)
-                            {
-                                // Update operation
+                            {                                
                                 var response = await ApiHelper.PutAsync($"StudentManagement/Update/{Id}", studentModel);
 
                                 if (response.IsSuccess)

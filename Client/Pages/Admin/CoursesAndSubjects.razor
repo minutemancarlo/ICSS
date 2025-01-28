@@ -22,13 +22,13 @@
                                         <MudButton Size="Size.Small" StartIcon="fa-solid fa-circle-plus" OnClick="OnShowAddCourseDialog" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Success" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
                                             Add Course
                                         </MudButton>
-                                        <MudButton Size="Size.Small" StartIcon="fa-solid fa-refresh" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Primary" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
+                                        <MudButton Size="Size.Small" OnClick="OnLoadCourses" StartIcon="fa-solid fa-refresh" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Primary" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
                                             Refresh
                                         </MudButton>
                                     </MudHidden>
                                     <MudHidden Breakpoint="Breakpoint.MdAndDown" Invert="true">
                                         <MudIconButton ButtonType="ButtonType.Button" Variant="Variant.Filled" OnClick="OnShowAddCourseDialog" Class="my-2 mx-1" Size="Size.Small" Icon="fa-solid fa-user-plus" Color="Color.Success" Disabled="!MainLayout.IsOnline" />
-                                        <MudIconButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Class="my-2 mx-1" Size="Size.Small" Icon="fa-solid fa-refresh" Color="Color.Primary" Disabled="!MainLayout.IsOnline" />
+                                        <MudIconButton ButtonType="ButtonType.Button" OnClick="OnLoadCourses" Variant="Variant.Filled" Class="my-2 mx-1" Size="Size.Small" Icon="fa-solid fa-refresh" Color="Color.Primary" Disabled="!MainLayout.IsOnline" />
                                     </MudHidden>
                                 </MudBreakpointProvider>
 
@@ -38,7 +38,7 @@
                             <Columns>
                                 <PropertyColumn Property="x => x.CourseCode" Title="Course Code" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
                                 <PropertyColumn Property="x => x.CourseName" Title="Description" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
-                                <PropertyColumn Property="x => x.CreatedBy" Title="Created By" Sortable="true" HeaderClass="data-grid text-nowrap text-white" Hidden>
+                                <PropertyColumn Property="x => x.CreatedBy" Title="Created By" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
                                     <CellTemplate>
                                         <MudStack Spacing="0">
                                             <MudText Typo="Typo.body2" Class="fw-bold">@context.Item.CreatedBy</MudText>
@@ -46,7 +46,7 @@
                                         </MudStack>
                                     </CellTemplate>
                                 </PropertyColumn>
-                                <PropertyColumn Property="x => x.UpdatedBy" Title="Updated By" Sortable="true" HeaderClass="data-grid text-nowrap text-white" Hidden>
+                                <PropertyColumn Property="x => x.UpdatedBy" Title="Updated By" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
                                     <CellTemplate>
                                         <MudStack Spacing="0">
                                             <MudText Typo="Typo.body2" Class="fw-bold">@context.Item.UpdatedBy</MudText>
@@ -54,6 +54,13 @@
                                         </MudStack>
                                     </CellTemplate>
                                 </PropertyColumn>
+                                <TemplateColumn Title="Actions" HeaderClass="data-grid text-nowrap text-white" Hideable="false">
+                                    <CellTemplate>
+                                        <MudTooltip Text="Edit Course Information">
+                                            <MudIconButton Icon="fa-solid fa-edit" Size="Size.Medium" Color="Color.Info" Variant="Variant.Filled" Disabled="@(!MainLayout.IsOnline)" OnClick="@(() => OnShowUpdateCourseDialog(context.Item))" />
+                                        </MudTooltip>
+                                    </CellTemplate>
+                                </TemplateColumn>
                             </Columns>
                             <NoRecordsContent>
                                 <MudText>No Records to show</MudText>
@@ -161,10 +168,14 @@
 
     private List<Course> courses = new();
     private List<Subjects> subjects = new();
+    private List<Course> coursesTemp = new();
+    private List<Subjects> subjectsTemp = new();
+    private bool isLoading = false;
 
     protected override async Task OnInitializedAsync()
     {
         MainLayout.SubTitle = "Courses and Subjects Management";
+        await OnLoadCourses();
         await base.OnInitializedAsync();
     }
 
@@ -183,7 +194,7 @@
 
                 };
 
-            var parameters = new DialogParameters<AddCourseDialog>
+            var parameters = new DialogParameters<CourseDialog>
             {
                 { x => x.Action, "Add" },
                 { x => x.Icon, "circle-plus" },
@@ -191,10 +202,11 @@
                 { x => x.currentUserId, MainLayout.CurrentUserId }
             };
 
-            var dialog = await DialogService.ShowAsync<AddCourseDialog>("", parameters, options);
+            var dialog = await DialogService.ShowAsync<CourseDialog>("", parameters, options);
             var result = await dialog.Result;
             if (!result.Canceled)
             {
+                await OnLoadCourses();
                 StateHasChanged();
             }
         }
@@ -204,7 +216,7 @@
         }
     }
 
-     private async Task OnShowAddSubjectDialog()
+    private async Task OnShowAddSubjectDialog()
     {
         try
         {
@@ -219,7 +231,7 @@
 
                 };
 
-            var parameters = new DialogParameters<AddSubjectDialog>
+            var parameters = new DialogParameters<SubjectDialog>
             {
                 { x => x.Action, "Add" },
                 { x => x.Icon, "circle-plus" },
@@ -227,16 +239,97 @@
                 { x => x.currentUserId, MainLayout.CurrentUserId }
             };
 
-            var dialog = await DialogService.ShowAsync<AddSubjectDialog>("", parameters, options);
+            var dialog = await DialogService.ShowAsync<SubjectDialog>("", parameters, options);
             var result = await dialog.Result;
             if (!result.Canceled)
             {
+
                 StateHasChanged();
             }
         }
         catch (Exception ex)
         {
             Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task OnShowUpdateCourseDialog(Course course)
+    {
+        try
+        {
+            var options = new DialogOptions
+                {
+                    CloseOnEscapeKey = false,
+                    FullWidth = true,
+                    MaxWidth = MaxWidth.Small,
+                    BackdropClick = false,
+                    CloseButton = false,
+                    BackgroundClass = "blurred"
+
+                };
+
+            var parameters = new DialogParameters<CourseDialog>
+            {
+                { x => x.Action, "Update" },
+                { x => x.Icon, "pen-to-square" },
+                {x => x.course, course},
+                { x => x.currentUserId, MainLayout.CurrentUserId }
+            };
+
+            var dialog = await DialogService.ShowAsync<CourseDialog>("", parameters, options);
+            var result = await dialog.Result;
+            if (!result.Canceled)
+            {
+                await OnLoadCourses();
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
+        }
+
+
+    }
+
+
+    private async Task OnLoadCourses()
+    {
+        isLoading = true;
+
+        try
+        {
+            if (MainLayout.IsOnline)
+            {
+                var response = await ApiHelper.GetAsync<List<Course>>("CourseAndSubject/GetAllCourses");
+                if (response.IsSuccess)
+                {
+                    courses = response.Data;
+                    coursesTemp = courses;
+                    await LocalStorage.SetItemAsync("courses", courses);
+                    StateHasChanged();
+                }
+                else
+                {
+                    Snackbar.Add($"Failed to load courses: {response.Message}", Severity.Error);
+                }
+            }
+            else
+            {
+                var cachedData = await LocalStorage.GetItemAsync<List<Course>>("courses");
+                courses = cachedData ?? new List<Course>();
+                coursesTemp = courses;
+                StateHasChanged();
+            }
+
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isLoading = false;
         }
     }
 

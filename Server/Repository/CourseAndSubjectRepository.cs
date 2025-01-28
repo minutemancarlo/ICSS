@@ -18,12 +18,27 @@ namespace ICSS.Server.Repository
         {
             var parameters = new DynamicParameters();
             parameters.Add("@CourseCode", course.CourseCode);
-            parameters.Add("@CourseName", course.CourseName);            
+            parameters.Add("@CourseName", course.CourseName);
             parameters.Add("@CreatedBy", course.CreatedBy);
-                        
+
             return await _dbConnection.ExecuteScalarAsync<int>("InsertCourse", parameters, commandType: CommandType.StoredProcedure);
         }
 
+        public async Task<int> UpdateCourseAsync(Course course)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("@CourseId", course.CourseId);
+            parameters.Add("@CourseCode", course.CourseCode);
+            parameters.Add("@CourseName", course.CourseName);
+            parameters.Add("@UpdatedBy", course.UpdatedBy);
+
+            return await _dbConnection.ExecuteScalarAsync<int>("UpdateCourse", parameters, commandType: CommandType.StoredProcedure);
+        }
+
+        public async Task<IEnumerable<Course>> GetCoursesAsync()
+        {
+            return await _dbConnection.QueryAsync<Course>("GetCourses", commandType: CommandType.StoredProcedure);
+        }
 
     }
 }

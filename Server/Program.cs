@@ -52,6 +52,7 @@ builder.Services.AddSingleton<FileLogger>();
 builder.Services.AddTransient<StudentRepository>();
 builder.Services.AddTransient<UserRepository>();
 builder.Services.AddTransient<TasksRepository>();
+builder.Services.AddTransient<CourseAndSubjectRepository>();
 
 builder.Services.AddHostedService<StudentInfoUploader>();
 
