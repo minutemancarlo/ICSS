@@ -6,151 +6,135 @@
 <MudContainer Class="py-4 py-sm-8 py-md-12 py-lg-16 py-xl-20">
     <MudGrid>
         <MudItem xs="12">
-            <MudExpansionPanels>
-                <MudExpansionPanel Expanded HeaderClass="mud-theme-dark">
-                    <TitleContent>
-                        <div class="d-flex">
-                            <MudIcon Icon="fa-solid fa-graduation-cap" class="mr-3"></MudIcon>
-                            Courses
-                        </div>
-                    </TitleContent>
-                    <ChildContent>
-                        <MudDataGrid Items="courses" Dense Hover Filterable Striped Virtualize ShowColumnOptions Hideable ShowMenuIcon>
-                            <ToolBarContent>
-                                <MudBreakpointProvider>
-                                    <MudHidden Breakpoint="Breakpoint.MdAndUp" Invert="true">
-                                        <MudButton Size="Size.Small" StartIcon="fa-solid fa-circle-plus" OnClick="OnShowAddCourseDialog" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Success" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
-                                            Add Course
-                                        </MudButton>
-                                        <MudButton Size="Size.Small" OnClick="OnLoadCourses" StartIcon="fa-solid fa-refresh" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Primary" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
-                                            Refresh
-                                        </MudButton>
-                                    </MudHidden>
-                                    <MudHidden Breakpoint="Breakpoint.MdAndDown" Invert="true">
-                                        <MudIconButton ButtonType="ButtonType.Button" Variant="Variant.Filled" OnClick="OnShowAddCourseDialog" Class="my-2 mx-1" Size="Size.Small" Icon="fa-solid fa-user-plus" Color="Color.Success" Disabled="!MainLayout.IsOnline" />
-                                        <MudIconButton ButtonType="ButtonType.Button" OnClick="OnLoadCourses" Variant="Variant.Filled" Class="my-2 mx-1" Size="Size.Small" Icon="fa-solid fa-refresh" Color="Color.Primary" Disabled="!MainLayout.IsOnline" />
-                                    </MudHidden>
-                                </MudBreakpointProvider>
+             <MudTabs Elevation="2" Rounded="true" Outlined="true" Color="Color.Tertiary">
+                <MudTabPanel Text="Courses" Icon="fa-solid fa-graduation-cap">
+                    <MudDataGrid Items="courses" Dense Hover Filterable Striped Virtualize ShowColumnOptions Hideable ShowMenuIcon>
+                        <ToolBarContent>
+                            <MudBreakpointProvider>
+                                <MudHidden Breakpoint="Breakpoint.MdAndUp" Invert="true">
+                                    <MudButton Size="Size.Small" StartIcon="fa-solid fa-circle-plus" OnClick="OnShowAddCourseDialog" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Success" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
+                                        Add Course
+                                    </MudButton>
+                                    <MudButton Size="Size.Small" OnClick="OnLoadCourses" StartIcon="fa-solid fa-refresh" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Primary" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
+                                        Refresh
+                                    </MudButton>
+                                </MudHidden>
+                                <MudHidden Breakpoint="Breakpoint.MdAndDown" Invert="true">
+                                    <MudIconButton ButtonType="ButtonType.Button" Variant="Variant.Filled" OnClick="OnShowAddCourseDialog" Class="my-2 mx-1" Size="Size.Small" Icon="fa-solid fa-user-plus" Color="Color.Success" Disabled="!MainLayout.IsOnline" />
+                                    <MudIconButton ButtonType="ButtonType.Button" OnClick="OnLoadCourses" Variant="Variant.Filled" Class="my-2 mx-1" Size="Size.Small" Icon="fa-solid fa-refresh" Color="Color.Primary" Disabled="!MainLayout.IsOnline" />
+                                </MudHidden>
+                            </MudBreakpointProvider>
 
-                                <MudSpacer />
-                                <MudTextField T="string" Immediate Placeholder="Search here.." Adornment="Adornment.Start" IconSize="Size.Small" AdornmentIcon="fa-solid fa-search" Margin="Margin.Dense" Variant="Variant.Text"></MudTextField>
-                            </ToolBarContent>
-                            <Columns>
-                                <PropertyColumn Property="x => x.CourseCode" Title="Course Code" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
-                                <PropertyColumn Property="x => x.CourseName" Title="Description" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
-                                <PropertyColumn Property="x => x.CreatedBy" Title="Created By" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
-                                    <CellTemplate>
-                                        <MudStack Spacing="0">
-                                            <MudText Typo="Typo.body2" Class="fw-bold">@context.Item.CreatedBy</MudText>
-                                            <MudText Typo="Typo.body2" Class="fw-italic">@context.Item.CreatedOn</MudText>
-                                        </MudStack>
-                                    </CellTemplate>
-                                </PropertyColumn>
-                                <PropertyColumn Property="x => x.UpdatedBy" Title="Updated By" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
-                                    <CellTemplate>
-                                        <MudStack Spacing="0">
-                                            <MudText Typo="Typo.body2" Class="fw-bold">@context.Item.UpdatedBy</MudText>
-                                            <MudText Typo="Typo.body2" Class="fw-italic">@context.Item.UpdatedOn</MudText>
-                                        </MudStack>
-                                    </CellTemplate>
-                                </PropertyColumn>
-                                <TemplateColumn Title="Actions" HeaderClass="data-grid text-nowrap text-white" Hideable="false">
-                                    <CellTemplate>
-                                        <MudTooltip Text="Edit Course Information">
-                                            <MudIconButton Icon="fa-solid fa-edit" Size="Size.Medium" Color="Color.Info" Variant="Variant.Filled" Disabled="@(!MainLayout.IsOnline)" OnClick="@(() => OnShowUpdateCourseDialog(context.Item))" />
-                                        </MudTooltip>
-                                    </CellTemplate>
-                                </TemplateColumn>
-                            </Columns>
-                            <NoRecordsContent>
-                                <MudText>No Records to show</MudText>
-                            </NoRecordsContent>
-                            <LoadingContent>
-                                <MudText>Loading Content...</MudText>
-                            </LoadingContent>
-                            <PagerContent>
-                                <MudDataGridPager T="Course" />
-                            </PagerContent>
-                        </MudDataGrid>
-                    </ChildContent>
-                </MudExpansionPanel>
-                <MudExpansionPanel HeaderClass="mud-theme-dark">
-                    <TitleContent>
-                        <div class="d-flex">
-                            <MudIcon Icon="fa-solid fa-book" class="mr-3"></MudIcon>
-                            Subjects
-                        </div>
-                    </TitleContent>
-                    <ChildContent>
-                        <MudDataGrid Items="subjects" Dense Hover Filterable Striped Virtualize ShowColumnOptions Hideable ShowMenuIcon>
-                            <ToolBarContent>
-                                <MudBreakpointProvider>
-                                    <MudHidden Breakpoint="Breakpoint.MdAndUp" Invert="true">
-                                        <MudButton Size="Size.Small" StartIcon="fa-solid fa-circle-plus" OnClick="OnShowAddSubjectDialog" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Success" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
-                                            Add Subject
-                                        </MudButton>
-                                        <MudButton Size="Size.Small" OnClick="OnLoadSubjects" StartIcon="fa-solid fa-refresh" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Primary" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
-                                            Refresh
-                                        </MudButton>
-                                    </MudHidden>
-                                    <MudHidden Breakpoint="Breakpoint.MdAndDown" Invert="true">
-                                        <MudIconButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Class="my-2 mx-1" Size="Size.Small" OnClick="OnShowAddSubjectDialog" Icon="fa-solid fa-user-plus" Color="Color.Success" Disabled="!MainLayout.IsOnline" />
-                                        <MudIconButton ButtonType="ButtonType.Button" OnClick="OnLoadSubjects" Variant="Variant.Filled" Class="my-2 mx-1" Size="Size.Small" Icon="fa-solid fa-refresh" Color="Color.Primary" Disabled="!MainLayout.IsOnline" />
-                                    </MudHidden>
-                                </MudBreakpointProvider>
+                            <MudSpacer />
+                            <MudTextField ValueChanged="@(s=>OnsearchCourses(s))" T="string" Immediate Placeholder="Search here.." Adornment="Adornment.Start" IconSize="Size.Small" AdornmentIcon="fa-solid fa-search" Margin="Margin.Dense" Variant="Variant.Text"></MudTextField>
+                        </ToolBarContent>
+                        <Columns>
+                            <PropertyColumn Property="x => x.CourseCode" Title="Course Code" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
+                            <PropertyColumn Property="x => x.CourseName" Title="Description" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
+                            <PropertyColumn Property="x => x.CreatedBy" Title="Created By" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
+                                <CellTemplate>
+                                    <MudStack Spacing="0">
+                                        <MudText Typo="Typo.body2" Class="fw-bold">@context.Item.CreatedBy</MudText>
+                                        <MudText Typo="Typo.body2" Class="fw-italic">@context.Item.CreatedOn</MudText>
+                                    </MudStack>
+                                </CellTemplate>
+                            </PropertyColumn>
+                            <PropertyColumn Property="x => x.UpdatedBy" Title="Updated By" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
+                                <CellTemplate>
+                                    <MudStack Spacing="0">
+                                        <MudText Typo="Typo.body2" Class="fw-bold">@context.Item.UpdatedBy</MudText>
+                                        <MudText Typo="Typo.body2" Class="fw-italic">@context.Item.UpdatedOn</MudText>
+                                    </MudStack>
+                                </CellTemplate>
+                            </PropertyColumn>
+                            <TemplateColumn Title="Actions" HeaderClass="data-grid text-nowrap text-white" Hideable="false">
+                                <CellTemplate>
+                                    <MudTooltip Text="Edit Course Information">
+                                        <MudIconButton Icon="fa-solid fa-edit" Size="Size.Medium" Color="Color.Info" Variant="Variant.Filled" Disabled="@(!MainLayout.IsOnline)" OnClick="@(() => OnShowUpdateCourseDialog(context.Item))" />
+                                    </MudTooltip>
+                                </CellTemplate>
+                            </TemplateColumn>
+                        </Columns>
+                        <NoRecordsContent>
+                            <MudText>No Records to show</MudText>
+                        </NoRecordsContent>
+                        <LoadingContent>
+                            <MudText>Loading Content...</MudText>
+                        </LoadingContent>
+                        <PagerContent>
+                            <MudDataGridPager T="Course" />
+                        </PagerContent>
+                    </MudDataGrid>
+                </MudTabPanel>
+                <MudTabPanel Text="Subjects" Icon="fa-solid fa-book">
+                    <MudDataGrid Items="subjects" Dense Hover Filterable Striped Virtualize ShowColumnOptions Hideable ShowMenuIcon>
+                        <ToolBarContent>
+                            <MudBreakpointProvider>
+                                <MudHidden Breakpoint="Breakpoint.MdAndUp" Invert="true">
+                                    <MudButton Size="Size.Small" StartIcon="fa-solid fa-circle-plus" OnClick="OnShowAddSubjectDialog" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Success" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
+                                        Add Subject
+                                    </MudButton>
+                                    <MudButton Size="Size.Small" OnClick="OnLoadSubjects" StartIcon="fa-solid fa-refresh" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Primary" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
+                                        Refresh
+                                    </MudButton>
+                                </MudHidden>
+                                <MudHidden Breakpoint="Breakpoint.MdAndDown" Invert="true">
+                                    <MudIconButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Class="my-2 mx-1" Size="Size.Small" OnClick="OnShowAddSubjectDialog" Icon="fa-solid fa-user-plus" Color="Color.Success" Disabled="!MainLayout.IsOnline" />
+                                    <MudIconButton ButtonType="ButtonType.Button" OnClick="OnLoadSubjects" Variant="Variant.Filled" Class="my-2 mx-1" Size="Size.Small" Icon="fa-solid fa-refresh" Color="Color.Primary" Disabled="!MainLayout.IsOnline" />
+                                </MudHidden>
+                            </MudBreakpointProvider>
 
-                                <MudSpacer />
-                                <MudTextField T="string" Immediate Placeholder="Search here.." Adornment="Adornment.Start" IconSize="Size.Small" AdornmentIcon="fa-solid fa-search" Margin="Margin.Dense" Variant="Variant.Text"></MudTextField>
-                            </ToolBarContent>
-                            <Columns>
-                                <PropertyColumn Property="x => x.SubjectCode" Title="Subject Code" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
-                                <PropertyColumn Property="x => x.SubjectName" Title="Subject Name" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
-                                <PropertyColumn Property="x => x.LectureHour" Title="Lecture Hour" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
-                                <PropertyColumn Property="x => x.LabHour" Title="Laboratory Hour" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
-                                <PropertyColumn Property="x => x.MaxStudent" Title="Maximum Student" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
-                                <PropertyColumn Property="x => x.Units" Title="Units" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
-                                <PropertyColumn Property="x => x.IsActive" Title="Status" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
-                                    <CellTemplate>
-                                        @if (context.Item.IsActive)
-                                        {
-                                            <MudChip Variant="Variant.Filled" Color="Color.Success" Size="Size.Small">Active</MudChip>
-                                        }
-                                        else
-                                        {
-                                            <MudChip Variant="Variant.Filled" Color="Color.Error" Size="Size.Small">Not Active</MudChip>
-                                        }
-                                    </CellTemplate>
-                                </PropertyColumn>
-                                <PropertyColumn Property="x => x.CreatedBy" Title="Created By" Sortable="true" HeaderClass="data-grid text-nowrap text-white" Hidden>
-                                    <CellTemplate>
-                                        <MudStack Spacing="0">
-                                            <MudText Typo="Typo.body2" Class="fw-bold">@context.Item.CreatedBy</MudText>
-                                            <MudText Typo="Typo.body2" Class="fw-italic">@context.Item.CreatedOn</MudText>
-                                        </MudStack>
-                                    </CellTemplate>
-                                </PropertyColumn>
-                                <PropertyColumn Property="x => x.UpdatedBy" Title="Updated By" Sortable="true" HeaderClass="data-grid text-nowrap text-white" Hidden>
-                                    <CellTemplate>
-                                        <MudStack Spacing="0">
-                                            <MudText Typo="Typo.body2" Class="fw-bold">@context.Item.UpdatedBy</MudText>
-                                            <MudText Typo="Typo.body2" Class="fw-italic">@context.Item.UpdatedOn</MudText>
-                                        </MudStack>
-                                    </CellTemplate>
-                                </PropertyColumn>
-                            </Columns>
-                            <NoRecordsContent>
-                                <MudText>No Records to show</MudText>
-                            </NoRecordsContent>
-                            <LoadingContent>
-                                <MudText>Loading Content...</MudText>
-                            </LoadingContent>
-                            <PagerContent>
-                                <MudDataGridPager T="Subjects" />
-                            </PagerContent>
-                        </MudDataGrid>
-                    </ChildContent>
-                </MudExpansionPanel>
-            </MudExpansionPanels>
+                            <MudSpacer />
+                            <MudTextField ValueChanged="@(s=>OnsearchSubjects(s))" T="string" Immediate Placeholder="Search here.." Adornment="Adornment.Start" IconSize="Size.Small" AdornmentIcon="fa-solid fa-search" Margin="Margin.Dense" Variant="Variant.Text"></MudTextField>
+                        </ToolBarContent>
+                        <Columns>
+                            <PropertyColumn Property="x => x.SubjectCode" Title="Subject Code" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
+                            <PropertyColumn Property="x => x.SubjectName" Title="Subject Name" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
+                            <PropertyColumn Property="x => x.LectureHour" Title="Lecture Hour" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
+                            <PropertyColumn Property="x => x.LabHour" Title="Laboratory Hour" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
+                            <PropertyColumn Property="x => x.MaxStudent" Title="Maximum Student" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
+                            <PropertyColumn Property="x => x.Units" Title="Units" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
+                            <PropertyColumn Property="x => x.IsActive" Title="Status" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
+                                <CellTemplate>
+                                    @if (context.Item.IsActive)
+                                    {
+                                        <MudChip Variant="Variant.Filled" Color="Color.Success" Size="Size.Small">Active</MudChip>
+                                    }
+                                    else
+                                    {
+                                        <MudChip Variant="Variant.Filled" Color="Color.Error" Size="Size.Small">Not Active</MudChip>
+                                    }
+                                </CellTemplate>
+                            </PropertyColumn>
+                            <PropertyColumn Property="x => x.CreatedBy" Title="Created By" Sortable="true" HeaderClass="data-grid text-nowrap text-white" Hidden>
+                                <CellTemplate>
+                                    <MudStack Spacing="0">
+                                        <MudText Typo="Typo.body2" Class="fw-bold">@context.Item.CreatedBy</MudText>
+                                        <MudText Typo="Typo.body2" Class="fw-italic">@context.Item.CreatedOn</MudText>
+                                    </MudStack>
+                                </CellTemplate>
+                            </PropertyColumn>
+                            <PropertyColumn Property="x => x.UpdatedBy" Title="Updated By" Sortable="true" HeaderClass="data-grid text-nowrap text-white" Hidden>
+                                <CellTemplate>
+                                    <MudStack Spacing="0">
+                                        <MudText Typo="Typo.body2" Class="fw-bold">@context.Item.UpdatedBy</MudText>
+                                        <MudText Typo="Typo.body2" Class="fw-italic">@context.Item.UpdatedOn</MudText>
+                                    </MudStack>
+                                </CellTemplate>
+                            </PropertyColumn>
+                        </Columns>
+                        <NoRecordsContent>
+                            <MudText>No Records to show</MudText>
+                        </NoRecordsContent>
+                        <LoadingContent>
+                            <MudText>Loading Content...</MudText>
+                        </LoadingContent>
+                        <PagerContent>
+                            <MudDataGridPager T="Subjects" />
+                        </PagerContent>
+                    </MudDataGrid>
+                    </MudTabPanel>
+            </MudTabs>          
         </MudItem>
     </MudGrid>
 </MudContainer>
@@ -372,6 +356,36 @@
         {
             isLoading = false;
         }
+    }
+
+    private async Task OnsearchCourses(string query)
+    {
+
+        coursesTemp = courses.Where(data =>
+           {
+               if (string.IsNullOrWhiteSpace(query))
+                   return true;
+               if (data.CourseCode.Contains(query, StringComparison.OrdinalIgnoreCase))
+                   return true;
+               if (data.CourseName.Contains(query, StringComparison.OrdinalIgnoreCase))
+                   return true;
+               return false;
+           }).ToList();
+    }
+
+    private async Task OnsearchSubjects(string query)
+    {
+
+        subjectsTemp= subjects.Where(data =>
+           {
+               if (string.IsNullOrWhiteSpace(query))
+                   return true;
+               if (data.SubjectCode.Contains(query, StringComparison.OrdinalIgnoreCase))
+                   return true;
+               if (data.SubjectName.Contains(query, StringComparison.OrdinalIgnoreCase))
+                   return true;
+               return false;
+           }).ToList();
     }
 
 }
