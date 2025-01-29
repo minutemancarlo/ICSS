@@ -8,7 +8,7 @@
         <MudItem xs="12">
              <MudTabs Elevation="2" Rounded="true" Outlined="true" Color="Color.Tertiary">
                 <MudTabPanel Text="Courses" Icon="fa-solid fa-graduation-cap">
-                    <MudDataGrid Items="courses" Dense Hover Filterable Striped Virtualize ShowColumnOptions Hideable ShowMenuIcon>
+                    <MudDataGrid Items="coursesTemp" Dense Hover Filterable Striped Virtualize ShowColumnOptions Hideable ShowMenuIcon>
                         <ToolBarContent>
                             <MudBreakpointProvider>
                                 <MudHidden Breakpoint="Breakpoint.MdAndUp" Invert="true">
@@ -29,6 +29,13 @@
                             <MudTextField ValueChanged="@(s=>OnsearchCourses(s))" T="string" Immediate Placeholder="Search here.." Adornment="Adornment.Start" IconSize="Size.Small" AdornmentIcon="fa-solid fa-search" Margin="Margin.Dense" Variant="Variant.Text"></MudTextField>
                         </ToolBarContent>
                         <Columns>
+                            <TemplateColumn Title="Actions" HeaderClass="data-grid text-nowrap text-white" Hideable="false">
+                                <CellTemplate>
+                                    <MudTooltip Text="Edit Course Information">
+                                        <MudIconButton Icon="fa-solid fa-edit" Size="Size.Medium" Color="Color.Info" Variant="Variant.Filled" Disabled="@(!MainLayout.IsOnline)" OnClick="@(() => OnShowUpdateCourseDialog(context.Item))" />
+                                    </MudTooltip>
+                                </CellTemplate>
+                            </TemplateColumn>
                             <PropertyColumn Property="x => x.CourseCode" Title="Course Code" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
                             <PropertyColumn Property="x => x.CourseName" Title="Description" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
                             <PropertyColumn Property="x => x.CreatedBy" Title="Created By" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
@@ -46,14 +53,7 @@
                                         <MudText Typo="Typo.body2" Class="fw-italic">@context.Item.UpdatedOn</MudText>
                                     </MudStack>
                                 </CellTemplate>
-                            </PropertyColumn>
-                            <TemplateColumn Title="Actions" HeaderClass="data-grid text-nowrap text-white" Hideable="false">
-                                <CellTemplate>
-                                    <MudTooltip Text="Edit Course Information">
-                                        <MudIconButton Icon="fa-solid fa-edit" Size="Size.Medium" Color="Color.Info" Variant="Variant.Filled" Disabled="@(!MainLayout.IsOnline)" OnClick="@(() => OnShowUpdateCourseDialog(context.Item))" />
-                                    </MudTooltip>
-                                </CellTemplate>
-                            </TemplateColumn>
+                            </PropertyColumn>                            
                         </Columns>
                         <NoRecordsContent>
                             <MudText>No Records to show</MudText>
@@ -67,7 +67,7 @@
                     </MudDataGrid>
                 </MudTabPanel>
                 <MudTabPanel Text="Subjects" Icon="fa-solid fa-book">
-                    <MudDataGrid Items="subjects" Dense Hover Filterable Striped Virtualize ShowColumnOptions Hideable ShowMenuIcon>
+                    <MudDataGrid Items="subjectsTemp" Dense Hover Filterable Striped Virtualize ShowColumnOptions Hideable ShowMenuIcon>
                         <ToolBarContent>
                             <MudBreakpointProvider>
                                 <MudHidden Breakpoint="Breakpoint.MdAndUp" Invert="true">
@@ -88,6 +88,13 @@
                             <MudTextField ValueChanged="@(s=>OnsearchSubjects(s))" T="string" Immediate Placeholder="Search here.." Adornment="Adornment.Start" IconSize="Size.Small" AdornmentIcon="fa-solid fa-search" Margin="Margin.Dense" Variant="Variant.Text"></MudTextField>
                         </ToolBarContent>
                         <Columns>
+                            <TemplateColumn Title="Actions" HeaderClass="data-grid text-nowrap text-white" Hideable="false">
+                                <CellTemplate>
+                                    <MudTooltip Text="Edit Subject Information">
+                                        <MudIconButton Icon="fa-solid fa-edit" Size="Size.Medium" Color="Color.Info" Variant="Variant.Filled" Disabled="@(!MainLayout.IsOnline)" OnClick="@(() => OnShowUpdateSubjectDialog(context.Item))" />
+                                    </MudTooltip>
+                                </CellTemplate>
+                            </TemplateColumn>
                             <PropertyColumn Property="x => x.SubjectCode" Title="Subject Code" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
                             <PropertyColumn Property="x => x.SubjectName" Title="Subject Name" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
                             <PropertyColumn Property="x => x.LectureHour" Title="Lecture Hour" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
@@ -221,6 +228,43 @@
                 { x => x.Action, "Add" },
                 { x => x.Icon, "circle-plus" },
                 {x => x.subjects, new Subjects()},
+                { x => x.currentUserId, MainLayout.CurrentUserId }
+            };
+
+            var dialog = await DialogService.ShowAsync<SubjectDialog>("", parameters, options);
+            var result = await dialog.Result;
+            if (!result.Canceled)
+            {
+                await OnLoadSubjects();
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task OnShowUpdateSubjectDialog(Subjects subjects)
+    {
+        try
+        {
+            var options = new DialogOptions
+                {
+                    CloseOnEscapeKey = false,
+                    FullWidth = true,
+                    MaxWidth = MaxWidth.Small,
+                    BackdropClick = false,
+                    CloseButton = false,
+                    BackgroundClass = "blurred"
+
+                };
+
+            var parameters = new DialogParameters<SubjectDialog>
+            {
+                { x => x.Action, "Update" },
+                { x => x.Icon, "pen-to-square" },
+                {x => x.subjects, subjects},
                 { x => x.currentUserId, MainLayout.CurrentUserId }
             };
 

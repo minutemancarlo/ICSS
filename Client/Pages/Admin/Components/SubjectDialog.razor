@@ -10,12 +10,12 @@
     <DialogContent>
         <MudForm @ref="_form" Model="subjects">
             <MudStack>                
-                <MudTextField @bind-Value="subjects.SubjectCode" Label="Subject Code" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
-                <MudTextField @bind-Value="subjects.SubjectName" Label="Subject Description" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
-                <MudNumericField HideSpinButtons @bind-Value="subjects.Units" Label="Units" Variant="Variant.Outlined" Margin="Margin.Dense"></MudNumericField>
-                <MudNumericField HideSpinButtons @bind-Value="subjects.LectureHour" Label="Lecture Hours" Variant="Variant.Outlined" Margin="Margin.Dense"></MudNumericField>
-                <MudNumericField HideSpinButtons @bind-Value="subjects.LabHour" Label="Laboratory Hours" Variant="Variant.Outlined" Margin="Margin.Dense"></MudNumericField>
-                <MudNumericField HideSpinButtons @bind-Value="subjects.MaxStudent" Label="Student Capacity" Variant="Variant.Outlined" Margin="Margin.Dense"></MudNumericField>
+                <MudTextField @bind-Value="subjects.SubjectCode" Label="Subject Code" Variant="Variant.Outlined" Required RequiredError="Subject Code is Required" Margin="Margin.Dense"></MudTextField>
+                <MudTextField @bind-Value="subjects.SubjectName" Label="Subject Description" Variant="Variant.Outlined" Required RequiredError="Subject Description is Required" Margin="Margin.Dense"></MudTextField>
+                <MudNumericField HideSpinButtons @bind-Value="subjects.Units" Label="Units" Variant="Variant.Outlined" Min="0" Margin="Margin.Dense"></MudNumericField>
+                <MudNumericField HideSpinButtons @bind-Value="subjects.LectureHour" Label="Lecture Hours" Min="0" Variant="Variant.Outlined" Margin="Margin.Dense"></MudNumericField>
+                <MudNumericField HideSpinButtons @bind-Value="subjects.LabHour" Label="Laboratory Hours" Min="0" Variant="Variant.Outlined" Margin="Margin.Dense"></MudNumericField>
+                <MudNumericField HideSpinButtons @bind-Value="subjects.MaxStudent" Label="Student Capacity" Min="0" Variant="Variant.Outlined" Margin="Margin.Dense"></MudNumericField>
                 <MudSwitch @bind-Value="subjects.IsActive" Label="Is Active" Color="Color.Success" />
 
             </MudStack>

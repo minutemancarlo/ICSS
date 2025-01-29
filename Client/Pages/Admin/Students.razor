@@ -44,6 +44,13 @@
                                     <MudTextField ValueChanged="@(s=>Onsearch(s))" T="string" Immediate Placeholder="Search here.." Adornment="Adornment.Start" IconSize="Size.Small" AdornmentIcon="fa-solid fa-search" Margin="Margin.Dense" Variant="Variant.Text"></MudTextField>
                                 </ToolBarContent>
                                 <Columns>
+                                    <TemplateColumn Title="Actions" HeaderClass="data-grid text-nowrap text-white">
+                                        <CellTemplate>
+                                            <MudTooltip Text="Update Student Information">
+                                                <MudIconButton Icon="fa-solid fa-user-edit" Size="Size.Medium" Color="Color.Info" Variant="Variant.Filled" Disabled="@(!MainLayout.IsOnline)" OnClick="@(() => OnShowUpdateStudentDialog(context.Item))" />
+                                            </MudTooltip>
+                                        </CellTemplate>
+                                    </TemplateColumn>
                                     <PropertyColumn Property="x => x.Id" Title="No." Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
                                     <PropertyColumn Property="x => x.IdNumber" Title="ID Number" Sortable="true" HeaderClass="data-grid text-nowrap text-white"/>                                        
                                     <PropertyColumn Property="x => x.Name" Title="Name" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
@@ -68,13 +75,7 @@
                                             </MudStack>
                                         </CellTemplate>
                                     </PropertyColumn>
-                                    <TemplateColumn Title="Actions" HeaderClass="data-grid text-nowrap text-white">
-                                        <CellTemplate>
-                                            <MudTooltip Text="Update Student Information">
-                                                <MudIconButton Icon="fa-solid fa-user-edit" Size="Size.Medium" Color="Color.Info" Variant="Variant.Filled" Disabled="@(!MainLayout.IsOnline)" OnClick="@(() => OnShowUpdateStudentDialog(context.Item))" />
-                                            </MudTooltip>
-                                        </CellTemplate>
-                                    </TemplateColumn>
+                                   
                                 </Columns>
                                 <NoRecordsContent>
                                     <MudText>No Records to show</MudText>
@@ -144,6 +145,16 @@
                                     <MudTextField ValueChanged="@(s=>OnsearchTasks(s))" T="string" Immediate Placeholder="Search here.." Adornment="Adornment.Start" IconSize="Size.Small" AdornmentIcon="fa-solid fa-search" Margin="Margin.Dense" Variant="Variant.Text"></MudTextField>
                                 </ToolBarContent>
                                 <Columns>
+                                    <TemplateColumn Title="Actions" HeaderClass="data-grid text-nowrap text-white">
+                                        <CellTemplate>
+                                            @if (context.Item.Status == TaskStatus.On_Queue)
+                                            {
+                                                <MudTooltip Text="Remove from Queue">
+                                                    <MudIconButton Icon="fa-solid fa-circle-stop" Size="Size.Medium" Color="Color.Error" OnClick="@(() => OnShowRemoveFromQueue(context.Item.TaskId))" Variant="Variant.Filled" Disabled="@(!MainLayout.IsOnline)" />
+                                                </MudTooltip>
+                                            }
+                                        </CellTemplate>
+                                    </TemplateColumn>
                                     <PropertyColumn Property="x => x.TaskId" Title="Task Id" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
                                     <PropertyColumn Property="x => x.TaskType" Title="Type" Sortable="true" HeaderClass="data-grid text-nowrap text-white" >
                                         <CellTemplate>
@@ -187,16 +198,7 @@
                                             </MudStack>
                                         </CellTemplate>
                                     </PropertyColumn>                                 
-                                    <TemplateColumn Title="Actions" HeaderClass="data-grid text-nowrap text-white">
-                                        <CellTemplate>
-                                            @if (context.Item.Status == TaskStatus.On_Queue)
-                                            {
-                                                <MudTooltip Text="Remove from Queue">
-                                                    <MudIconButton Icon="fa-solid fa-circle-stop" Size="Size.Medium" Color="Color.Error" OnClick="@(() => OnShowRemoveFromQueue(context.Item.TaskId))" Variant="Variant.Filled" Disabled="@(!MainLayout.IsOnline)" />
-                                                </MudTooltip>
-                                            }
-                                        </CellTemplate>
-                                    </TemplateColumn>
+                                   
                                 </Columns>
                                 <NoRecordsContent>
                                     <MudText>No Records to show</MudText>

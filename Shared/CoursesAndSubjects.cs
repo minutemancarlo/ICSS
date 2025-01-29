@@ -25,7 +25,7 @@ namespace ICSS.Shared
         public int MaxStudent { get; set; } = 0;
         public decimal Units { get; set; } = 0.0M;        
         public int? CourseId { get; set; }
-        public bool IsActive { get; set; }
+        public bool IsActive { get; set; } = true;
 
     }
 }
