@@ -40,5 +40,22 @@ namespace ICSS.Server.Repository
             return await _dbConnection.QueryAsync<Course>("GetCourses", commandType: CommandType.StoredProcedure);
         }
 
+
+        public async Task<int> InsertUpdateSubjectAsync(Subjects subject)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("@SubjectId", subject.SubjectId, DbType.Int32);
+            parameters.Add("@SubjectCode", subject.SubjectCode, DbType.String);
+            parameters.Add("@SubjectName", subject.SubjectName, DbType.String);
+            parameters.Add("@LectureHour", subject.LectureHour, DbType.Decimal);
+            parameters.Add("@LabHour", subject.LabHour, DbType.Decimal);
+            parameters.Add("@Units", subject.Units, DbType.Decimal);
+            parameters.Add("@MaxStudent", subject.MaxStudent, DbType.Int32);
+            parameters.Add("@IsActive", subject.IsActive, DbType.Boolean);
+            parameters.Add("@User", subject.UpdatedBy ?? subject.CreatedBy, DbType.String);
+
+            return await _dbConnection.ExecuteScalarAsync<int>("sp_InsertUpdateSubject", parameters, commandType: CommandType.StoredProcedure);
+        }
+
     }
 }

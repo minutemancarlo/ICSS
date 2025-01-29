@@ -78,5 +78,52 @@ namespace ICSS.Server.Controllers
             }
         }
 
+
+        [HttpPost("InsertSubject")]
+        public async Task<IActionResult> InsertSubject([FromBody] Subjects subject)
+        {
+            try
+            {
+                if (subject == null)
+                {
+                    return BadRequest("Invalid subject data.");
+                }
+
+                var result = await _courseAndSubjectRepository.InsertUpdateSubjectAsync(subject);
+
+                return Ok(new { Message = "Subject inserted successfully.", CourseId = result });
+
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred while inserting the subject. Error: {ex.Message}");
+            }
+        }
+
+
+
+        [HttpPut("UpdateSubject")]
+        public async Task<IActionResult> UpdateSubject([FromBody] Subjects subject)
+        {
+            try
+            {
+                if (subject == null || subject.SubjectId<= 0)
+                {
+                    return BadRequest("Invalid subject data.");
+                }
+
+                var result = await _courseAndSubjectRepository.InsertUpdateSubjectAsync(subject);
+
+                return Ok(new { Message = "Subject updated successfully.", RowsAffected = result });
+
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred while updating the subject.Error: {ex.Message}");
+            }
+
+
+        }
+
     }
 }
