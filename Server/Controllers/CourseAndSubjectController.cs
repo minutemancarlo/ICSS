@@ -125,5 +125,21 @@ namespace ICSS.Server.Controllers
 
         }
 
+        [HttpGet("GetAllSubjects")]
+        public async Task<ActionResult<IEnumerable<Subjects>>> GetAllSubjects()
+        {
+            try
+            {
+
+                var subjects = await _courseAndSubjectRepository.GetSubjectsAsync();
+
+                return Ok(subjects);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
+        }
+
     }
 }

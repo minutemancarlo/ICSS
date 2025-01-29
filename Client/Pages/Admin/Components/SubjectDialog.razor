@@ -39,6 +39,7 @@
     [CascadingParameter] MudDialogInstance? MudDialog { get; set; }
     [Inject] HttpClient? httpClient { get; set; }
     [Inject] ISnackbar Snackbar { get; set; }
+    [Inject] private ApiRequestHelper ApiHelper { get; set; }
 
     [Parameter] public string? Action { get; set; }
     [Parameter] public string? Icon { get; set; }
@@ -53,7 +54,62 @@
 
     private async Task OnSubmit()
     {
+        try
+        {
+            if (_form is not null)
+            {
+                await _form.Validate();
 
+                if (_form.IsValid)
+                {
+                    _loading = true;
+
+                    if (subjects.SubjectId is null)
+                    {
+                        subjects.CreatedBy = currentUserId;
+                        var response = await ApiHelper.PostAsync<Subjects, ApiResponse<int>>("CourseAndSubject/InsertSubject", subjects);
+
+                        if (response.IsSuccess)
+                        {
+                            Snackbar.Add("Subject added successfully.", Severity.Success);
+                            MudDialog.Close(DialogResult.Ok(true));
+                        }
+                        else
+                        {
+                            Snackbar.Add($"Error: {response.Message}", Severity.Error);
+                        }
+
+                    }
+                    else
+                    {
+                        subjects.UpdatedBy = currentUserId;
+                        var response = await ApiHelper.PutAsync("CourseAndSubject/UpdateSubject", subjects);
+
+                        if (response.IsSuccess)
+                        {
+                            Snackbar.Add("Subject updated successfully.", Severity.Success);
+                            MudDialog.Close(DialogResult.Ok(true));
+                        }
+                        else
+                        {
+                            Snackbar.Add($"Error: {response.Message}", Severity.Error);
+                        }
+                    }
+
+
+
+
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
     }
 
 

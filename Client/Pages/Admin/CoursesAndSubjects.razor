@@ -89,13 +89,13 @@
                                         <MudButton Size="Size.Small" StartIcon="fa-solid fa-circle-plus" OnClick="OnShowAddSubjectDialog" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Success" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
                                             Add Subject
                                         </MudButton>
-                                        <MudButton Size="Size.Small" StartIcon="fa-solid fa-refresh" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Primary" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
+                                        <MudButton Size="Size.Small" OnClick="OnLoadSubjects" StartIcon="fa-solid fa-refresh" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Primary" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
                                             Refresh
                                         </MudButton>
                                     </MudHidden>
                                     <MudHidden Breakpoint="Breakpoint.MdAndDown" Invert="true">
                                         <MudIconButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Class="my-2 mx-1" Size="Size.Small" OnClick="OnShowAddSubjectDialog" Icon="fa-solid fa-user-plus" Color="Color.Success" Disabled="!MainLayout.IsOnline" />
-                                        <MudIconButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Class="my-2 mx-1" Size="Size.Small" Icon="fa-solid fa-refresh" Color="Color.Primary" Disabled="!MainLayout.IsOnline" />
+                                        <MudIconButton ButtonType="ButtonType.Button" OnClick="OnLoadSubjects" Variant="Variant.Filled" Class="my-2 mx-1" Size="Size.Small" Icon="fa-solid fa-refresh" Color="Color.Primary" Disabled="!MainLayout.IsOnline" />
                                     </MudHidden>
                                 </MudBreakpointProvider>
 
@@ -176,6 +176,7 @@
     {
         MainLayout.SubTitle = "Courses and Subjects Management";
         await OnLoadCourses();
+        await OnLoadSubjects();
         await base.OnInitializedAsync();
     }
 
@@ -243,7 +244,7 @@
             var result = await dialog.Result;
             if (!result.Canceled)
             {
-
+                await OnLoadSubjects();
                 StateHasChanged();
             }
         }
@@ -319,6 +320,46 @@
                 var cachedData = await LocalStorage.GetItemAsync<List<Course>>("courses");
                 courses = cachedData ?? new List<Course>();
                 coursesTemp = courses;
+                StateHasChanged();
+            }
+
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task OnLoadSubjects()
+    {
+        isLoading = true;
+
+        try
+        {
+            if (MainLayout.IsOnline)
+            {
+                var response = await ApiHelper.GetAsync<List<Subjects>>("CourseAndSubject/GetAllSubjects");
+                if (response.IsSuccess)
+                {
+                    subjects = response.Data;
+                    subjectsTemp = subjects;
+                    await LocalStorage.SetItemAsync("subjects", subjects);
+                    StateHasChanged();
+                }
+                else
+                {
+                    Snackbar.Add($"Failed to load subjects: {response.Message}", Severity.Error);
+                }
+            }
+            else
+            {
+                var cachedData = await LocalStorage.GetItemAsync<List<Subjects>>("subjects");
+                subjects= cachedData ?? new List<Subjects>();
+                subjectsTemp = subjects;
                 StateHasChanged();
             }
 

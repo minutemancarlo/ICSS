@@ -54,7 +54,12 @@ namespace ICSS.Server.Repository
             parameters.Add("@IsActive", subject.IsActive, DbType.Boolean);
             parameters.Add("@User", subject.UpdatedBy ?? subject.CreatedBy, DbType.String);
 
-            return await _dbConnection.ExecuteScalarAsync<int>("sp_InsertUpdateSubject", parameters, commandType: CommandType.StoredProcedure);
+            return await _dbConnection.ExecuteScalarAsync<int>("InsertUpdateSubject", parameters, commandType: CommandType.StoredProcedure);
+        }
+
+        public async Task<IEnumerable<Subjects>> GetSubjectsAsync()
+        {
+            return await _dbConnection.QueryAsync<Subjects>("GetSubjects", commandType: CommandType.StoredProcedure);
         }
 
     }
