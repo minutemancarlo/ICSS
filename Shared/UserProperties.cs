@@ -27,4 +27,11 @@ namespace ICSS.Shared
         public string? Name { get; set; }
         public string? Description { get; set; }
     }
+
+    public class SetUserRole
+    {
+        public string UserId { get; set; }
+        public string RoleId { get; set; }
+    }
+
 }

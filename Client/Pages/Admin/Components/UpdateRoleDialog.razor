@@ -10,10 +10,10 @@
     </TitleContent>
     <DialogContent>
         <MudToggleGroup T="string" SelectionMode="SelectionMode.SingleSelection" @bind-Value="RoleValue" Color="Color.Primary" CheckMark FixedContent>
-            @foreach(var item in Roles)
+            @foreach (var item in Roles)
             {
-                <MudToggleItem Value="@item.Id" Text="@item.Name"/>
-            }            
+                <MudToggleItem Value="@item.Id" Text="@item.Name" />
+            }
         </MudToggleGroup>
     </DialogContent>
     <DialogActions>
@@ -34,8 +34,11 @@
     [CascadingParameter] MudDialogInstance? MudDialog { get; set; }
     [Inject] HttpClient? httpClient { get; set; }
     [Inject] ISnackbar Snackbar { get; set; }
+    [Inject] private ApiRequestHelper ApiHelper { get; set; }
+
     [Parameter] public string CurrentRole { get; set; }
-    [Parameter] public List<RolesProperty> Roles  { get; set; }
+    [Parameter] public List<RolesProperty> Roles { get; set; }
+    [Parameter] public string? userId { get; set; }
     private string? RoleValue;
 
     private bool _loading = false;
@@ -52,8 +55,35 @@
 
     private async Task OnSubmit()
     {
+        try
+        {
+            _loading = true;
+            var payload = new SetUserRole
+                {
+                    RoleId = RoleValue,
+                    UserId = userId
 
+                };
+            var response = await ApiHelper.PostAsync<SetUserRole, ApiResponse<int>>("UserManagement/SetUserRole", payload);
+
+            if (response.IsSuccess)
+            {
+                Snackbar.Add("User role successfully updated.", Severity.Success);
+                MudDialog.Close(DialogResult.Ok(true));
+            }
+            else
+            {
+                Snackbar.Add($"Error updating user role: {response.Message}", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
+        }finally
+        {
+            _loading = false;
+        }
     }
 
-    
+
 }

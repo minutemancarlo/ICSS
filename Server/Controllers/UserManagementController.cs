@@ -134,6 +134,41 @@ namespace ICSS.Server.Controllers
             }
         }
 
+        [HttpPost("SetUserRole")]
+        public async Task<ActionResult<string>> SetUserRole([FromBody] SetUserRole user)
+        {
+            try
+            {
+                var currentUserRole = await GetUserRole(user.UserId);
+                if (!string.IsNullOrEmpty(currentUserRole))
+                {
+                    var oldData = new AssignRolesRequest
+                    {
+                        Roles = new string[] { currentUserRole }
+                    };
+
+                    await _managementApiClient.Users.RemoveRolesAsync(user.UserId, oldData);
+                }
+                var currentData = new AssignRolesRequest
+                {
+                    Roles = new string[] { user.RoleId }
+                };
+                   await _managementApiClient.Users.AssignRolesAsync(user.UserId, currentData);                
+                return Ok(new { Message = "Operation completed successfully." });
+            }
+            catch (Exception ex)
+            {                                
+                return BadRequest($"Exception Occured: {ex.Message}");
+            }
+        }
+
+        private async Task<string> GetUserRole(string userid)
+        {
+            var result = await _managementApiClient.Users.GetRolesAsync(userid);
+            var userRole = result.FirstOrDefault()?.Id;
+            return userRole;
+        }
+
 
     }
 }

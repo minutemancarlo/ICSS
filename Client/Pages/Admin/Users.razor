@@ -7,7 +7,7 @@
 
 <MudContainer Class="py-4 py-sm-8 py-md-12 py-lg-16 py-xl-20">
     <MudGrid>
-        
+
         <MudItem xs="12">               
             @if (!MainLayout.IsOnline)
             {
@@ -20,7 +20,7 @@
             <MudPaper Class="w-100" Style="background-color: #1abc9c; color: white">
                 <MudText Typo="Typo.h6" Class="fw-bold p-2">Users List</MudText>
             </MudPaper>
-            
+
             <MudDivider />
         </MudItem>
         <MudItem xs="12">
@@ -36,7 +36,7 @@
                             <MudIconButton ButtonType="ButtonType.Button" OnClick="RefreshUserData" Size="Size.Small" Icon="fa-solid fa-refresh" Variant="Variant.Filled" Color="Color.Primary" Disabled="!MainLayout.IsOnline"/>                            
                         </MudHidden>
                     </MudBreakpointProvider>
-                    
+
                     <MudSpacer />
                     <MudTextField ValueChanged="@(s=>Onsearch(s))" T="string" Immediate Placeholder="Search here.." Adornment="Adornment.Start" IconSize="Size.Small" AdornmentIcon="fa-solid fa-search" Margin="Margin.Dense" Variant="Variant.Text"></MudTextField>
                 </ToolBarContent>
@@ -45,7 +45,7 @@
                         <CellTemplate>
                             <MudStack Row>
                                 <MudTooltip Text="Update Role">
-                                    <MudIconButton Icon="fa-solid fa-user-shield" Size="Size.Medium" Color="Color.Info" Variant="Variant.Filled" Disabled="@(context.Item.User_Id==MainLayout.CurrentUserId||!MainLayout.IsOnline)" OnClick="@(() => OnShowUpdateRole(context.Item.Role))" />
+                                    <MudIconButton Icon="fa-solid fa-user-shield" Size="Size.Medium" Color="Color.Info" Variant="Variant.Filled" Disabled="@(context.Item.User_Id==MainLayout.CurrentUserId||!MainLayout.IsOnline)" OnClick="@(async () => await OnShowUpdateRole(context.Item.Role,context.Item.User_Id))" />
                                 </MudTooltip>
                                 <MudTooltip Text="@(context.Item.Blocked?"Enable Access":"Disable Access")">
                                     <MudIconButton Icon="@(!context.Item.Blocked?"fa-solid fa-user-slash":"fa-solid fa-user")" Size="Size.Medium" Color="@(context.Item.Blocked?Color.Success:Color.Error)" Variant="Variant.Filled" Disabled="@(context.Item.User_Id==MainLayout.CurrentUserId||!MainLayout.IsOnline)" OnClick="@(() => OnUpdateUserAccess(context.Item.User_Id,context.Item.Blocked?"enable":"disable"))" />
@@ -85,7 +85,7 @@
                         </CellTemplate>
                     </PropertyColumn>
                     <PropertyColumn Property="x => x.Last_Login" Title="Last Login" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
-                   
+
                 </Columns>
                 <NoRecordsContent>
                     <MudText>No Records to show</MudText>
@@ -109,7 +109,7 @@
     private List<UserProperties> userPropertiesTemp = new();
     private List<RolesProperty> rolesProperty = new();
     private bool isLoading = true;
-    
+
     private string? roleId;
     private string? searchText;
     private MudDataGrid<UserProperties> _table = default!;
@@ -142,7 +142,7 @@
            }).ToList();
     }
 
-    private async Task OnShowUpdateRole(string role)
+    private async Task OnShowUpdateRole(string role,string userid)
     {
         var options = new DialogOptions
             {
@@ -157,10 +157,16 @@
         var parameters = new DialogParameters<UpdateRoleDialog>
             {
                 { x => x.CurrentRole, role },
-                {x => x.Roles, rolesProperty}
+                {x => x.Roles, rolesProperty},
+                {x => x.userId, userid }
             };
 
         var dialog = await DialogService.ShowAsync<UpdateRoleDialog>("",parameters, options);
+        var result = await dialog.Result;
+        if (!result.Canceled)
+        {
+            await LoadUserData();
+        }
     }
 
     private async Task OnUpdateUserAccess(string userId,string access)
