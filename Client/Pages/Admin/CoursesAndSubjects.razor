@@ -6,9 +6,17 @@
 <MudContainer Class="py-4 py-sm-8 py-md-12 py-lg-16 py-xl-20">
     <MudGrid>
         <MudItem xs="12">
+            @if (!MainLayout.IsOnline)
+            {
+                <MudAlert Severity="Severity.Error" Variant="Variant.Filled" Style="margin-bottom: 16px;" Visible="!isOnline">
+                    You are currently offline. Data may not be up-to-date.
+                </MudAlert>
+            }
+        </MudItem>
+        <MudItem xs="12">
              <MudTabs Elevation="2" Rounded="true" Outlined="true" Color="Color.Tertiary">
                 <MudTabPanel Text="Courses" Icon="fa-solid fa-graduation-cap">
-                    <MudDataGrid Items="coursesTemp" Dense Hover Filterable Striped Virtualize ShowColumnOptions Hideable ShowMenuIcon>
+                    <MudDataGrid Items="coursesTemp" Dense Hover Filterable Striped Virtualize ShowColumnOptions Hideable ShowMenuIcon Loading="isLoading">
                         <ToolBarContent>
                             <MudBreakpointProvider>
                                 <MudHidden Breakpoint="Breakpoint.MdAndUp" Invert="true">
@@ -67,7 +75,7 @@
                     </MudDataGrid>
                 </MudTabPanel>
                 <MudTabPanel Text="Subjects" Icon="fa-solid fa-book">
-                    <MudDataGrid Items="subjectsTemp" Dense Hover Filterable Striped Virtualize ShowColumnOptions Hideable ShowMenuIcon>
+                    <MudDataGrid Items="subjectsTemp" Dense Hover Filterable Striped Virtualize ShowColumnOptions Hideable ShowMenuIcon Loading="isLoading">
                         <ToolBarContent>
                             <MudBreakpointProvider>
                                 <MudHidden Breakpoint="Breakpoint.MdAndUp" Invert="true">
