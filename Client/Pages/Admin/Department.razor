@@ -40,7 +40,7 @@
                         <Columns>
                             <TemplateColumn Title="Actions" HeaderClass="data-grid text-nowrap text-white" Hideable="false">
                                 <CellTemplate>
-                                    <MudTooltip Text="Edit Course Information">
+                                    <MudTooltip Text="Edit Department Information">
                                         <MudIconButton Icon="fa-solid fa-edit" Size="Size.Medium" Color="Color.Info" Variant="Variant.Filled" Disabled="@(!MainLayout.IsOnline)" OnClick="@(() => OnShowUpdateDepartmentDialog(context.Item))" />
                                     </MudTooltip>
                                 </CellTemplate>

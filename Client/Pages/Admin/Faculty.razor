@@ -1,21 +1,87 @@
 ﻿@page "/manage-faculty"
 @attribute [Authorize]
 @layout MainLayout
-
+@using ICSS.Shared
+@using ICSS.Client.Pages.Admin.Components
 
 
 <MudContainer Class="py-4 py-sm-8 py-md-12 py-lg-16 py-xl-20">
     <MudGrid>
-        <MudItem xs="6">
-            <MudPaper Elevation="4">
-
-            </MudPaper>
+        <MudItem xs="12">
+            @if (!MainLayout.IsOnline)
+            {
+                <MudAlert Severity="Severity.Error" Variant="Variant.Filled" Style="margin-bottom: 16px;" Visible="!isOnline">
+                    You are currently offline. Data may not be up-to-date.
+                </MudAlert>
+            }
         </MudItem>
-        <MudItem xs="6">
-            <MudPaper Elevation="4">
+        <MudItem xs="12">
+            <MudDataGrid Items="facultyTemp" Dense Hover Filterable Striped Virtualize ShowColumnOptions Hideable ShowMenuIcon Loading="isLoading">
+                <ToolBarContent>
+                    <MudBreakpointProvider>
+                        <MudHidden Breakpoint="Breakpoint.MdAndUp" Invert="true">
+                            <MudButton Size="Size.Small" StartIcon="fa-solid fa-circle-plus" OnClick="OnShowAddFacultyDialog" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Success" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
+                                Add Faculty
+                            </MudButton>
+                            <MudButton Size="Size.Small" OnClick="OnLoadFaculty" StartIcon="fa-solid fa-refresh" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Primary" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
+                                Refresh
+                            </MudButton>
+                        </MudHidden>
+                        <MudHidden Breakpoint="Breakpoint.MdAndDown" Invert="true">
+                            <MudIconButton ButtonType="ButtonType.Button" Variant="Variant.Filled" OnClick="OnShowAddFacultyDialog" Class="my-2 mx-1" Size="Size.Small" Icon="fa-solid fa-user-plus" Color="Color.Success" Disabled="!MainLayout.IsOnline" />
+                            <MudIconButton ButtonType="ButtonType.Button" OnClick="OnLoadFaculty" Variant="Variant.Filled" Class="my-2 mx-1" Size="Size.Small" Icon="fa-solid fa-refresh" Color="Color.Primary" Disabled="!MainLayout.IsOnline" />
+                        </MudHidden>
+                    </MudBreakpointProvider>
 
-            </MudPaper>
+                    <MudSpacer />
+                    <MudTextField ValueChanged="@(s=>OnsearchFaculty(s))" T="string" Immediate Placeholder="Search here.." Adornment="Adornment.Start" IconSize="Size.Small" AdornmentIcon="fa-solid fa-search" Margin="Margin.Dense" Variant="Variant.Text"></MudTextField>
+                </ToolBarContent>
+                <Columns>
+                    <TemplateColumn Title="Actions" HeaderClass="data-grid text-nowrap text-white" Hideable="false">
+                        <CellTemplate>
+                            <MudTooltip Text="Edit Faculty Information">
+                                <MudIconButton Icon="fa-solid fa-edit" Size="Size.Medium" Color="Color.Info" Variant="Variant.Filled" Disabled="@(!MainLayout.IsOnline)" OnClick="@(() => OnShowUpdateFacultyDialog(context.Item))" />
+                            </MudTooltip>
+                        </CellTemplate>
+                    </TemplateColumn>
+                    <PropertyColumn Property="x => x.FacultyName" Title="Name" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
+                    <PropertyColumn Property="x => x.AcademicRank" Title="Academic Rank" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
+                    <PropertyColumn Property="x => x.DepartmentId" Title="Department" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
+                        <CellTemplate>
+                            <MudStack Spacing="0">
+                                <MudText Typo="Typo.body2">@($"{(context.Item.DepartmentId == null ? "Unassigned" : "Assigned")}")</MudText>
+                            </MudStack>
+                        </CellTemplate>
+                    </PropertyColumn>
+                    <PropertyColumn Property="x => x.CreatedBy" Title="Created By" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
+                        <CellTemplate>
+                            <MudStack Spacing="0">
+                                <MudText Typo="Typo.body2" Class="fw-bold">@context.Item.CreatedBy</MudText>
+                                <MudText Typo="Typo.body2" Class="fw-italic">@context.Item.CreatedOn</MudText>
+                            </MudStack>
+                        </CellTemplate>
+                    </PropertyColumn>
+                    <PropertyColumn Property="x => x.UpdatedBy" Title="Updated By" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
+                        <CellTemplate>
+                            <MudStack Spacing="0">
+                                <MudText Typo="Typo.body2" Class="fw-bold">@context.Item.UpdatedBy</MudText>
+                                <MudText Typo="Typo.body2" Class="fw-italic">@context.Item.UpdatedOn</MudText>
+                            </MudStack>
+                        </CellTemplate>
+                    </PropertyColumn>
+                </Columns>
+                <NoRecordsContent>
+                    <MudText>No Records to show</MudText>
+                </NoRecordsContent>
+                <LoadingContent>
+                    <MudText>Loading Content...</MudText>
+                </LoadingContent>
+                <PagerContent>
+                    <MudDataGridPager T="FacultyModel" />
+                </PagerContent>
+            </MudDataGrid>
         </MudItem>
+
     </MudGrid>
 </MudContainer>
 
@@ -23,10 +89,56 @@
     [CascadingParameter]
     public MainLayout MainLayout { get; private set; }
 
+    [Inject] private ISnackbar Snackbar { get; set; }
+    [Inject] private ILocalStorageService LocalStorage { get; set; }
+    [Inject] private HttpClient HttpClient { get; set; }
+    [Inject] private ApiRequestHelper ApiHelper { get; set; }
+    [Inject] private NavigationManager navigationManager { get; set; }
+    [Inject] IDialogService? DialogService { get; set; }
+
+
+    private List<FacultyModel> faculty = new();
+    private List<FacultyModel> facultyTemp = new();
+
+    private bool isLoading = false;
+
     protected override async Task OnInitializedAsync()
     {
         MainLayout.SubTitle = "Faculty Management";
+        await OnLoadFaculty();
         await base.OnInitializedAsync();
+    }
+
+    #region Dialogs
+    private async Task OnShowAddFacultyDialog()
+    {
+
+    }
+
+    private async Task OnShowUpdateFacultyDialog(FacultyModel faculty)
+    {
+    
+    }
+    #endregion
+
+    private async Task OnLoadFaculty()
+    {
+
+    }
+
+    private async Task OnsearchFaculty(string query)
+    {
+
+        facultyTemp = faculty.Where(data =>
+           {
+               if (string.IsNullOrWhiteSpace(query))
+                   return true;
+               if (data.FacultyName.Contains(query, StringComparison.OrdinalIgnoreCase))
+                   return true;
+               if (data.AcademicRank.Contains(query, StringComparison.OrdinalIgnoreCase))
+                   return true;               
+               return false;
+           }).ToList();
     }
 
 }
