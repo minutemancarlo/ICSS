@@ -16,6 +16,13 @@
             }
         </MudItem>
         <MudItem xs="12">
+            <MudPaper Class="w-100" Style="background-color: #1abc9c; color: white">
+                <MudText Typo="Typo.h6" Class="fw-bold p-2">Faculty List</MudText>
+            </MudPaper>
+
+            <MudDivider />
+        </MudItem>
+        <MudItem xs="12">
             <MudDataGrid Items="facultyTemp" Dense Hover Filterable Striped Virtualize ShowColumnOptions Hideable ShowMenuIcon Loading="isLoading">
                 <ToolBarContent>
                     <MudBreakpointProvider>
@@ -39,9 +46,14 @@
                 <Columns>
                     <TemplateColumn Title="Actions" HeaderClass="data-grid text-nowrap text-white" Hideable="false">
                         <CellTemplate>
-                            <MudTooltip Text="Edit Faculty Information">
-                                <MudIconButton Icon="fa-solid fa-edit" Size="Size.Medium" Color="Color.Info" Variant="Variant.Filled" Disabled="@(!MainLayout.IsOnline)" OnClick="@(() => OnShowUpdateFacultyDialog(context.Item))" />
-                            </MudTooltip>
+                            <MudStack Row>
+                                <MudTooltip Text="Edit Faculty Information">
+                                    <MudIconButton Icon="fa-solid fa-edit" Size="Size.Medium" Color="Color.Info" Variant="Variant.Filled" Disabled="@(!MainLayout.IsOnline)" OnClick="@(() => OnShowUpdateFacultyDialog(context.Item))" />
+                                </MudTooltip>
+                                <MudTooltip Text="Delete Faculty Information">
+                                    <MudIconButton Icon="fa-solid fa-trash-can" Size="Size.Medium" Color="Color.Error" Variant="Variant.Filled" Disabled="@(!MainLayout.IsOnline)" OnClick="@(() => OnShowUpdateFacultyDialog(context.Item))" />
+                                </MudTooltip>
+                            </MudStack>
                         </CellTemplate>
                     </TemplateColumn>
                     <PropertyColumn Property="x => x.FacultyName" Title="Name" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
@@ -49,7 +61,21 @@
                     <PropertyColumn Property="x => x.DepartmentId" Title="Department" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
                         <CellTemplate>
                             <MudStack Spacing="0">
-                                <MudText Typo="Typo.body2">@($"{(context.Item.DepartmentId == null ? "Unassigned" : "Assigned")}")</MudText>
+                                <MudText Typo="Typo.body2">
+                                    @(context.Item.DepartmentId == null
+                                        ? "Unassigned"
+                                        : departments.FirstOrDefault(x => x.DepartmentId == context.Item.DepartmentId)?.DepartmentName ?? "Unassigned")
+                                </MudText>
+                            </MudStack>
+                        </CellTemplate>
+                    </PropertyColumn>
+                    <PropertyColumn Property="x => x.TotalLoadUnits" Title="Total Load Units" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
+                    <PropertyColumn Property="x => x.BachelorsDegree" Title="Degree" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
+                        <CellTemplate>
+                            <MudStack Spacing="0">
+                                <MudText Typo="Typo.body2"><strong>Bachelors: </strong>@(context.Item.BachelorsDegree ?? "N/A")</MudText>
+                                <MudText Typo="Typo.body2"><strong>Masteral: </strong>@(context.Item.MastersDegree ?? "N/A")</MudText>
+                                <MudText Typo="Typo.body2"><strong>Doctorate: </strong>@(context.Item.DoctorateDegree ?? "N/A")</MudText>
                             </MudStack>
                         </CellTemplate>
                     </PropertyColumn>
@@ -100,11 +126,15 @@
     private List<FacultyModel> faculty = new();
     private List<FacultyModel> facultyTemp = new();
 
+    private List<Departments> departments = new();
+    private List<Departments> departmentsTemp = new();
+
     private bool isLoading = false;
 
     protected override async Task OnInitializedAsync()
     {
         MainLayout.SubTitle = "Faculty Management";
+        await OnLoadDepartments();
         await OnLoadFaculty();
         await base.OnInitializedAsync();
     }
@@ -112,18 +142,162 @@
     #region Dialogs
     private async Task OnShowAddFacultyDialog()
     {
+        try
+        {
+            var options = new DialogOptions
+                {
+                    CloseOnEscapeKey = false,
+                    FullWidth = true,
+                    MaxWidth = MaxWidth.Small,
+                    BackdropClick = false,
+                    CloseButton = false,
+                    BackgroundClass = "blurred"
 
+                };
+
+            var parameters = new DialogParameters<FacultyDialog>
+            {
+                { x => x.Action, "Add" },
+                { x => x.Icon, "circle-plus" },
+                {x => x.faculty, new FacultyModel()},
+                { x => x.currentUserId, MainLayout.CurrentUserId },
+                { x => x.departments, departments}
+            };
+
+            var dialog = await DialogService.ShowAsync<FacultyDialog>("", parameters, options);
+            var result = await dialog.Result;
+            if (!result.Canceled)
+            {
+                await OnLoadDepartments();
+                await OnLoadFaculty();
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
+        }
     }
 
     private async Task OnShowUpdateFacultyDialog(FacultyModel faculty)
     {
-    
+        try
+        {
+            var options = new DialogOptions
+                {
+                    CloseOnEscapeKey = false,
+                    FullWidth = true,
+                    MaxWidth = MaxWidth.Small,
+                    BackdropClick = false,
+                    CloseButton = false,
+                    BackgroundClass = "blurred"
+
+                };
+
+            var parameters = new DialogParameters<FacultyDialog>
+            {
+                { x => x.Action, "Update" },
+                { x => x.Icon, "pen-to-square" },
+                {x => x.faculty, faculty},
+                { x => x.currentUserId, MainLayout.CurrentUserId },
+                { x => x.departments, departments},
+                { x => x.selectedDepartment, departments.FirstOrDefault(d => d.DepartmentId == faculty.DepartmentId)}
+            };
+
+            var dialog = await DialogService.ShowAsync<FacultyDialog>("", parameters, options);
+            var result = await dialog.Result;
+            if (!result.Canceled)
+            {
+                await OnLoadDepartments();
+                await OnLoadFaculty();
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
+        }
     }
     #endregion
 
     private async Task OnLoadFaculty()
     {
+        isLoading = true;
 
+        try
+        {
+            if (MainLayout.IsOnline)
+            {
+                var response = await ApiHelper.GetAsync<List<FacultyModel>>("FacultyManagement/GetAllFaculty");
+                if (response.IsSuccess)
+                {
+                    faculty = response.Data;
+                    facultyTemp = faculty;
+                    await LocalStorage.SetItemAsync("faculty", faculty);
+                    StateHasChanged();
+                }
+                else
+                {
+                    Snackbar.Add($"Failed to load faculty: {response.Message}", Severity.Error);
+                }
+            }
+            else
+            {
+                var cachedData = await LocalStorage.GetItemAsync<List<FacultyModel>>("faculty");
+                faculty = cachedData ?? new List<FacultyModel>();
+                facultyTemp = faculty;
+                StateHasChanged();
+            }
+
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task OnLoadDepartments()
+    {
+        isLoading = true;
+
+        try
+        {
+            if (MainLayout.IsOnline)
+            {
+                var response = await ApiHelper.GetAsync<List<Departments>>("DepartmentManagement/GetAllDepartments");
+                if (response.IsSuccess)
+                {
+                    departments = response.Data;
+                    departmentsTemp = departments;
+                    await LocalStorage.SetItemAsync("departments", departments);
+                    StateHasChanged();
+                }
+                else
+                {
+                    Snackbar.Add($"Failed to load departments: {response.Message}", Severity.Error);
+                }
+            }
+            else
+            {
+                var cachedData = await LocalStorage.GetItemAsync<List<Departments>>("departments");
+                departments = cachedData ?? new List<Departments>();
+                departmentsTemp = departments;
+                StateHasChanged();
+            }
+
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isLoading = false;
+        }
     }
 
     private async Task OnsearchFaculty(string query)
@@ -136,7 +310,7 @@
                if (data.FacultyName.Contains(query, StringComparison.OrdinalIgnoreCase))
                    return true;
                if (data.AcademicRank.Contains(query, StringComparison.OrdinalIgnoreCase))
-                   return true;               
+                   return true;
                return false;
            }).ToList();
     }

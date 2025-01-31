@@ -1,0 +1,136 @@
+﻿@using ICSS.Shared
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@($"fa-solid fa-{Icon}")"></MudIcon>
+            @Action Faculty Information
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudForm @ref="_form" Model="faculty">
+            <MudStack>
+                <MudTextField @bind-Value="faculty.FacultyName" Label="Faculty Name" Variant="Variant.Outlined" Margin="Margin.Dense" Required RequiredError="Faculty Name is Required" />
+                <MudTextField @bind-Value="faculty.AcademicRank" Label="Academic Rank" Variant="Variant.Outlined" Margin="Margin.Dense" Required RequiredError="Academic Rank is Required"></MudTextField>
+                <MudAutocomplete T="Departments"                
+                Label="Select Department"
+                @bind-Value="selectedDepartment"
+                SearchFunc="SearchDepartments"
+                ToStringFunc="(dept) => dept.DepartmentName"
+                ResetValueOnEmptyText
+                CoerceText CoerceValue ShowProgressIndicator                
+                Variant="Variant.Outlined" Required RequiredError="Department is Required"
+                />
+                <MudNumericField @bind-Value="faculty.TotalLoadUnits" Label="Total Load Units" Variant="Variant.Outlined" Margin="Margin.Dense" HideSpinButtons />
+                <MudTextField @bind-Value="faculty.BachelorsDegree" Label="Bachelors Degree" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
+                <MudTextField @bind-Value="faculty.MastersDegree" Label="Masters Degree" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
+                <MudTextField @bind-Value="faculty.DoctorateDegree" Label="Doctorate Degree" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
+            </MudStack>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Disabled="_loading" Size="Size.Medium" OnClick="Cancel">Cancel</MudButton>
+        <MudLoadingButton Variant="Variant.Filled"
+        Color="Color.Success"
+        Size="Size.Medium"
+        Loading="@(_loading)"
+        OnClick="@(async => OnSubmit())"
+        ButtonType="ButtonType.Button">
+            <LoadingContent>Submitting...</LoadingContent>
+            <ChildContent>Submit</ChildContent>
+        </MudLoadingButton>
+    </DialogActions>
+</MudDialog>
+
+@code{
+    [CascadingParameter] MudDialogInstance? MudDialog { get; set; }
+    [Inject] HttpClient? httpClient { get; set; }
+    [Inject] ISnackbar Snackbar { get; set; }
+    [Inject] private ApiRequestHelper ApiHelper { get; set; }
+
+    [Parameter] public string? Action { get; set; }
+    [Parameter] public string? Icon { get; set; }
+    [Parameter] public FacultyModel faculty { get; set; }
+    [Parameter] public string? currentUserId { get; set; }
+    [Parameter] public List<Departments> departments { get; set; }
+    [Parameter] public Departments? selectedDepartment { get; set; }
+
+    MudForm? _form;
+    private bool _loading = false;
+
+
+    void Cancel() => MudDialog.Cancel();
+
+    private async Task OnSubmit()
+    {
+        try
+        {
+            if (_form is not null)
+            {
+                await _form.Validate();
+
+                if (_form.IsValid)
+                {
+                    _loading = true;
+
+                    if (faculty.FacultyId is null)
+                    {
+                        faculty.CreatedBy = currentUserId;
+                        faculty.DepartmentId = selectedDepartment.DepartmentId;
+                        var response = await ApiHelper.PostAsync<FacultyModel, ApiResponse<int>>("FacultyManagement/InsertFaculty", faculty);
+
+                        if (response.IsSuccess)
+                        {
+                            Snackbar.Add("Faculty information added successfully.", Severity.Success);
+                            MudDialog.Close(DialogResult.Ok(true));
+                        }
+                        else
+                        {
+                            Snackbar.Add($"Error: {response.Message}", Severity.Error);
+                        }
+
+                    }
+                    else
+                    {
+                        faculty.UpdatedBy = currentUserId;
+                        var response = await ApiHelper.PutAsync("FacultyManagement/UpdateFaculty", faculty);
+
+                        if (response.IsSuccess)
+                        {
+                            Snackbar.Add("Faculty Information updated successfully.", Severity.Success);
+                            MudDialog.Close(DialogResult.Ok(true));
+                        }
+                        else
+                        {
+                            Snackbar.Add($"Error: {response.Message}", Severity.Error);
+                        }
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+
+
+        // Snackbar.Add($"Selected department id: {selectedDepartment.DepartmentCode}");
+    }
+
+    private async Task<IEnumerable<Departments>> SearchDepartments(string value, CancellationToken token)
+    {
+        await Task.Delay(5, token); // Simulate API delay
+
+        if (string.IsNullOrWhiteSpace(value))
+            return departments;
+
+        return departments.Where(d => d.DepartmentName.Contains(value, StringComparison.OrdinalIgnoreCase) ||
+                                      d.DepartmentCode.Contains(value, StringComparison.OrdinalIgnoreCase))
+                          .ToList();
+    }
+
+}

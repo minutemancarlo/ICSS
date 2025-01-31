@@ -54,6 +54,7 @@ builder.Services.AddTransient<UserRepository>();
 builder.Services.AddTransient<TasksRepository>();
 builder.Services.AddTransient<CourseAndSubjectRepository>();
 builder.Services.AddTransient<DepartmentRepository>();
+builder.Services.AddTransient<FacultyRepository>();
 
 builder.Services.AddHostedService<StudentInfoUploader>();
 
