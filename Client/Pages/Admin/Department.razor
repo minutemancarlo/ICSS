@@ -80,6 +80,7 @@
                         <MudAutocomplete T="Departments"
                         Class="p-2" Dense
                         Label="Select Department"
+                        @ref = "_mudAutoComplete"
                         @bind-Value="SelectedDepartment"
                         SearchFunc="SearchDepartments"
                         ToStringFunc="(dept) => dept.DepartmentName"
@@ -90,13 +91,46 @@
                         Clearable
                         AdornmentColor="Color.Primary" />
                     </MudItem>
-                    <MudItem xs="12" Class="d-flex flex-column align-left justify-center">
-                        <MudTransferList @ref="_transferList" T="DepartmentMember" @bind-StartCollection="_startCollection" @bind-EndCollection="_endCollection" Color="Color.Primary"
-                        StyleListCommon="background-color: var(--mud-palette-background-gray); width: 100%" MultiSelection="true" MaxItems="10" SelectAllType="SelectAllType.Buttons"
-                        ClassStartList="w-100" ClassEndList="w-100" ToStringFunc="@(e => e?.FacultyModel?.FacultyName)"
-                        ButtonVariant="Variant.Filled"
-                        AllowDoubleClick="false" SearchBoxStart SearchBoxEnd
-                        StartTitle="Available Members" EndTitle="Added Members" />
+                    <MudItem xs="12">
+
+                    </MudItem>
+                    <MudItem xs="8" Class="d-flex flex-column align-left justify-center">
+                        <MudCard Elevation="4">
+                            <MudCardHeader>
+                                <CardHeaderContent>
+                                    Assign Members to Department
+                                </CardHeaderContent>                               
+                            </MudCardHeader>
+                            <MudCardContent>
+                                <MudTransferList @ref="_transferList" T="DepartmentMember" @bind-StartCollection="_startCollection" @bind-EndCollection="_endCollection" Color="Color.Primary"
+                                StyleListCommon="background-color: var(--mud-palette-background-gray); width: 100%" MultiSelection="true" MaxItems="10" SelectAllType="SelectAllType.Buttons"
+                                ClassStartList="w-100" ClassEndList="w-100" ToStringFunc="@(e => e?.FacultyModel?.FacultyName)"
+                                ButtonVariant="Variant.Filled"
+                                AllowDoubleClick="false" SearchBoxStart SearchBoxEnd
+                                StartTitle="Available Members" EndTitle="Added Members" />
+                            </MudCardContent>
+                            <MudCardActions>
+                                <MudStack Row>
+                                    @if(_selectedDepartment is not null){
+                                        <MudBreakpointProvider>
+                                            <MudHidden Breakpoint="Breakpoint.MdAndUp" Invert="true">
+                                                <MudButton Size="Size.Small" OnClick="DiscardChanges" StartIcon="fa-solid fa-ban" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Warning" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
+                                                    Discard Changes
+                                                </MudButton>
+                                                <MudButton Size="Size.Small" StartIcon="fa-solid fa-floppy-disk" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Success" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
+                                                    Save Changes
+                                                </MudButton>
+                                            </MudHidden>
+                                            <MudHidden Breakpoint="Breakpoint.MdAndDown" Invert="true">
+                                                <MudIconButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Class="my-2 mx-1" Size="Size.Small" Icon="fa-solid fa-ban" Color="Color.Warning" Disabled="!MainLayout.IsOnline" />
+                                                <MudIconButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Class="my-2 mx-1" Size="Size.Small" Icon="fa-solid fa-floppy-disk" Color="Color.Success" Disabled="!MainLayout.IsOnline" />
+                                            </MudHidden>
+                                        </MudBreakpointProvider>
+                                    }
+                                </MudStack>
+                            </MudCardActions>
+                        </MudCard>
+
                     </MudItem>
                 </MudTabPanel>
             </MudTabs>
@@ -118,7 +152,7 @@
     private List<Departments> departments = new();
     private List<Departments> departmentsTemp = new();
     private List<FacultyModel> faculty = new();
-
+    MudAutocomplete<Departments>? _mudAutoComplete;
     MudTransferList<DepartmentMember> _transferList = new();
 
     ICollection<DepartmentMember> _startCollection = new List<DepartmentMember>();
@@ -203,6 +237,12 @@
             Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
         }
 
+    }
+
+    private async Task DiscardChanges()
+    {
+        await _mudAutoComplete.ClearAsync();
+        StateHasChanged();
     }
 
     protected override async Task OnInitializedAsync()
