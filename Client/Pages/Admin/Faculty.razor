@@ -62,7 +62,7 @@
                         <CellTemplate>
                             <MudStack Spacing="0">
                                 <MudText Typo="Typo.body2">
-                                    @(context.Item.Departments.DepartmentId == null
+                                    @(context.Item.Departments?.DepartmentId == null
                                         ? "Unassigned"
                                         : departments.FirstOrDefault(x => x.DepartmentId == context.Item.Departments.DepartmentId)?.DepartmentName ?? "Unassigned")
                                 </MudText>

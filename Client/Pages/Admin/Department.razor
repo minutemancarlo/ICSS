@@ -118,7 +118,7 @@
     private List<Departments> departments = new();
     private List<Departments> departmentsTemp = new();
     private List<FacultyModel> faculty = new();
-    
+
     MudTransferList<DepartmentMember> _transferList = new();
 
     ICollection<DepartmentMember> _startCollection = new List<DepartmentMember>();
@@ -202,7 +202,7 @@
         {
             Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
         }
-        
+
     }
 
     protected override async Task OnInitializedAsync()
@@ -218,7 +218,7 @@
         await Task.Delay(5, token); // Simulate API delay
 
         if (string.IsNullOrWhiteSpace(value))
-            return new List<Departments>();
+            return departments;
 
         return departments.Where(d => d.DepartmentName.Contains(value, StringComparison.OrdinalIgnoreCase) ||
                                       d.DepartmentCode.Contains(value, StringComparison.OrdinalIgnoreCase))
