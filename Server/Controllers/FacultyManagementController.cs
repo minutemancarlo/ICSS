@@ -60,13 +60,28 @@ namespace ICSS.Server.Controllers
         }
 
         [HttpGet("GetAllFaculty")]
-        public async Task<ActionResult<IEnumerable<FacultyModel>>> GetAllFaculty()
+        public async Task<ActionResult<IEnumerable<DepartmentMember>>> GetAllFaculty()
         {
             try
             {
 
                 var faculty = await _facultyRepository.GetFacultyAsync();
 
+                return Ok(faculty);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
+        }
+
+        [HttpGet("GetFacultyNotMember")]
+        public async Task<ActionResult<IEnumerable<DepartmentMember>>> GetFacultyNotMember()
+        {
+            try
+            {
+
+                var faculty = await _facultyRepository.GetFacultyNotMemberAsync();                
                 return Ok(faculty);
             }
             catch (Exception ex)

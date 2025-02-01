@@ -80,21 +80,23 @@
                         <MudAutocomplete T="Departments"
                         Class="p-2" Dense
                         Label="Select Department"
-                        @bind-Value="selectedDepartment"
+                        @bind-Value="SelectedDepartment"
                         SearchFunc="SearchDepartments"
                         ToStringFunc="(dept) => dept.DepartmentName"
                         ResetValueOnEmptyText
                         CoerceText CoerceValue ShowProgressIndicator
                         AdornmentIcon="@Icons.Material.Filled.Search"
                         Variant="Variant.Outlined"
+                        Clearable
                         AdornmentColor="Color.Primary" />
                     </MudItem>
-                    <MudItem xs="12" Class="d-flex flex-column align-center justify-center">
-                        <MudTransferList @ref="_transferList" T="Departments" @bind-StartCollection="_startCollection" @bind-EndCollection="_endCollection" Color="Color.Primary"
-                                         StyleListCommon="background-color: var(--mud-palette-background-gray); width: 200px" MultiSelection="true" MaxItems="10" SelectAllType="SelectAllType.Buttons"
-                                         OrderFunc="@(_orderOnTransfer == false ? null : new Func<ICollection<Departments>, ICollection<Departments>>(OrderMethod))" ButtonVariant="Variant.Filled"
-                                         AllowDoubleClick="false" SearchBoxStart SearchBoxEnd
-                                         StartTitle="Available Members" EndTitle="Added Members" />
+                    <MudItem xs="12" Class="d-flex flex-column align-left justify-center">
+                        <MudTransferList @ref="_transferList" T="DepartmentMember" @bind-StartCollection="_startCollection" @bind-EndCollection="_endCollection" Color="Color.Primary"
+                        StyleListCommon="background-color: var(--mud-palette-background-gray); width: 100%" MultiSelection="true" MaxItems="10" SelectAllType="SelectAllType.Buttons"
+                        ClassStartList="w-100" ClassEndList="w-100" ToStringFunc="@(e => e?.FacultyModel?.FacultyName)"
+                        ButtonVariant="Variant.Filled"
+                        AllowDoubleClick="false" SearchBoxStart SearchBoxEnd
+                        StartTitle="Available Members" EndTitle="Added Members" />
                     </MudItem>
                 </MudTabPanel>
             </MudTabs>
@@ -115,19 +117,99 @@
 
     private List<Departments> departments = new();
     private List<Departments> departmentsTemp = new();
+    private List<FacultyModel> faculty = new();
+    
+    MudTransferList<DepartmentMember> _transferList = new();
 
-    MudTransferList<Departments> _transferList = new();
-    ICollection<Departments> _startCollection = new List<Departments>();
-    ICollection<Departments> _endCollection = new List<Departments>();
+    ICollection<DepartmentMember> _startCollection = new List<DepartmentMember>();
+
+    ICollection<DepartmentMember> _endCollection = new List<DepartmentMember>();
+
+
     private bool _orderOnTransfer = true;
 
     private bool isLoading = false;
 
-    private Departments selectedDepartment;
+    private Departments _selectedDepartment;
+
+    public Departments SelectedDepartment
+    {
+        get { return _selectedDepartment; }
+        set
+        {
+            if (_selectedDepartment != value)
+            {
+                _selectedDepartment = value;
+                OnSelectedDepartmentChanged();
+            }
+        }
+    }
+
+    private async Task OnSelectedDepartmentChanged()
+    {
+        try
+        {
+            if (_selectedDepartment is null)
+            {
+                _startCollection.Clear();
+                _endCollection.Clear();
+            }
+            else
+            {
+                if (MainLayout.IsOnline)
+                {
+                    var response = await ApiHelper.GetAsync<List<DepartmentMember>>("FacultyManagement/GetFacultyNotMember");
+                    if (response.IsSuccess)
+                    {
+                        _startCollection = response.Data.Select(dm => new DepartmentMember
+                            {
+                                Id = dm.Id,
+                                FacultyModel = new FacultyModel
+                                {
+                                    FacultyId = dm.FacultyModel?.FacultyId,
+                                    FacultyName = dm.FacultyModel?.FacultyName,
+                                    AcademicRank = dm.FacultyModel?.AcademicRank,                                    
+                                    TotalLoadUnits = dm.FacultyModel?.TotalLoadUnits,
+                                    BachelorsDegree = dm.FacultyModel?.BachelorsDegree,
+                                    MastersDegree = dm.FacultyModel?.MastersDegree,
+                                    DoctorateDegree = dm.FacultyModel?.DoctorateDegree,
+                                    IsDeleted = dm.FacultyModel?.IsDeleted ?? false
+                                },
+                                Departments = new Departments
+                                {
+                                    DepartmentId = dm.Departments?.DepartmentId,
+                                    DepartmentCode = dm.Departments?.DepartmentCode,
+                                    DepartmentName = dm.Departments?.DepartmentName,
+                                    IsDeleted = dm.Departments?.IsDeleted ?? false
+                                }
+                            }).ToList();
+                        await LocalStorage.SetItemAsync("NotMembers", _startCollection);
+                        StateHasChanged();
+                    }
+                    else
+                    {
+                        Snackbar.Add($"Failed to load departments: {response.Message}", Severity.Error);
+                    }
+                }
+                else
+                {
+                    var cachedData = await LocalStorage.GetItemAsync<List<DepartmentMember>>("NotMembers");
+                    _startCollection = cachedData;
+                    StateHasChanged();
+                }
+            }
+        }catch(Exception ex)
+        {
+            Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
+        }
+        
+    }
+
     protected override async Task OnInitializedAsync()
     {
         MainLayout.SubTitle = "Department Management";
         await OnLoadDepartments();
+        await OnLoadFacultyList();
         await base.OnInitializedAsync();
     }
 
@@ -145,9 +227,9 @@
 
 
 
-    private ICollection<Departments> OrderMethod(ICollection<Departments> e)
+    private ICollection<DepartmentMember> OrderMethod(ICollection<DepartmentMember> e)
     {
-        return e.OrderBy(d => d.DepartmentName).ToList(); // Replace 'Name' with the property you want to order by
+        return e.OrderBy(d => d.FacultyModel.FacultyName).ToList();
     }
 
     private bool CheckTransfer(bool startToEnd)
@@ -276,6 +358,39 @@
         finally
         {
             isLoading = false;
+        }
+    }
+
+    private async Task OnLoadFacultyList()
+    {
+        try
+        {
+            if (MainLayout.IsOnline)
+            {
+                var response = await ApiHelper.GetAsync<List<FacultyModel>>("FacultyManagement/GetAllFaculty");
+                if (response.IsSuccess)
+                {
+                    faculty = response.Data;
+                    await LocalStorage.SetItemAsync("faculty", faculty);
+
+                    StateHasChanged();
+                }
+                else
+                {
+                    Snackbar.Add($"Failed to load faculty: {response.Message}", Severity.Error);
+                }
+            }
+            else
+            {
+                var cachedData = await LocalStorage.GetItemAsync<List<FacultyModel>>("faculty");
+                faculty = cachedData ?? new List<FacultyModel>();
+                StateHasChanged();
+            }
+
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
         }
     }
 

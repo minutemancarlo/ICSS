@@ -10,8 +10,7 @@ namespace ICSS.Shared
     {
         public int? FacultyId { get; set; }
         public string FacultyName { get; set; }
-        public string AcademicRank { get; set; }
-        public int? DepartmentId { get; set; }
+        public string AcademicRank { get; set; }        
         public decimal? TotalLoadUnits { get; set; }
         public string? BachelorsDegree { get; set; }
         public string? MastersDegree { get; set; }

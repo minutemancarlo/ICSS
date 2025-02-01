@@ -48,50 +48,50 @@
                         <CellTemplate>
                             <MudStack Row>
                                 <MudTooltip Text="Edit Faculty Information">
-                                    <MudIconButton Icon="fa-solid fa-edit" Size="Size.Medium" Color="Color.Info" Variant="Variant.Filled" Disabled="@(!MainLayout.IsOnline)" OnClick="@(() => OnShowUpdateFacultyDialog(context.Item))" />
+                                    <MudIconButton Icon="fa-solid fa-edit" Size="Size.Medium" Color="Color.Info" Variant="Variant.Filled" Disabled="@(!MainLayout.IsOnline)" OnClick="@(() => OnShowUpdateFacultyDialog(context.Item.FacultyModel))" />
                                 </MudTooltip>
                                 <MudTooltip Text="Delete Faculty Information">
-                                    <MudIconButton Icon="fa-solid fa-trash-can" Size="Size.Medium" Color="Color.Error" Variant="Variant.Filled" Disabled="@(!MainLayout.IsOnline)" OnClick="@(() => OnShowUpdateFacultyDialog(context.Item))" />
+                                    <MudIconButton Icon="fa-solid fa-trash-can" Size="Size.Medium" Color="Color.Error" Variant="Variant.Filled" Disabled="@(!MainLayout.IsOnline)" OnClick="@(() => OnShowUpdateFacultyDialog(context.Item.FacultyModel))" />
                                 </MudTooltip>
                             </MudStack>
                         </CellTemplate>
                     </TemplateColumn>
-                    <PropertyColumn Property="x => x.FacultyName" Title="Name" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
-                    <PropertyColumn Property="x => x.AcademicRank" Title="Academic Rank" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
-                    <PropertyColumn Property="x => x.DepartmentId" Title="Department" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
+                    <PropertyColumn Property="x => x.FacultyModel.FacultyName" Title="Name" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
+                    <PropertyColumn Property="x => x.FacultyModel.AcademicRank" Title="Academic Rank" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
+                    <PropertyColumn Property="x => x.Departments.DepartmentId" Title="Department" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
                         <CellTemplate>
                             <MudStack Spacing="0">
                                 <MudText Typo="Typo.body2">
-                                    @(context.Item.DepartmentId == null
+                                    @(context.Item.Departments.DepartmentId == null
                                         ? "Unassigned"
-                                        : departments.FirstOrDefault(x => x.DepartmentId == context.Item.DepartmentId)?.DepartmentName ?? "Unassigned")
+                                        : departments.FirstOrDefault(x => x.DepartmentId == context.Item.Departments.DepartmentId)?.DepartmentName ?? "Unassigned")
                                 </MudText>
                             </MudStack>
                         </CellTemplate>
                     </PropertyColumn>
-                    <PropertyColumn Property="x => x.TotalLoadUnits" Title="Total Load Units" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
-                    <PropertyColumn Property="x => x.BachelorsDegree" Title="Degree" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
+                    <PropertyColumn Property="x => x.FacultyModel.TotalLoadUnits" Title="Total Load Units" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
+                    <PropertyColumn Property="x => x.FacultyModel.BachelorsDegree" Title="Degree" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
                         <CellTemplate>
                             <MudStack Spacing="0">
-                                <MudText Typo="Typo.body2"><strong>Bachelors: </strong>@(context.Item.BachelorsDegree ?? "N/A")</MudText>
-                                <MudText Typo="Typo.body2"><strong>Masteral: </strong>@(context.Item.MastersDegree ?? "N/A")</MudText>
-                                <MudText Typo="Typo.body2"><strong>Doctorate: </strong>@(context.Item.DoctorateDegree ?? "N/A")</MudText>
+                                <MudText Typo="Typo.body2"><strong>Bachelors: </strong>@(context.Item.FacultyModel.BachelorsDegree ?? "N/A")</MudText>
+                                <MudText Typo="Typo.body2"><strong>Masteral: </strong>@(context.Item.FacultyModel.MastersDegree ?? "N/A")</MudText>
+                                <MudText Typo="Typo.body2"><strong>Doctorate: </strong>@(context.Item.FacultyModel.DoctorateDegree ?? "N/A")</MudText>
                             </MudStack>
                         </CellTemplate>
                     </PropertyColumn>
-                    <PropertyColumn Property="x => x.CreatedBy" Title="Created By" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
+                    <PropertyColumn Property="x => x.FacultyModel.CreatedBy" Title="Created By" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
                         <CellTemplate>
                             <MudStack Spacing="0">
-                                <MudText Typo="Typo.body2" Class="fw-bold">@context.Item.CreatedBy</MudText>
-                                <MudText Typo="Typo.body2" Class="fw-italic">@context.Item.CreatedOn</MudText>
+                                <MudText Typo="Typo.body2" Class="fw-bold">@context.Item.FacultyModel.CreatedBy</MudText>
+                                <MudText Typo="Typo.body2" Class="fw-italic">@context.Item.FacultyModel.CreatedOn</MudText>
                             </MudStack>
                         </CellTemplate>
                     </PropertyColumn>
-                    <PropertyColumn Property="x => x.UpdatedBy" Title="Updated By" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
+                    <PropertyColumn Property="x => x.FacultyModel.UpdatedBy" Title="Updated By" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
                         <CellTemplate>
                             <MudStack Spacing="0">
-                                <MudText Typo="Typo.body2" Class="fw-bold">@context.Item.UpdatedBy</MudText>
-                                <MudText Typo="Typo.body2" Class="fw-italic">@context.Item.UpdatedOn</MudText>
+                                <MudText Typo="Typo.body2" Class="fw-bold">@context.Item.FacultyModel.UpdatedBy</MudText>
+                                <MudText Typo="Typo.body2" Class="fw-italic">@context.Item.FacultyModel.UpdatedOn</MudText>
                             </MudStack>
                         </CellTemplate>
                     </PropertyColumn>
@@ -103,7 +103,7 @@
                     <MudText>Loading Content...</MudText>
                 </LoadingContent>
                 <PagerContent>
-                    <MudDataGridPager T="FacultyModel" />
+                    <MudDataGridPager T="DepartmentMember" />
                 </PagerContent>
             </MudDataGrid>
         </MudItem>
@@ -123,8 +123,8 @@
     [Inject] IDialogService? DialogService { get; set; }
 
 
-    private List<FacultyModel> faculty = new();
-    private List<FacultyModel> facultyTemp = new();
+    private List<DepartmentMember> faculty = new();
+    private List<DepartmentMember> facultyTemp = new();
 
     private List<Departments> departments = new();
     private List<Departments> departmentsTemp = new();
@@ -201,7 +201,7 @@
                 {x => x.faculty, faculty},
                 { x => x.currentUserId, MainLayout.CurrentUserId },
                 { x => x.departments, departments},
-                { x => x.selectedDepartment, departments.FirstOrDefault(d => d.DepartmentId == faculty.DepartmentId)}
+                // { x => x.selectedDepartment, departments.FirstOrDefault(d => d.DepartmentId == faculty.DepartmentId)}
             };
 
             var dialog = await DialogService.ShowAsync<FacultyDialog>("", parameters, options);
@@ -228,7 +228,7 @@
         {
             if (MainLayout.IsOnline)
             {
-                var response = await ApiHelper.GetAsync<List<FacultyModel>>("FacultyManagement/GetAllFaculty");
+                var response = await ApiHelper.GetAsync<List<DepartmentMember>>("FacultyManagement/GetAllFaculty");
                 if (response.IsSuccess)
                 {
                     faculty = response.Data;
@@ -243,8 +243,8 @@
             }
             else
             {
-                var cachedData = await LocalStorage.GetItemAsync<List<FacultyModel>>("faculty");
-                faculty = cachedData ?? new List<FacultyModel>();
+                var cachedData = await LocalStorage.GetItemAsync<List<DepartmentMember>>("faculty");
+                faculty = cachedData ?? new List<DepartmentMember>();
                 facultyTemp = faculty;
                 StateHasChanged();
             }
@@ -307,9 +307,9 @@
            {
                if (string.IsNullOrWhiteSpace(query))
                    return true;
-               if (data.FacultyName.Contains(query, StringComparison.OrdinalIgnoreCase))
+               if (data.FacultyModel.FacultyName.Contains(query, StringComparison.OrdinalIgnoreCase))
                    return true;
-               if (data.AcademicRank.Contains(query, StringComparison.OrdinalIgnoreCase))
+               if (data.FacultyModel.AcademicRank.Contains(query, StringComparison.OrdinalIgnoreCase))
                    return true;
                return false;
            }).ToList();

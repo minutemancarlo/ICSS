@@ -14,4 +14,12 @@ namespace ICSS.Shared
         public bool IsDeleted { get; set; } = false;
 
     }
+
+    public class  DepartmentMember: BaseModel
+    {
+        public int? Id { get; set; }        
+        public FacultyModel? FacultyModel { get;set; }
+        public Departments? Departments { get; set; }
+    }
+
 }

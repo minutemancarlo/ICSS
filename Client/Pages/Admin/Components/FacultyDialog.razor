@@ -12,7 +12,7 @@
             <MudStack>
                 <MudTextField @bind-Value="faculty.FacultyName" Label="Faculty Name" Variant="Variant.Outlined" Margin="Margin.Dense" Required RequiredError="Faculty Name is Required" />
                 <MudTextField @bind-Value="faculty.AcademicRank" Label="Academic Rank" Variant="Variant.Outlined" Margin="Margin.Dense" Required RequiredError="Academic Rank is Required"></MudTextField>
-                <MudAutocomplete T="Departments"                
+               @*  <MudAutocomplete T="Departments"                
                 Label="Select Department"
                 @bind-Value="selectedDepartment"
                 SearchFunc="SearchDepartments"
@@ -20,7 +20,7 @@
                 ResetValueOnEmptyText
                 CoerceText CoerceValue ShowProgressIndicator                
                 Variant="Variant.Outlined" Required RequiredError="Department is Required"
-                />
+                /> *@
                 <MudNumericField @bind-Value="faculty.TotalLoadUnits" Label="Total Load Units" Variant="Variant.Outlined" Margin="Margin.Dense" HideSpinButtons />
                 <MudTextField @bind-Value="faculty.BachelorsDegree" Label="Bachelors Degree" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
                 <MudTextField @bind-Value="faculty.MastersDegree" Label="Masters Degree" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
@@ -75,8 +75,7 @@
 
                     if (faculty.FacultyId is null)
                     {
-                        faculty.CreatedBy = currentUserId;
-                        faculty.DepartmentId = selectedDepartment.DepartmentId;
+                        faculty.CreatedBy = currentUserId;                        
                         var response = await ApiHelper.PostAsync<FacultyModel, ApiResponse<int>>("FacultyManagement/InsertFaculty", faculty);
 
                         if (response.IsSuccess)
