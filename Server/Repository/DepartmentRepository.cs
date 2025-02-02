@@ -31,6 +31,25 @@ namespace ICSS.Server.Repository
             return await _dbConnection.ExecuteScalarAsync<int>("InsertUpdateDepartment", parameters, commandType: CommandType.StoredProcedure);
         }
 
+        public async Task SaveDepartmentMembersAsync(List<DepartmentMember> departmentMembers)
+        {
+            var departmentMemberTable = new DataTable();
+            departmentMemberTable.Columns.Add("DepartmentId", typeof(int));
+            departmentMemberTable.Columns.Add("FacultyId", typeof(int));
+
+            foreach (var member in departmentMembers)
+            {
+                departmentMemberTable.Rows.Add(member.Departments.DepartmentId, member.FacultyModel.FacultyId);
+            }
+
+            await _dbConnection.ExecuteAsync(
+                "InsertOrUpdateDepartmentMembers",
+                new { DepartmentMembers = departmentMemberTable.AsTableValuedParameter("DepartmentMemberType") },
+                commandType: CommandType.StoredProcedure
+            );
+        }
+
+
 
     }
 }

@@ -74,5 +74,25 @@ namespace ICSS.Server.Controllers
             }
         }
 
+
+        [HttpPost("SaveDepartmentMembers")]
+        public async Task<IActionResult> SaveDepartmentMembers([FromBody] List<DepartmentMember> departmentMembers)
+        {
+            try
+            {
+                if (departmentMembers == null || !departmentMembers.Any())
+                {
+                    return BadRequest("Invalid department members data or no members provided.");
+                }
+
+                await _departmentRepository.SaveDepartmentMembersAsync(departmentMembers);
+
+                return Ok(new { Message = "Department members saved successfully." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred while saving department members. Error: {ex.Message}");
+            }
+        }
     }
 }

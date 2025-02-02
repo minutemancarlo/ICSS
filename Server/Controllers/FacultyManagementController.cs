@@ -75,6 +75,21 @@ namespace ICSS.Server.Controllers
             }
         }
 
+        [HttpGet("GetAllFacultyAssigned/{departmentId}")]
+        public async Task<ActionResult<IEnumerable<DepartmentMember>>> GetAllFacultyAssigned(int departmentId)
+        {
+            try
+            {
+                var faculty = await _facultyRepository.GetFacultyAssignedAsync(departmentId);
+                return Ok(faculty);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
+        }
+
+
         [HttpGet("GetFacultyNotMember")]
         public async Task<ActionResult<IEnumerable<DepartmentMember>>> GetFacultyNotMember()
         {

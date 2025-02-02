@@ -80,7 +80,7 @@
                         <MudAutocomplete T="Departments"
                         Class="p-2" Dense
                         Label="Select Department"
-                        @ref = "_mudAutoComplete"
+                        @ref="_mudAutoComplete"
                         @bind-Value="SelectedDepartment"
                         SearchFunc="SearchDepartments"
                         ToStringFunc="(dept) => dept.DepartmentName"
@@ -94,36 +94,37 @@
                     <MudItem xs="12">
 
                     </MudItem>
-                    <MudItem xs="8" Class="d-flex flex-column align-left justify-center">
+                    <MudItem xs="8" Class="d-flex flex-column">
                         <MudCard Elevation="4">
                             <MudCardHeader>
                                 <CardHeaderContent>
                                     Assign Members to Department
-                                </CardHeaderContent>                               
+                                </CardHeaderContent>
                             </MudCardHeader>
                             <MudCardContent>
                                 <MudTransferList @ref="_transferList" T="DepartmentMember" @bind-StartCollection="_startCollection" @bind-EndCollection="_endCollection" Color="Color.Primary"
                                 StyleListCommon="background-color: var(--mud-palette-background-gray); width: 100%" MultiSelection="true" MaxItems="10" SelectAllType="SelectAllType.Buttons"
-                                ClassStartList="w-100" ClassEndList="w-100" ToStringFunc="@(e => e?.FacultyModel?.FacultyName)"
+                                ClassStartList="w-100" ClassEndList="w-100" ToStringFunc="@(e => e?.FacultyModel?.FacultyName)" Class=""
                                 ButtonVariant="Variant.Filled"
                                 AllowDoubleClick="false" SearchBoxStart SearchBoxEnd
                                 StartTitle="Available Members" EndTitle="Added Members" />
                             </MudCardContent>
                             <MudCardActions>
                                 <MudStack Row>
-                                    @if(_selectedDepartment is not null){
+                                    @if (_selectedDepartment is not null)
+                                    {
                                         <MudBreakpointProvider>
                                             <MudHidden Breakpoint="Breakpoint.MdAndUp" Invert="true">
-                                                <MudButton Size="Size.Small" OnClick="DiscardChanges" StartIcon="fa-solid fa-ban" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Warning" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
+                                                <MudButton Size="Size.Small" OnClick="OnDiscardChanges" StartIcon="fa-solid fa-ban" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Warning" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
                                                     Discard Changes
                                                 </MudButton>
-                                                <MudButton Size="Size.Small" StartIcon="fa-solid fa-floppy-disk" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Success" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
+                                                <MudButton Size="Size.Small" OnClick="OnSaveChanges" StartIcon="fa-solid fa-floppy-disk" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Success" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
                                                     Save Changes
                                                 </MudButton>
                                             </MudHidden>
                                             <MudHidden Breakpoint="Breakpoint.MdAndDown" Invert="true">
-                                                <MudIconButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Class="my-2 mx-1" Size="Size.Small" Icon="fa-solid fa-ban" Color="Color.Warning" Disabled="!MainLayout.IsOnline" />
-                                                <MudIconButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Class="my-2 mx-1" Size="Size.Small" Icon="fa-solid fa-floppy-disk" Color="Color.Success" Disabled="!MainLayout.IsOnline" />
+                                                <MudIconButton ButtonType="ButtonType.Button" OnClick="OnDiscardChanges" Variant="Variant.Filled" Class="my-2 mx-1" Size="Size.Small" Icon="fa-solid fa-ban" Color="Color.Warning" Disabled="!MainLayout.IsOnline" />
+                                                <MudIconButton ButtonType="ButtonType.Button" OnClick="OnSaveChanges" Variant="Variant.Filled" Class="my-2 mx-1" Size="Size.Small" Icon="fa-solid fa-floppy-disk" Color="Color.Success" Disabled="!MainLayout.IsOnline" />
                                             </MudHidden>
                                         </MudBreakpointProvider>
                                     }
@@ -202,7 +203,7 @@
                                 {
                                     FacultyId = dm.FacultyModel?.FacultyId,
                                     FacultyName = dm.FacultyModel?.FacultyName,
-                                    AcademicRank = dm.FacultyModel?.AcademicRank,                                    
+                                    AcademicRank = dm.FacultyModel?.AcademicRank,
                                     TotalLoadUnits = dm.FacultyModel?.TotalLoadUnits,
                                     BachelorsDegree = dm.FacultyModel?.BachelorsDegree,
                                     MastersDegree = dm.FacultyModel?.MastersDegree,
@@ -222,7 +223,7 @@
                     }
                     else
                     {
-                        Snackbar.Add($"Failed to load departments: {response.Message}", Severity.Error);
+                        Snackbar.Add($"Failed to load unassigned faculty: {response.Message}", Severity.Error);
                     }
                 }
                 else
@@ -231,18 +232,92 @@
                     _startCollection = cachedData;
                     StateHasChanged();
                 }
+
+
+                if (MainLayout.IsOnline)
+                {
+                    var response = await ApiHelper.GetAsync<List<DepartmentMember>>($"FacultyManagement/GetAllFacultyAssigned/{_selectedDepartment.DepartmentId}");
+                    
+                    if (response.IsSuccess)
+                    {
+                        _endCollection = response.Data.Select(dm => new DepartmentMember
+                            {
+                                Id = dm.Id,
+                                FacultyModel = new FacultyModel
+                                {
+                                    FacultyId = dm.FacultyModel?.FacultyId,
+                                    FacultyName = dm.FacultyModel?.FacultyName,
+                                    AcademicRank = dm.FacultyModel?.AcademicRank,
+                                    TotalLoadUnits = dm.FacultyModel?.TotalLoadUnits,
+                                    BachelorsDegree = dm.FacultyModel?.BachelorsDegree,
+                                    MastersDegree = dm.FacultyModel?.MastersDegree,
+                                    DoctorateDegree = dm.FacultyModel?.DoctorateDegree,
+                                    IsDeleted = dm.FacultyModel?.IsDeleted ?? false
+                                },
+                                Departments = new Departments
+                                {
+                                    DepartmentId = dm.Departments?.DepartmentId,
+                                    DepartmentCode = dm.Departments?.DepartmentCode,
+                                    DepartmentName = dm.Departments?.DepartmentName,
+                                    IsDeleted = dm.Departments?.IsDeleted ?? false
+                                }
+                            }).ToList();
+                        await LocalStorage.SetItemAsync("Members", response.Data);
+                        StateHasChanged();
+                    }
+                    else
+                    {
+                        Snackbar.Add($"Failed to load department members: {response.Message}", Severity.Error);
+                    }
+                }
+                else
+                {
+                    var cachedData = await LocalStorage.GetItemAsync<List<DepartmentMember>>("Members");
+                    _endCollection = cachedData;
+                    StateHasChanged();
+                }
             }
-        }catch(Exception ex)
+        }
+        catch (Exception ex)
         {
             Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
         }
 
     }
 
-    private async Task DiscardChanges()
+    private async Task OnDiscardChanges()
     {
         await _mudAutoComplete.ClearAsync();
         StateHasChanged();
+    }
+
+    private async Task OnSaveChanges()
+    {
+        try
+        {
+            foreach (var item in _endCollection)
+            {
+                item.Departments = _selectedDepartment;
+            }
+
+            var response = await ApiHelper.PostAsync<List<DepartmentMember>, ApiResponse<int>>("DepartmentManagement/SaveDepartmentMembers", _endCollection.ToList());
+
+            if (response.IsSuccess)
+            {
+                Snackbar.Add("Department members updated.", Severity.Success);
+                await OnDiscardChanges();
+            }
+            else
+            {
+                Snackbar.Add($"Error: {response.Message}", Severity.Error);
+            }
+
+
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
+        }
     }
 
     protected override async Task OnInitializedAsync()

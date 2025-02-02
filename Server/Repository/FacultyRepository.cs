@@ -32,6 +32,28 @@ namespace ICSS.Server.Repository
             return result;
         }
 
+        public async Task<IEnumerable<DepartmentMember>> GetFacultyAssignedAsync(int departmentId)
+        {
+            var parameters = new { DepartmentId = departmentId };
+
+            var result = await _dbConnection.QueryAsync<FacultyModel, Departments, DepartmentMember>(
+                "GetFacultyAssigned",
+                (faculty, department) =>
+                {
+                    return new DepartmentMember
+                    {
+                        FacultyModel = faculty,
+                        Departments = department
+                    };
+                },
+                param: parameters,
+                splitOn: "DepartmentId",
+                commandType: CommandType.StoredProcedure
+            );
+
+            return result;
+        }
+
 
 
         public async Task<IEnumerable<DepartmentMember>> GetFacultyNotMemberAsync()
