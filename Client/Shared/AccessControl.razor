@@ -56,6 +56,7 @@
     private Task<AuthenticationState>? authenticationState { get; set; }
     public List<Claim> UserClaims { get; set; } = new List<Claim>();
     [Inject] private ApiRequestHelper ApiHelper { get; set; }
+    [Inject] private ISnackbar Snackbar { get; set; }
     protected override async Task OnInitializedAsync()
     {
         if (authenticationState is not null)
@@ -70,15 +71,16 @@
                             .Where(c => c.Type.Equals("picture"))
                             .Select(c => c.Value)
                             .FirstOrDefault() ?? string.Empty;
-                var internalUser = new InternalUser
-                    {
-                        Name = user.Claims
-                        .Where(c => c.Type.Equals("name"))
-                        .Select(c => c.Value)
-                        .FirstOrDefault() ?? string.Empty,
-                        SystemId = user.FindFirst(c => c.Type == "sub")?.Value
-                    };
-                await ApiHelper.PostAsync<InternalUser, object>("UserManagement/check-and-insert", internalUser);
+                var response = await ApiHelper.GetAsync<InternalUser>($"UserManagement/GetUserById/{user.FindFirst(c => c.Type == "sub")?.Value}");
+
+                if(response.IsSuccess)
+                {
+                    var internalUser = response.Data;                    
+                    await ApiHelper.PostAsync<InternalUser, object>("UserManagement/check-and-insert", internalUser);
+                }else
+                {
+                    Snackbar.Add("Unable to get User Information",Severity.Error);
+                }                
             }
         }
 

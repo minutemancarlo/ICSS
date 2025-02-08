@@ -12,11 +12,12 @@ namespace ICSS.Server.Repository
             _dbConnection = dbConnection;
         }
 
-        public async Task<bool> CheckAndInsertSystemIdAsync(string systemId, string name)
+        public async Task<bool> CheckAndInsertSystemIdAsync(string systemId, string name, string email)
         {
             var parameters = new DynamicParameters();
             parameters.Add("@SystemId", systemId, DbType.String);
             parameters.Add("@Name", name, DbType.String);
+            parameters.Add("@Email", email, DbType.String);
 
             await _dbConnection.ExecuteAsync("CheckAndInsertSystemId", parameters, commandType: CommandType.StoredProcedure);
 
@@ -24,3 +25,4 @@ namespace ICSS.Server.Repository
         }
     }
 }
+ 

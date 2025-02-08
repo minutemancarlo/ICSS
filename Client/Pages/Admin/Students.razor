@@ -23,7 +23,7 @@
                 <MudTabPanel Text="Students List" Icon="fa-solid fa-user-graduate">                    
                     <MudItem xs="12">
                         <MudPaper Elevation="4">
-                            <MudDataGrid Items="studentsTemp" Loading="isLoading" Dense Hover Filterable Striped Virtualize>
+                            <MudDataGrid Items="studentsTemp" Loading="isLoading" Dense Hover Filterable Striped Virtualize ShowMenuIcon>
                                 <ToolBarContent>
                                     <MudBreakpointProvider>
                                         <MudHidden Breakpoint="Breakpoint.MdAndUp" Invert="true">
@@ -54,12 +54,13 @@
                                     <PropertyColumn Property="x => x.Id" Title="No." Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
                                     <PropertyColumn Property="x => x.IdNumber" Title="ID Number" Sortable="true" HeaderClass="data-grid text-nowrap text-white"/>                                        
                                     <PropertyColumn Property="x => x.Name" Title="Name" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
-                                    <PropertyColumn Property="x => x.IsActive" Title="Status" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
+                                    <PropertyColumn Property="x => x.Email" Title="Email" Sortable="true" Hideable="true" HeaderClass="data-grid text-nowrap text-white" />
+                                    <PropertyColumn Property="x => x.IsActive" Title="Status" Sortable="true" Hideable="true" HeaderClass="data-grid text-nowrap text-white">
                                         <CellTemplate>
                                             <MudChip Variant="Variant.Filled" Size="Size.Small" Color="@(context.Item.IsActive?Color.Success:Color.Error)">@(context.Item.IsActive ? "Active" : "InActive")</MudChip>
                                         </CellTemplate>
                                     </PropertyColumn>
-                                    <PropertyColumn Property="x => x.CreatedBy" Title="Created By" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
+                                    <PropertyColumn Property="x => x.CreatedBy" Title="Created By" Sortable="true" Hideable="true" HeaderClass="data-grid text-nowrap text-white">
                                         <CellTemplate>
                                             <MudStack Spacing="0">
                                                 <MudText Typo="Typo.body2" Class="fw-bold">@context.Item.CreatedBy</MudText>
@@ -67,7 +68,7 @@
                                             </MudStack>
                                         </CellTemplate>
                                     </PropertyColumn>
-                                    <PropertyColumn Property="x => x.UpdatedBy" Title="Updated By" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
+                                    <PropertyColumn Property="x => x.UpdatedBy" Title="Updated By" Sortable="true" Hideable="true" HeaderClass="data-grid text-nowrap text-white">
                                         <CellTemplate>
                                             <MudStack Spacing="0">
                                                 <MudText Typo="Typo.body2" Class="fw-bold">@context.Item.UpdatedBy</MudText>

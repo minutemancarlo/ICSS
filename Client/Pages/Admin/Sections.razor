@@ -6,15 +6,22 @@
 
 <MudContainer Class="py-4 py-sm-8 py-md-12 py-lg-16 py-xl-20">
     <MudGrid>
-        <MudItem xs="6">
-            <MudPaper Elevation="4">
-
-            </MudPaper>
+        <MudItem xs="12">
+            @if (!MainLayout.IsOnline)
+            {
+                <MudAlert Severity="Severity.Error" Variant="Variant.Filled" Style="margin-bottom: 16px;" Visible="!isOnline">
+                    You are currently offline. Data may not be up-to-date.
+                </MudAlert>
+            }
         </MudItem>
-        <MudItem xs="6">
-            <MudPaper Elevation="4">
-
+        <MudItem xs="12">
+            <MudPaper Class="w-100" Style="background-color: #1abc9c; color: white">
+                <MudText Typo="Typo.h6" Class="fw-bold p-2">Student Sections List</MudText>
             </MudPaper>
+            <MudDivider />
+        </MudItem>
+        <MudItem xs="12">
+
         </MudItem>
     </MudGrid>
 </MudContainer>

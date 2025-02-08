@@ -6,6 +6,7 @@ using ICSS.Server.Repository;
 using ICSS.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Globalization;
 
 namespace ICSS.Server.Controllers
 {
@@ -29,7 +30,7 @@ namespace ICSS.Server.Controllers
             try
             {
                 var users = await _managementApiClient.Users.GetAllAsync(new GetUsersRequest(), new PaginationInfo());
-
+                
                 List<UserProperties> userslist = new List<UserProperties>();
 
                 foreach (var user in users)
@@ -116,7 +117,7 @@ namespace ICSS.Server.Controllers
             if (model == null || string.IsNullOrEmpty(model.SystemId))
                 return BadRequest("SystemId is required.");
 
-            await _userRepository.CheckAndInsertSystemIdAsync(model.SystemId, model.Name ?? string.Empty);
+            await _userRepository.CheckAndInsertSystemIdAsync(model.SystemId, model.Name ?? string.Empty, model.Email ?? string.Empty);
             return Ok(new { Message = "Operation completed successfully." });
         }
 
@@ -159,6 +160,29 @@ namespace ICSS.Server.Controllers
             catch (Exception ex)
             {                                
                 return BadRequest($"Exception Occured: {ex.Message}");
+            }
+        }
+
+
+        [HttpGet("GetUserById/{Id}")]        
+        public async Task<ActionResult<InternalUser>> GetUserById(string Id)
+        {
+            try
+            {
+                var users = await _managementApiClient.Users.GetAsync(Id);
+                var usersList = new InternalUser
+                {
+                    SystemId = users.UserId,
+                    Name = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(users.FullName.ToLower()),
+                    Email = users.Email,
+
+                };            
+
+                return Ok(usersList);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Exception Occurred: {ex.Message}");
             }
         }
 
