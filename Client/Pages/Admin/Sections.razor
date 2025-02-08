@@ -1,8 +1,8 @@
 ﻿@page "/manage-section"
 @attribute [Authorize]
 @layout MainLayout
-
-
+@using ICSS.Shared
+@using SectionsModel = ICSS.Shared.Sections
 
 <MudContainer Class="py-4 py-sm-8 py-md-12 py-lg-16 py-xl-20">
     <MudGrid>
@@ -15,13 +15,92 @@
             }
         </MudItem>
         <MudItem xs="12">
-            <MudPaper Class="w-100" Style="background-color: #1abc9c; color: white">
-                <MudText Typo="Typo.h6" Class="fw-bold p-2">Student Sections List</MudText>
-            </MudPaper>
-            <MudDivider />
-        </MudItem>
-        <MudItem xs="12">
+            <MudTabs Elevation="2" Rounded="true" Outlined="true" Color="Color.Tertiary">
+                <MudTabPanel Text="Sections" Icon="fa-solid fa-house-user">
+                    <MudPaper Elevation="4" Class="pt-2">
 
+                        <MudStack Row Class="p-2">
+                            <MudSelect ValueChanged="OnChangeCourse" @ref="_mudSelectCourse" T="int?" Clearable Label="Select Course" AdornmentIcon="fa-solid fa-graduation-cap" Variant="Variant.Outlined" Margin="Margin.Dense" AdornmentColor="Color.Primary">
+                                @foreach (var item in courses)
+                                {
+                                    <MudSelectItem T="int?" Value="@(item.CourseId)">@item.CourseName</MudSelectItem>
+                                }
+                            </MudSelect>
+
+                            <MudSelect ValueChanged="OnSelectSchoolYear" @ref="_mudSelectSchoolYear" T="string" Clearable Label="Select School Year" AdornmentIcon="fa-solid fa-calendar-day" Variant="Variant.Outlined" Margin="Margin.Dense" AdornmentColor="Color.Primary">
+                                @foreach (var item in schoolYears)
+                                {
+                                    <MudSelectItem Value="@(item)">@item</MudSelectItem>
+                                }
+                            </MudSelect>
+                            <MudSelect @bind-Value="selectedYearLevel" T="YearLevel?" Label="Select Year Level" Clearable="true" Disabled="selectedSchoolYear==null"
+                            AdornmentIcon="fa-solid fa-hashtag" Variant="Variant.Outlined"
+                            Margin="Margin.Dense" AdornmentColor="Color.Primary">
+                                @foreach (var item in Enum.GetValues<YearLevel>())
+                                {
+                                    <MudSelectItem T="YearLevel?" Value="@item">@item.ToString().Replace("_", " ")</MudSelectItem>
+                                }
+                            </MudSelect>
+                            <MudCheckBox @bind-Value="isSummerClass" Color="Color.Primary" Label="Summer Class" Disabled="selectedSchoolYear==null"></MudCheckBox>
+                        </MudStack>
+                    </MudPaper>
+                    <MudText Typo="Typo.body2" Class="fw-bold pt-3">Select Section Range</MudText>
+                    <MudSlider TickMarks="true" TickMarkLabels="@labels" Step="1" Max="15" Min="1" Value="@value" Size="Size.Medium" T="int" ValueChanged="OnRangeValueChanged" Disabled="@(selectedYearLevel==null||selectedSchoolYear==null)" />
+
+                    <MudStack Row Spacing="1" Class="pt-2">
+                        <MudButton Size="Size.Small" OnClick="OnDiscardChanges" StartIcon="fa-solid fa-ban" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Warning" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
+                            Discard Changes
+                        </MudButton>
+                        <MudButton Size="Size.Small" OnClick="OnSaveChanges" StartIcon="fa-solid fa-floppy-disk" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Success" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
+                            Save Changes
+                        </MudButton>
+                    </MudStack>
+
+                    <MudDataGrid Items="sections" Dense Hover Filterable Striped Virtualize ShowColumnOptions Hideable ShowMenuIcon Loading="isLoading" Class="my-5">
+                        <Columns>
+                            <PropertyColumn Property="x => x.SchoolYear" Title="School Year" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
+                            <PropertyColumn Property="x => x.YearLevel" Title="Year Level" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
+                                <CellTemplate>
+                                    <MudText Typo="Typo.body2">@context.Item.YearLevel.ToString().Replace("_", " ")</MudText>
+                                </CellTemplate>
+                            </PropertyColumn>
+                            <PropertyColumn Property="x => x.SectionName" Title="Section" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
+                            <PropertyColumn Property="x => x.IsSummer" Title="Is Summer Class" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
+                                <CellTemplate>
+                                    <MudChip Variant="Variant.Filled" Size="Size.Small" Color="@(context.Item.IsSummer?Color.Success:Color.Error)">@(context.Item.IsSummer ? "Summer Class" : "Non Summer Class")</MudChip>
+                                </CellTemplate>
+                            </PropertyColumn>
+                            <PropertyColumn Property="x => x.StudentCount" Title="Student Count" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
+
+                            <PropertyColumn Property="x => x.CreatedBy" Title="Created By" Sortable="true" Hideable="true" HeaderClass="data-grid text-nowrap text-white" Hidden>
+                                <CellTemplate>
+                                    <MudStack Spacing="0">
+                                        <MudText Typo="Typo.body2" Class="fw-bold">@context.Item.CreatedBy</MudText>
+                                        <MudText Typo="Typo.body2" Class="fw-italic">@context.Item.CreatedOn</MudText>
+                                    </MudStack>
+                                </CellTemplate>
+                            </PropertyColumn>
+                            <PropertyColumn Property="x => x.UpdatedBy" Title="Updated By" Sortable="true" Hideable="true" HeaderClass="data-grid text-nowrap text-white" Hidden>
+                                <CellTemplate>
+                                    <MudStack Spacing="0">
+                                        <MudText Typo="Typo.body2" Class="fw-bold">@context.Item.UpdatedBy</MudText>
+                                        <MudText Typo="Typo.body2" Class="fw-italic">@context.Item.UpdatedOn</MudText>
+                                    </MudStack>
+                                </CellTemplate>
+                            </PropertyColumn>
+                        </Columns>
+                        <NoRecordsContent>
+                            <MudText>No Records to show</MudText>
+                        </NoRecordsContent>
+                        <LoadingContent>
+                            <MudText>Loading Content...</MudText>
+                        </LoadingContent>
+                    </MudDataGrid>
+                </MudTabPanel>
+                <MudTabPanel Text="Student Section Assignment" Icon="fa-solid fa-house-medical">
+
+                </MudTabPanel>
+            </MudTabs>
         </MudItem>
     </MudGrid>
 </MudContainer>
@@ -29,11 +108,119 @@
 @code {
     [CascadingParameter]
     public MainLayout MainLayout { get; private set; }
+    [Inject] private ISnackbar Snackbar { get; set; }
+    [Inject] private ILocalStorageService LocalStorage { get; set; }
+    [Inject] private HttpClient HttpClient { get; set; }
+    [Inject] private ApiRequestHelper ApiHelper { get; set; }
+    private List<string> schoolYears = new();
+    private List<Course> courses = new();
+    private YearLevel? selectedYearLevel;
+    private string? selectedSchoolYear;
+    private int? selectedSectionRange;
+    private bool isSummerClass = false;
+    string[] labels = Enumerable.Range('A', 15).Select(c => ((char)c).ToString()).ToArray();
+    int value = 1;
+
+
+    MudSelect<string> _mudSelectSchoolYear;
+    MudSelect<int?> _mudSelectCourse;
+
+    private List<SectionsModel> sections = new List<SectionsModel>
+{
+    new SectionsModel { SectionId = 1, SchoolYear = "SY 2025-2026", SectionName = "A", YearLevel = YearLevel.First_Year, StudentCount = 30, IsSummer = true },
+    new SectionsModel { SectionId = 2, SchoolYear = "SY 2025-2026", SectionName = "B", YearLevel = YearLevel.First_Year, StudentCount = 28 },
+    new SectionsModel { SectionId = 3, SchoolYear = "SY 2025-2026", SectionName = "C", YearLevel = YearLevel.First_Year, StudentCount = 35 },
+    new SectionsModel { SectionId = 4, SchoolYear = "SY 2025-2026", SectionName = "D", YearLevel = YearLevel.First_Year, StudentCount = 32 },
+    new SectionsModel { SectionId = 5, SchoolYear = "SY 2025-2026", SectionName = "E", YearLevel = YearLevel.First_Year, StudentCount = 25 }
+};
+    private bool isLoading = false;
+
 
     protected override async Task OnInitializedAsync()
     {
         MainLayout.SubTitle = "Sections Management";
+        await OnGetCourses();
+        int currentYear = DateTime.UtcNow.Year;
+        schoolYears = new List<string>
+    {
+        $"SY {currentYear}-{currentYear + 1}",
+        $"SY {currentYear + 1}-{currentYear + 2}"
+    };
         await base.OnInitializedAsync();
+    }
+
+    private async Task OnSelectSchoolYear(string value)
+    {
+        selectedSchoolYear = value;
+    }
+
+    private async Task OnRangeValueChanged(int value)
+    {
+        Console.WriteLine(value);
+        selectedSectionRange = value;
+    }
+
+    private async Task OnChangeCourse(int? value)
+    {
+        if(!value.HasValue)
+        {
+            value = 1;
+            selectedSectionRange = null;
+            isSummerClass = false;
+            selectedSchoolYear = null;
+            selectedYearLevel = null;
+            await _mudSelectCourse.Clear();
+            await _mudSelectSchoolYear.Clear();
+            StateHasChanged();
+        }
+    }
+
+    private async Task OnDiscardChanges()
+    {
+        value = 1;
+        selectedSectionRange = null;
+        isSummerClass = false;
+        selectedSchoolYear = null;
+        selectedYearLevel = null;
+        await _mudSelectSchoolYear.Clear();
+        StateHasChanged();
+    }
+
+    private async Task OnSaveChanges()
+    {
+
+    }
+
+    private async Task OnGetCourses()
+    {
+        try
+        {
+            if (MainLayout.IsOnline)
+            {
+                var response = await ApiHelper.GetAsync<List<Course>>("CourseAndSubject/GetAllCourses");
+                if (response.IsSuccess)
+                {
+                    courses = response.Data;
+                    await LocalStorage.SetItemAsync("courses", courses);
+                    StateHasChanged();
+                }
+                else
+                {
+                    Snackbar.Add($"Failed to load courses: {response.Message}", Severity.Error);
+                }
+            }
+            else
+            {
+                var cachedData = await LocalStorage.GetItemAsync<List<Course>>("courses");
+                courses = cachedData ?? new List<Course>();
+                StateHasChanged();
+            }
+
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
+        }
     }
 
 }

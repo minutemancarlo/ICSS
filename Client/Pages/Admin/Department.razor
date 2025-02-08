@@ -78,7 +78,7 @@
                 <MudTabPanel Text="Members" Icon="fa-solid fa-chalkboard-user">
                     <MudItem xs="6">
                         <MudAutocomplete T="Departments"
-                        Class="p-2" Dense
+                        Class="p-2"
                         Label="Select Department"
                         @ref="_mudAutoComplete"
                         @bind-Value="SelectedDepartment"
@@ -89,6 +89,7 @@
                         AdornmentIcon="@Icons.Material.Filled.Search"
                         Variant="Variant.Outlined"
                         Clearable
+                        Margin="Margin.Dense"
                         AdornmentColor="Color.Primary" />
                     </MudItem>
                     <MudItem xs="12">

@@ -173,9 +173,8 @@ namespace ICSS.Server.Controllers
                 var usersList = new InternalUser
                 {
                     SystemId = users.UserId,
-                    Name = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(users.FullName.ToLower()),
+                    Name = string.IsNullOrWhiteSpace(users.FullName) ? users.NickName : CultureInfo.CurrentCulture.TextInfo.ToTitleCase(users.FullName.ToLower()),
                     Email = users.Email,
-
                 };            
 
                 return Ok(usersList);
