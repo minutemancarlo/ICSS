@@ -27,7 +27,7 @@
                                 }
                             </MudSelect>
 
-                            <MudSelect ValueChanged="OnSelectSchoolYear" @ref="_mudSelectSchoolYear" T="string" Clearable Label="Select School Year" AdornmentIcon="fa-solid fa-calendar-day" Variant="Variant.Outlined" Margin="Margin.Dense" AdornmentColor="Color.Primary">
+                            <MudSelect ValueChanged="OnSelectSchoolYear" @ref="_mudSelectSchoolYear" T="string" Clearable Label="Select School Year" AdornmentIcon="fa-solid fa-calendar-day" Variant="Variant.Outlined" Margin="Margin.Dense" AdornmentColor="Color.Primary" Disabled="@(selectedCourse==null)">
                                 @foreach (var item in schoolYears)
                                 {
                                     <MudSelectItem Value="@(item)">@item</MudSelectItem>
@@ -45,7 +45,7 @@
                         </MudStack>
                     </MudPaper>
                     <MudText Typo="Typo.body2" Class="fw-bold pt-3">Select Section Range</MudText>
-                    <MudSlider TickMarks="true" TickMarkLabels="@labels" Step="1" Max="15" Min="1" Value="@value" Size="Size.Medium" T="int" ValueChanged="OnRangeValueChanged" Disabled="@(selectedYearLevel==null||selectedSchoolYear==null)" />
+                    <MudSlider TickMarks="true" TickMarkLabels="@labels" Immediate Step="1" Max="15" Min="1"  Value="@sliderValue" Size="Size.Medium" T="int" ValueChanged="OnRangeValueChanged" Disabled="@(selectedYearLevel==null||selectedSchoolYear==null)" />
 
                     <MudStack Row Spacing="1" Class="pt-2">
                         <MudButton Size="Size.Small" OnClick="OnDiscardChanges" StartIcon="fa-solid fa-ban" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Warning" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
@@ -58,6 +58,7 @@
 
                     <MudDataGrid Items="sections" Dense Hover Filterable Striped Virtualize ShowColumnOptions Hideable ShowMenuIcon Loading="isLoading" Class="my-5">
                         <Columns>
+                            <PropertyColumn Property="x => x.Course.CourseCode" Title="Course" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
                             <PropertyColumn Property="x => x.SchoolYear" Title="School Year" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
                             <PropertyColumn Property="x => x.YearLevel" Title="Year Level" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
                                 <CellTemplate>
@@ -117,9 +118,10 @@
     private YearLevel? selectedYearLevel;
     private string? selectedSchoolYear;
     private int? selectedSectionRange;
+    private int? selectedCourse;
     private bool isSummerClass = false;
     string[] labels = Enumerable.Range('A', 15).Select(c => ((char)c).ToString()).ToArray();
-    int value = 1;
+    int sliderValue = 1;
 
 
     MudSelect<string> _mudSelectSchoolYear;
@@ -127,7 +129,7 @@
 
     private List<SectionsModel> sections = new List<SectionsModel>
 {
-    new SectionsModel { SectionId = 1, SchoolYear = "SY 2025-2026", SectionName = "A", YearLevel = YearLevel.First_Year, StudentCount = 30, IsSummer = true },
+    new SectionsModel { SectionId = 1, SchoolYear = "SY 2025-2026", SectionName = "A", YearLevel = YearLevel.First_Year, StudentCount = 30, IsSummer = true, Course = new Course{ CourseId=1,CourseCode = "BSCS",CourseName="Bachelor of Science in Computer Science" } },
     new SectionsModel { SectionId = 2, SchoolYear = "SY 2025-2026", SectionName = "B", YearLevel = YearLevel.First_Year, StudentCount = 28 },
     new SectionsModel { SectionId = 3, SchoolYear = "SY 2025-2026", SectionName = "C", YearLevel = YearLevel.First_Year, StudentCount = 35 },
     new SectionsModel { SectionId = 4, SchoolYear = "SY 2025-2026", SectionName = "D", YearLevel = YearLevel.First_Year, StudentCount = 32 },
@@ -164,7 +166,8 @@
     {
         if(!value.HasValue)
         {
-            value = 1;
+            sliderValue = 1;
+            selectedCourse = null;
             selectedSectionRange = null;
             isSummerClass = false;
             selectedSchoolYear = null;
@@ -173,16 +176,22 @@
             await _mudSelectSchoolYear.Clear();
             StateHasChanged();
         }
+        else
+        {
+            selectedCourse = value;
+        }
     }
 
     private async Task OnDiscardChanges()
     {
-        value = 1;
+        sliderValue = 1;
         selectedSectionRange = null;
         isSummerClass = false;
         selectedSchoolYear = null;
         selectedYearLevel = null;
         await _mudSelectSchoolYear.Clear();
+        await _mudSelectCourse.Clear();
+
         StateHasChanged();
     }
 

@@ -15,6 +15,7 @@ namespace ICSS.Shared
         public YearLevel YearLevel { get; set; }
         public bool IsDeleted { get; set; } = false;
         public int? StudentCount { get; set; }
+        public Course? Course { get; set; }
     }
 
 
