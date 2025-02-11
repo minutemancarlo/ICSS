@@ -20,6 +20,23 @@ namespace ICSS.Server.Controllers
             _sectionRepository = sectionRepository;
         }
 
+
+        [HttpGet("GetSections")]
+        public async Task<ActionResult<IEnumerable<Sections>>> GetSections()
+        {
+            try
+            {
+
+                var sections = await _sectionRepository.GetSectionsWithCoursesAsync();
+
+                return Ok(sections);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
+        }
+
         [HttpPost("InsertSection")]
         public async Task<IActionResult> InsertSection([FromBody] List<Sections> sections, [FromQuery] string userId)
         {

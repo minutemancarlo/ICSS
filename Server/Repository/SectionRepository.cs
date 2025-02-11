@@ -15,6 +15,28 @@ namespace ICSS.Server.Repository
             _dbConnection = dbConnection;
         }
 
+        public async Task<List<Sections>> GetSectionsWithCoursesAsync()
+        {
+            using var connection = _dbConnection;
+            using var multi = await connection.QueryMultipleAsync("GetSections", commandType: CommandType.StoredProcedure);
+
+            var sections = await multi.ReadAsync<Sections>();
+            var courses = await multi.ReadAsync<Course>();
+
+            // Map Course to Sections
+            var courseDict = courses.ToDictionary(c => c.CourseId);
+            foreach (var section in sections)
+            {
+                if (section.Course.CourseId.HasValue && courseDict.TryGetValue(section.Course.CourseId.Value, out var course))
+                {
+                    section.Course = course;
+                }
+            }
+
+            return sections.ToList();
+        }
+
+
         public async Task<bool> InsertOrUpdateSectionsAsync(List<Sections> sections, string userId)
         {
             var table = new DataTable();
