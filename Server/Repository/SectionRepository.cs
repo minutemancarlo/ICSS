@@ -27,7 +27,7 @@ namespace ICSS.Server.Repository
             var courseDict = courses.ToDictionary(c => c.CourseId);
             foreach (var section in sections)
             {
-                if (section.Course.CourseId.HasValue && courseDict.TryGetValue(section.Course.CourseId.Value, out var course))
+                if (section.CourseId.HasValue && courseDict.TryGetValue(section.CourseId.Value, out var course))
                 {
                     section.Course = course;
                 }
@@ -37,34 +37,56 @@ namespace ICSS.Server.Repository
         }
 
 
-        public async Task<bool> InsertOrUpdateSectionsAsync(List<Sections> sections, string userId)
+        public async Task<bool> InsertSectionAsync(Sections section, string userId)
         {
-            var table = new DataTable();
-            table.Columns.Add("SectionId", typeof(int));
-            table.Columns.Add("SectionName", typeof(string));
-            table.Columns.Add("IsSummer", typeof(bool));
-            table.Columns.Add("YearLevel", typeof(int));
-            table.Columns.Add("IsDeleted", typeof(bool));
-            table.Columns.Add("CourseId", typeof(int));
-
-            foreach (var section in sections)
-            {
-                table.Rows.Add(
-                    section.SectionId ?? (object)DBNull.Value,
-                    section.SectionName,
-                    section.IsSummer,
-                    (int)section.YearLevel,
-                    section.IsDeleted,
-                    section.Course?.CourseId ?? (object)DBNull.Value
-                );
-            }
-
             var parameters = new DynamicParameters();
-            parameters.Add("@SectionsTVP", table.AsTableValuedParameter("dbo.SectionsTableType"));
-            parameters.Add("@UserId", userId);
+            parameters.Add("@SectionName", section.SectionName);
+            parameters.Add("@IsSummer", section.IsSummer);
+            parameters.Add("@YearLevel", (int)section.YearLevel);
+            parameters.Add("@IsDeleted", section.IsDeleted);
+            parameters.Add("@CourseId", section.CourseId);
+            parameters.Add("@SchoolYear", section.SchoolYear);
+            parameters.Add("@CreatedBy", userId);
 
-            int affectedRows = await _dbConnection.ExecuteAsync("InsertOrUpdateSections", parameters, commandType: CommandType.StoredProcedure);
+            int affectedRows = await _dbConnection.ExecuteAsync("InsertSection", parameters, commandType: CommandType.StoredProcedure);
             return affectedRows > 0;
         }
+
+
+        public async Task<bool> UpdateSectionAsync(Sections section, string userId)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("@SectionId", section.SectionId);
+            parameters.Add("@SectionName", section.SectionName);
+            parameters.Add("@IsSummer", section.IsSummer);
+            parameters.Add("@YearLevel", (int)section.YearLevel);
+            parameters.Add("@IsDeleted", section.IsDeleted);
+            parameters.Add("@CourseId", section.CourseId);
+            parameters.Add("@SchoolYear", section.SchoolYear);
+            parameters.Add("@UpdatedBy", userId);
+
+            int affectedRows = await _dbConnection.ExecuteAsync("UpdateSection", parameters, commandType: CommandType.StoredProcedure);
+            return affectedRows > 0;
+        }
+
+        public async Task<int> GetSectionsSingleAsync(Sections sections)
+        {
+            var query = @"SELECT COUNT(*) FROM Sections 
+                  WHERE SchoolYear = @SchoolYear 
+                  AND YearLevel = @YearLevel 
+                  AND CourseId = @CourseId 
+                  AND IsSummer = @IsSummer";
+
+            var parameters = new DynamicParameters();
+            parameters.Add("@SchoolYear", sections.SchoolYear);
+            parameters.Add("@YearLevel", sections.YearLevel);
+            parameters.Add("@CourseId", sections.CourseId);
+            parameters.Add("@IsSummer", sections.IsSummer);
+
+            return await _dbConnection.ExecuteScalarAsync<int>(query, parameters);
+        }
+
+
+
     }
 }

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using ICSS.Server.Repository;
+using TagLib.Ape;
 
 namespace ICSS.Server.Controllers
 {
@@ -45,12 +46,13 @@ namespace ICSS.Server.Controllers
 
             try
             {
-                bool result = await _sectionRepository.InsertOrUpdateSectionsAsync(sections, userId);
 
-                if (result)
-                    return Ok("Sections added successfully.");
-                else
-                    return StatusCode(500, "Failed to add sections.");
+                foreach (var item in sections)
+                {
+                    await _sectionRepository.InsertSectionAsync(item, userId);
+                }
+                return Ok(new { Message = "Sections added successfully." });
+
             }
             catch (Exception ex)
             {
@@ -59,19 +61,16 @@ namespace ICSS.Server.Controllers
         }
 
         [HttpPost("UpdateSection")]
-        public async Task<IActionResult> UpdateSection([FromBody] List<Sections> sections, [FromQuery] string userId)
+        public async Task<IActionResult> UpdateSection([FromBody] Sections sections, [FromQuery] string userId)
         {
-            if (sections == null || sections.Count == 0)
+            if (sections == null)
                 return BadRequest("Invalid sections data.");
 
             try
             {
-                bool result = await _sectionRepository.InsertOrUpdateSectionsAsync(sections, userId);
+                await _sectionRepository.UpdateSectionAsync(sections, userId);
+                return Ok("Sections updated successfully.");
 
-                if (result)
-                    return Ok("Sections updated successfully.");
-                else
-                    return StatusCode(500, "Failed to update sections.");
             }
             catch (Exception ex)
             {

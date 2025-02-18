@@ -3,6 +3,8 @@
 @layout MainLayout
 @using ICSS.Shared
 @using SectionsModel = ICSS.Shared.Sections
+@using ICSS.Client.Pages.Admin.Components
+
 
 <MudContainer Class="py-4 py-sm-8 py-md-12 py-lg-16 py-xl-20">
     <MudGrid>
@@ -17,47 +19,37 @@
         <MudItem xs="12">
             <MudTabs Elevation="2" Rounded="true" Outlined="true" Color="Color.Tertiary">
                 <MudTabPanel Text="Sections" Icon="fa-solid fa-house-user">
-                    <MudPaper Elevation="4" Class="pt-2">
-
-                        <MudStack Row Class="p-2">
-                            <MudSelect ValueChanged="OnChangeCourse" @ref="_mudSelectCourse" T="int?" Clearable Label="Select Course" AdornmentIcon="fa-solid fa-graduation-cap" Variant="Variant.Outlined" Margin="Margin.Dense" AdornmentColor="Color.Primary">
-                                @foreach (var item in courses)
-                                {
-                                    <MudSelectItem T="int?" Value="@(item.CourseId)">@item.CourseName</MudSelectItem>
-                                }
-                            </MudSelect>
-
-                            <MudSelect ValueChanged="OnSelectSchoolYear" @ref="_mudSelectSchoolYear" T="string" Clearable Label="Select School Year" AdornmentIcon="fa-solid fa-calendar-day" Variant="Variant.Outlined" Margin="Margin.Dense" AdornmentColor="Color.Primary" Disabled="@(selectedCourse==null)">
-                                @foreach (var item in schoolYears)
-                                {
-                                    <MudSelectItem Value="@(item)">@item</MudSelectItem>
-                                }
-                            </MudSelect>
-                            <MudSelect @bind-Value="selectedYearLevel" T="YearLevel?" Label="Select Year Level" Clearable="true" Disabled="selectedSchoolYear==null"
-                            AdornmentIcon="fa-solid fa-hashtag" Variant="Variant.Outlined"
-                            Margin="Margin.Dense" AdornmentColor="Color.Primary">
-                                @foreach (var item in Enum.GetValues<YearLevel>())
-                                {
-                                    <MudSelectItem T="YearLevel?" Value="@item">@item.ToString().Replace("_", " ")</MudSelectItem>
-                                }
-                            </MudSelect>
-                            <MudCheckBox @bind-Value="isSummerClass" Color="Color.Primary" Label="Summer Class" Disabled="selectedSchoolYear==null"></MudCheckBox>
-                        </MudStack>
-                    </MudPaper>
-                    <MudText Typo="Typo.body2" Class="fw-bold pt-3">Select Section Range</MudText>
-                    <MudSlider TickMarks="true" TickMarkLabels="@labels" Immediate Step="1" Max="15" Min="1"  Value="@sliderValue" Size="Size.Medium" T="int" ValueChanged="OnRangeValueChanged" Disabled="@(selectedYearLevel==null||selectedSchoolYear==null)" />
-
-                    <MudStack Row Spacing="1" Class="pt-2">
-                        <MudButton Size="Size.Small" OnClick="OnDiscardChanges" StartIcon="fa-solid fa-ban" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Warning" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
-                            Discard Changes
-                        </MudButton>
-                        <MudButton Size="Size.Small" OnClick="OnSaveChanges" StartIcon="fa-solid fa-floppy-disk" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Success" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
-                            Save Changes
-                        </MudButton>
-                    </MudStack>
-
                     <MudDataGrid Items="sections" Dense Hover Filterable Striped Virtualize ShowColumnOptions Hideable ShowMenuIcon Loading="isLoading" Class="my-5">
+                        <ToolBarContent>
+                            <MudBreakpointProvider>
+                                <MudHidden Breakpoint="Breakpoint.MdAndUp" Invert="true">
+                                    <MudButton Size="Size.Small" OnClick="OnShowAddSectionDialog" StartIcon="fa-solid fa-circle-plus" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Success" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
+                                        Add Sections
+                                    </MudButton>
+                                    <MudButton Size="Size.Small" StartIcon="fa-solid fa-refresh" OnClick="OnGetSections" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Primary" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
+                                        Refresh
+                                    </MudButton>
+                                </MudHidden>
+                                <MudHidden Breakpoint="Breakpoint.MdAndDown" Invert="true">
+                                    <MudIconButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Class="my-2 mx-1" Size="Size.Small" Icon="fa-solid fa-refresh" Color="Color.Primary" Disabled="!MainLayout.IsOnline" />
+                                </MudHidden>
+                            </MudBreakpointProvider>
+
+                            <MudSpacer />
+                        </ToolBarContent>
                         <Columns>
+                            <TemplateColumn Title="Actions" HeaderClass="data-grid text-nowrap text-white" Hideable="false">
+                                <CellTemplate>
+                                    <MudStack Row>
+                                     @*    <MudTooltip Text="Edit Section">
+                                            <MudIconButton Icon="fa-solid fa-edit" OnClick="@(() => OnShowUpdateSectionDialog(context.Item))" Size="Size.Medium" Color="Color.Info" Variant="Variant.Filled" Disabled="@(!MainLayout.IsOnline)"  />
+                                        </MudTooltip> *@
+                                        <MudTooltip Text="Disable Section">
+                                            <MudIconButton Icon="fa-solid fa-ban" Size="Size.Medium" Color="Color.Error" Variant="Variant.Filled" Disabled="@(!MainLayout.IsOnline)" />
+                                        </MudTooltip>
+                                    </MudStack>
+                                </CellTemplate>
+                            </TemplateColumn>
                             <PropertyColumn Property="x => x.Course.CourseCode" Title="Course" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
                             <PropertyColumn Property="x => x.SchoolYear" Title="School Year" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
                             <PropertyColumn Property="x => x.YearLevel" Title="Year Level" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
@@ -68,7 +60,7 @@
                             <PropertyColumn Property="x => x.SectionName" Title="Section" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
                             <PropertyColumn Property="x => x.IsSummer" Title="Is Summer Class" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
                                 <CellTemplate>
-                                    <MudChip Variant="Variant.Filled" Size="Size.Small" Color="@(context.Item.IsSummer?Color.Success:Color.Error)">@(context.Item.IsSummer ? "Summer Class" : "Non Summer Class")</MudChip>
+                                    <MudChip Variant="Variant.Filled" Size="Size.Small" Color="@(context.Item.IsSummer?Color.Info:Color.Success)">@(context.Item.IsSummer ? "Summer Class" : "Non Summer Class")</MudChip>
                                 </CellTemplate>
                             </PropertyColumn>
                             <PropertyColumn Property="x => x.StudentCount" Title="Student Count" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
@@ -96,6 +88,9 @@
                         <LoadingContent>
                             <MudText>Loading Content...</MudText>
                         </LoadingContent>
+                        <PagerContent>
+                            <MudDataGridPager T="SectionsModel" />
+                        </PagerContent>
                     </MudDataGrid>
                 </MudTabPanel>
                 <MudTabPanel Text="Student Section Assignment" Icon="fa-solid fa-house-medical">
@@ -104,124 +99,131 @@
             </MudTabs>
         </MudItem>
     </MudGrid>
+
 </MudContainer>
 
-@code {
+@code{
     [CascadingParameter]
     public MainLayout MainLayout { get; private set; }
     [Inject] private ISnackbar Snackbar { get; set; }
     [Inject] private ILocalStorageService LocalStorage { get; set; }
     [Inject] private HttpClient HttpClient { get; set; }
     [Inject] private ApiRequestHelper ApiHelper { get; set; }
-    private List<string> schoolYears = new();
-    private List<Course> courses = new();
-    private YearLevel? selectedYearLevel;
-    private string? selectedSchoolYear;
-    private int? selectedSectionRange;
-    private int? selectedCourse;
-    private bool isSummerClass = false;
-    string[] labels = Enumerable.Range('A', 15).Select(c => ((char)c).ToString()).ToArray();
-    int sliderValue = 1;
+    [Inject] IDialogService? DialogService { get; set; }
 
-
-    MudSelect<string> _mudSelectSchoolYear;
-    MudSelect<int?> _mudSelectCourse;
-
-    private List<SectionsModel> sections = new List<SectionsModel>
-{
-    new SectionsModel { SectionId = 1, SchoolYear = "SY 2025-2026", SectionName = "A", YearLevel = YearLevel.First_Year, StudentCount = 30, IsSummer = true, Course = new Course{ CourseId=1,CourseCode = "BSCS",CourseName="Bachelor of Science in Computer Science" } },
-    new SectionsModel { SectionId = 2, SchoolYear = "SY 2025-2026", SectionName = "B", YearLevel = YearLevel.First_Year, StudentCount = 28 },
-    new SectionsModel { SectionId = 3, SchoolYear = "SY 2025-2026", SectionName = "C", YearLevel = YearLevel.First_Year, StudentCount = 35 },
-    new SectionsModel { SectionId = 4, SchoolYear = "SY 2025-2026", SectionName = "D", YearLevel = YearLevel.First_Year, StudentCount = 32 },
-    new SectionsModel { SectionId = 5, SchoolYear = "SY 2025-2026", SectionName = "E", YearLevel = YearLevel.First_Year, StudentCount = 25 }
-};
+    private List<SectionsModel> sections = new();
     private bool isLoading = false;
+
 
 
     protected override async Task OnInitializedAsync()
     {
         MainLayout.SubTitle = "Sections Management";
-        await OnGetCourses();
-        int currentYear = DateTime.UtcNow.Year;
-        schoolYears = new List<string>
-    {
-        $"SY {currentYear}-{currentYear + 1}",
-        $"SY {currentYear + 1}-{currentYear + 2}"
-    };
+        await OnGetSections();
         await base.OnInitializedAsync();
     }
 
-    private async Task OnSelectSchoolYear(string value)
+    private async Task OnShowAddSectionDialog()
     {
-        selectedSchoolYear = value;
-    }
-
-    private async Task OnRangeValueChanged(int value)
-    {
-        Console.WriteLine(value);
-        selectedSectionRange = value;
-    }
-
-    private async Task OnChangeCourse(int? value)
-    {
-        if(!value.HasValue)
+        try
         {
-            sliderValue = 1;
-            selectedCourse = null;
-            selectedSectionRange = null;
-            isSummerClass = false;
-            selectedSchoolYear = null;
-            selectedYearLevel = null;
-            await _mudSelectCourse.Clear();
-            await _mudSelectSchoolYear.Clear();
-            StateHasChanged();
+            var options = new DialogOptions
+                {
+                    CloseOnEscapeKey = false,
+                    FullWidth = true,
+                    MaxWidth = MaxWidth.Small,
+                    BackdropClick = false,
+                    CloseButton = false,
+                    BackgroundClass = "blurred"                    
+
+                };
+
+            var parameters = new DialogParameters<SectionDialog>
+            {
+                { x => x.Action, "Add" },
+                { x => x.Icon, "circle-plus" },
+                {x => x.section, new SectionsModel()},
+                { x => x.currentUserId, MainLayout.CurrentUserId }                
+            };
+
+            var dialog = await DialogService.ShowAsync<SectionDialog>("", parameters, options);
+            var result = await dialog.Result;
+            if (!result.Canceled)
+            {
+                await OnGetSections();                
+                StateHasChanged();
+            }
         }
-        else
+        catch (Exception ex)
         {
-            selectedCourse = value;
+            Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
         }
     }
 
-    private async Task OnDiscardChanges()
-    {
-        sliderValue = 1;
-        selectedSectionRange = null;
-        isSummerClass = false;
-        selectedSchoolYear = null;
-        selectedYearLevel = null;
-        await _mudSelectSchoolYear.Clear();
-        await _mudSelectCourse.Clear();
 
-        StateHasChanged();
+    private async Task OnShowUpdateSectionDialog(SectionsModel sections)
+    {
+        try
+        {
+            var options = new DialogOptions
+                {
+                    CloseOnEscapeKey = false,
+                    FullWidth = true,
+                    MaxWidth = MaxWidth.Small,
+                    BackdropClick = false,
+                    CloseButton = false,
+                    BackgroundClass = "blurred"
+
+                };
+
+            var parameters = new DialogParameters<SectionDialog>
+            {
+                { x => x.Action, "Update" },
+                { x => x.Icon, "pen-to-square" },
+                {x => x.section, sections},
+                { x => x.currentUserId, MainLayout.CurrentUserId }
+            };
+
+            var dialog = await DialogService.ShowAsync<SectionDialog>("", parameters, options);
+            var result = await dialog.Result;
+            if (!result.Canceled)
+            {
+                await OnGetSections();
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
+        }
     }
 
-    private async Task OnSaveChanges()
-    {
 
-    }
-
-    private async Task OnGetCourses()
+    private async Task OnGetSections()
     {
+        isLoading = true;
+
         try
         {
             if (MainLayout.IsOnline)
             {
-                var response = await ApiHelper.GetAsync<List<Course>>("CourseAndSubject/GetAllCourses");
+                var response = await ApiHelper.GetAsync<List<SectionsModel>>("SectionManagement/GetSections");
                 if (response.IsSuccess)
                 {
-                    courses = response.Data;
-                    await LocalStorage.SetItemAsync("courses", courses);
+                    sections = response.Data;
+
+                    await LocalStorage.SetItemAsync("sections", sections);
                     StateHasChanged();
                 }
                 else
                 {
-                    Snackbar.Add($"Failed to load courses: {response.Message}", Severity.Error);
+                    Snackbar.Add($"Failed to load sections: {response.Message}", Severity.Error);
                 }
             }
             else
             {
-                var cachedData = await LocalStorage.GetItemAsync<List<Course>>("courses");
-                courses = cachedData ?? new List<Course>();
+                var cachedData = await LocalStorage.GetItemAsync<List<SectionsModel>>("sections");
+                sections = cachedData ?? new List<SectionsModel>();
                 StateHasChanged();
             }
 
@@ -229,6 +231,10 @@
         catch (Exception ex)
         {
             Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isLoading = false;
         }
     }
 

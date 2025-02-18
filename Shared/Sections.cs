@@ -12,12 +12,22 @@ namespace ICSS.Shared
         public string? SchoolYear { get; set; }
         public string? SectionName { get; set; }
         public bool IsSummer { get; set; } = false;
-        public YearLevel YearLevel { get; set; }
+        public YearLevel? YearLevel { get; set; }
         public bool IsDeleted { get; set; } = false;
         public int? StudentCount { get; set; }
+
+        public int? CourseId { get; set; }
         public Course? Course { get; set; }
     }
 
+
+    public class SectionRequest
+    {
+        public int? CourseId { get; set; }
+        public YearLevel? YearLevel { get; set; }
+        public bool IsSummer { get; set; }
+        public string? SchoolYear { get; set; }
+    }
 
     public enum YearLevel
     {        

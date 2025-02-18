@@ -1,0 +1,172 @@
+﻿@using ICSS.Shared
+@using SectionModel = ICSS.Shared.Sections
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@($"fa-solid fa-{Icon}")"></MudIcon>
+            @Action Section
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudForm @ref="_form" Model="section">
+            <MudStack>
+                @if (Action == "Update")
+                {
+                    <MudText Typo="Typo.h6">Section: <strong>@(section.SectionName)</strong></MudText>
+                }
+                @if (Action == "Add")
+                {
+                    <MudText Typo="Typo.body2" Class="fw-bold pt-3">Select Section Range</MudText>
+                    <MudSlider TickMarks="true" TickMarkLabels="@labels" Immediate Step="1" Max="15" Min="1" @bind-Value="sliderValue" Size="Size.Medium" T="int" />
+                }
+                <MudSelect Disabled="@(Action == "Update"?true:false)" @bind-Value="section.CourseId" T="int?" Clearable Label="Select Course" AdornmentIcon="fa-solid fa-graduation-cap" Variant="Variant.Outlined" Margin="Margin.Dense" AdornmentColor="Color.Primary">
+                    @foreach (var item in courses)
+                    {
+                        <MudSelectItem T="int?" Value="@(item.CourseId)">@item.CourseName</MudSelectItem>
+                    }
+                </MudSelect>
+
+                <MudSelect Disabled="@(Action == "Update"?true:false)" T="string" @bind-Value="section.SchoolYear" Clearable Label="Select School Year" AdornmentIcon="fa-solid fa-calendar-day" Variant="Variant.Outlined" Margin="Margin.Dense" AdornmentColor="Color.Primary">
+                    @foreach (var item in schoolYears)
+                    {
+                        <MudSelectItem Value="@(item)">@item</MudSelectItem>
+                    }
+                </MudSelect>
+
+                <MudSelect Disabled="@(Action == "Update"?true:false)" T="YearLevel?" @bind-Value="section.YearLevel" Label="Select Year Level" Clearable="true"
+                AdornmentIcon="fa-solid fa-hashtag" Variant="Variant.Outlined"
+                Margin="Margin.Dense" AdornmentColor="Color.Primary">
+                    @foreach (var item in Enum.GetValues<YearLevel>())
+                    {
+                        <MudSelectItem T="YearLevel?" Value="@item">@item.ToString().Replace("_", " ")</MudSelectItem>
+                    }
+                </MudSelect>
+                <MudCheckBox T="bool" Color="Color.Primary" Label="Summer Class"></MudCheckBox>
+            </MudStack>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Disabled="_loading" Size="Size.Medium" OnClick="Cancel">Cancel</MudButton>
+        <MudLoadingButton Variant="Variant.Filled"
+        Color="Color.Success"
+        Size="Size.Medium"
+        OnClick="OnSubmitAdd"
+        Loading="@(_loading)"
+        ButtonType="ButtonType.Button">
+            <LoadingContent>Submitting...</LoadingContent>
+            <ChildContent>Submit</ChildContent>
+        </MudLoadingButton>
+    </DialogActions>
+</MudDialog>
+
+
+@code {
+    [CascadingParameter] MudDialogInstance? MudDialog { get; set; }
+    [Inject] HttpClient? httpClient { get; set; }
+    [Inject] ISnackbar Snackbar { get; set; }
+    [Inject] private ApiRequestHelper ApiHelper { get; set; }
+
+    [Parameter] public string? Action { get; set; }
+    [Parameter] public string? Icon { get; set; }
+    [Parameter] public SectionModel section { get; set; }
+    [Parameter] public string? currentUserId { get; set; }
+    private bool _loading = false;
+    MudForm? _form;
+
+    private List<Course> courses = new();
+    private List<string> schoolYears = new();
+
+    string[] labels = Enumerable.Range('A', 15).Select(c => ((char)c).ToString()).ToArray();
+    int sliderValue = 1;
+
+    void Cancel() => MudDialog.Cancel();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        int currentYear = DateTime.UtcNow.Year;
+        schoolYears = new List<string>
+    {
+        $"SY {currentYear}-{currentYear + 1}",
+        $"SY {currentYear + 1}-{currentYear + 2}"
+    };
+        await OnGetCourses();
+        await base.OnParametersSetAsync();
+    }
+
+
+    private async Task OnSubmitAdd()
+    {
+        try
+        {
+            _loading = true;
+            if (section.CourseId == null || section.YearLevel == null || section.SchoolYear == null)
+            {
+                Snackbar.Add($"Please fill out all fields", Severity.Error);
+                return;
+            }
+
+
+            List<SectionModel> payload = new();
+
+            for (var i = 0; i < sliderValue; i++)
+            {
+                var item = new SectionModel
+                    {
+                        CourseId = section.CourseId,
+                        SectionName = ((char)('A' + i)).ToString(),
+                        CreatedBy = currentUserId,
+                        IsDeleted = false,
+                        IsSummer = section.IsSummer,
+                        SchoolYear = section.SchoolYear,
+                        YearLevel = section.YearLevel
+                    };
+                payload.Add(item);
+            }
+            var response = await ApiHelper.PostAsync<List<SectionModel>, ApiResponse<int>>($"SectionManagement/InsertSection?userId={currentUserId}", payload);
+
+            if (response.IsSuccess)
+            {
+                Snackbar.Add("Section successfully added", Severity.Success);
+            }
+            else
+            {
+                Snackbar.Add($"Error: {response.Message}", Severity.Error);
+            }
+
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+    }
+
+
+    private async Task OnGetCourses()
+    {
+        try
+        {
+            var response = await ApiHelper.GetAsync<List<Course>>("CourseAndSubject/GetAllCourses");
+            if (response.IsSuccess)
+            {
+                courses = response.Data;
+                StateHasChanged();
+            }
+            else
+            {
+                Snackbar.Add($"Failed to load courses: {response.Message}", Severity.Error);
+            }
+
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
+        }
+    }
+
+}
