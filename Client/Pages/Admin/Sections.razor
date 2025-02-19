@@ -41,11 +41,11 @@
                             <TemplateColumn Title="Actions" HeaderClass="data-grid text-nowrap text-white" Hideable="false">
                                 <CellTemplate>
                                     <MudStack Row>
-                                     @*    <MudTooltip Text="Edit Section">
+                                        @*    <MudTooltip Text="Edit Section">
                                             <MudIconButton Icon="fa-solid fa-edit" OnClick="@(() => OnShowUpdateSectionDialog(context.Item))" Size="Size.Medium" Color="Color.Info" Variant="Variant.Filled" Disabled="@(!MainLayout.IsOnline)"  />
                                         </MudTooltip> *@
-                                        <MudTooltip Text="Disable Section">
-                                            <MudIconButton Icon="fa-solid fa-ban" Size="Size.Medium" Color="Color.Error" Variant="Variant.Filled" Disabled="@(!MainLayout.IsOnline)" />
+                                        <MudTooltip Text="@(context.Item.IsDeleted?"Enable Section":"Disable Section")">
+                                            <MudIconButton Icon="@(context.Item.IsDeleted?"fa-solid fa-circle-check":"fa-solid fa-ban")" Size="Size.Medium" Color="@(context.Item.IsDeleted?Color.Success:Color.Error)" OnClick="@(() => OnDisableSection(context.Item,(!context.Item.IsDeleted)))" Variant="Variant.Filled" Disabled="@(!MainLayout.IsOnline)" />
                                         </MudTooltip>
                                     </MudStack>
                                 </CellTemplate>
@@ -102,7 +102,7 @@
 
 </MudContainer>
 
-@code{
+@code {
     [CascadingParameter]
     public MainLayout MainLayout { get; private set; }
     [Inject] private ISnackbar Snackbar { get; set; }
@@ -134,7 +134,7 @@
                     MaxWidth = MaxWidth.Small,
                     BackdropClick = false,
                     CloseButton = false,
-                    BackgroundClass = "blurred"                    
+                    BackgroundClass = "blurred"
 
                 };
 
@@ -143,20 +143,85 @@
                 { x => x.Action, "Add" },
                 { x => x.Icon, "circle-plus" },
                 {x => x.section, new SectionsModel()},
-                { x => x.currentUserId, MainLayout.CurrentUserId }                
+                { x => x.currentUserId, MainLayout.CurrentUserId }
             };
 
             var dialog = await DialogService.ShowAsync<SectionDialog>("", parameters, options);
             var result = await dialog.Result;
             if (!result.Canceled)
             {
-                await OnGetSections();                
+                await OnGetSections();
                 StateHasChanged();
             }
         }
         catch (Exception ex)
         {
             Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
+        }
+    }
+
+
+    private async Task OnDisableSection(SectionsModel sections, bool action)
+    {
+        try
+        {
+            var options = new DialogOptions
+                {
+                    CloseOnEscapeKey = false,
+                    FullWidth = true,
+                    MaxWidth = MaxWidth.Small,
+                    BackdropClick = false,
+                    CloseButton = false,
+                    BackgroundClass = "blurred"
+
+                };
+            string message = String.Empty;
+            string actionMessage = String.Empty;
+            if (action)
+            {
+                actionMessage = "Disable Section";
+                message = "This section will not be included on the next scheduling and all students in this section will be removed from it. Are you sure you want to disable this section?";
+            }
+            else
+            {
+                actionMessage = "Enable Section";
+                message = $"This section was previously disabled. This action will enable this section and will include it in the next scheduling. Do you want to enable this section?";
+            }
+            var parameters = new DialogParameters<ConfirmationDialog>
+            {
+                { x => x.Action, actionMessage },
+                {x => x.Message, message}
+            };
+
+            var dialog = await DialogService.ShowAsync<ConfirmationDialog>("", parameters, options);
+            var result = await dialog.Result;
+            if (!result.Canceled)
+            {
+                var confirmed = (bool)result.Data;
+                if (confirmed == true)
+                {
+                    sections.IsDeleted = action;
+                    var response = await ApiHelper.PostAsync<SectionsModel, ApiResponse<int>>($"SectionManagement/UpdateSection?userId={MainLayout.CurrentUserId}", sections);
+
+                    if (response.IsSuccess)
+                    {
+                        Snackbar.Add("Section successfully updated", Severity.Success);
+                    }
+                    else
+                    {
+                        Snackbar.Add($"Error: {response.Message}", Severity.Error);
+                    }
+                    Snackbar.Add("Section successfully updated", Severity.Success);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            await OnGetSections();
         }
     }
 

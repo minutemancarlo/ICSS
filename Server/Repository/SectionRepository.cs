@@ -75,7 +75,8 @@ namespace ICSS.Server.Repository
                   WHERE SchoolYear = @SchoolYear 
                   AND YearLevel = @YearLevel 
                   AND CourseId = @CourseId 
-                  AND IsSummer = @IsSummer";
+                  AND IsSummer = @IsSummer
+                  AND IsDeleted = 0";
 
             var parameters = new DynamicParameters();
             parameters.Add("@SchoolYear", sections.SchoolYear);

@@ -69,8 +69,7 @@ namespace ICSS.Server.Controllers
             try
             {
                 await _sectionRepository.UpdateSectionAsync(sections, userId);
-                return Ok("Sections updated successfully.");
-
+                return Ok(new { Message = "Sections updated successfully." });                
             }
             catch (Exception ex)
             {
