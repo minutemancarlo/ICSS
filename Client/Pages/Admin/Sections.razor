@@ -93,8 +93,39 @@
                         </PagerContent>
                     </MudDataGrid>
                 </MudTabPanel>
-                <MudTabPanel Text="Student Section Assignment" Icon="fa-solid fa-house-medical">
+                <MudTabPanel Text="Student Section Assignment" Icon="fa-solid fa-house-medical" OnClick="OnGetSections">
+                    <MudStack Row>
+                        <MudSelect Disabled="!MainLayout.IsOnline" @bind-Value="selectedCourse" T="int?" Clearable Label="Select Course" AdornmentIcon="fa-solid fa-graduation-cap" Variant="Variant.Outlined" Margin="Margin.Dense" AdornmentColor="Color.Primary">
+                            @foreach (var item in courses)
+                            {
+                                <MudSelectItem T="int?" Value="@(item.CourseId)">@item.CourseName</MudSelectItem>
+                            }
+                        </MudSelect>
 
+                        <MudSelect Disabled="!MainLayout.IsOnline" T="string" @bind-Value="selectedSchoolYear" Clearable Label="Select School Year" AdornmentIcon="fa-solid fa-calendar-day" Variant="Variant.Outlined" Margin="Margin.Dense" AdornmentColor="Color.Primary">
+                            @foreach (var item in schoolYear)
+                            {
+                                <MudSelectItem Value="@(item)">@item</MudSelectItem>
+                            }
+                        </MudSelect>
+
+                        <MudSelect Disabled="!MainLayout.IsOnline" T="YearLevel?" @bind-Value="selectedYearLevel" Label="Select Year Level" Clearable="true" AdornmentIcon="fa-solid fa-hashtag" Variant="Variant.Outlined" Margin="Margin.Dense" AdornmentColor="Color.Primary">
+                            @foreach (var item in yearLevel)
+                            {
+                                <MudSelectItem T="YearLevel?" Value="@item">@item.ToString().Replace("_", " ")</MudSelectItem>
+                            }
+                        </MudSelect>
+
+                        <MudSelect Disabled="!MainLayout.IsOnline" T="string" @bind-Value="selectedSection" Clearable Label="Select School Year" AdornmentIcon="fa-solid fa-calendar-day" Variant="Variant.Outlined" Margin="Margin.Dense" AdornmentColor="Color.Primary">
+                            @foreach (var item in sectionFilter)
+                            {
+                                <MudSelectItem Value="@(item)">@item</MudSelectItem>
+                            }
+                        </MudSelect>
+                        <MudButton Size="Size.Small" StartIcon="fa-solid fa-search" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Info" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
+                            Search
+                        </MudButton>
+                    </MudStack>
                 </MudTabPanel>
             </MudTabs>
         </MudItem>
@@ -114,7 +145,15 @@
     private List<SectionsModel> sections = new();
     private bool isLoading = false;
 
+    private int? selectedCourse;
+    private string? selectedSchoolYear;
+    private YearLevel? selectedYearLevel;
+    private string? selectedSection;
 
+    private List<Course> courses = new();
+    private List<string> schoolYear = new();
+    private List<YearLevel?> yearLevel = new();
+    private List<string?> sectionFilter = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -275,9 +314,9 @@
                 var response = await ApiHelper.GetAsync<List<SectionsModel>>("SectionManagement/GetSections");
                 if (response.IsSuccess)
                 {
-                    sections = response.Data;
-
+                    sections = response.Data;                    
                     await LocalStorage.SetItemAsync("sections", sections);
+                    await LocalStorage.SetItemAsync("filteredCourses", courses);
                     StateHasChanged();
                 }
                 else
@@ -288,6 +327,8 @@
             else
             {
                 var cachedData = await LocalStorage.GetItemAsync<List<SectionsModel>>("sections");
+                var cachedCourses = await LocalStorage.GetItemAsync<List<Course>>("filteredCourses");
+                courses = cachedCourses ?? new List<Course>();
                 sections = cachedData ?? new List<SectionsModel>();
                 StateHasChanged();
             }
@@ -299,6 +340,11 @@
         }
         finally
         {
+            courses = sections.Where(s => s.Course != null).DistinctBy(s => s.Course.CourseName).Select(s => s.Course).ToList();
+            schoolYear = sections.Where(s => !string.IsNullOrEmpty(s.SchoolYear)).Select(s => s.SchoolYear).Distinct().ToList();
+            yearLevel = sections.Where(s => s.YearLevel != null).Select(s => s.YearLevel).Distinct().ToList();
+            sectionFilter = sections.Where(s => !string.IsNullOrEmpty(s.SectionName)).Select(s => s.SectionName!).Distinct().ToList();
+
             isLoading = false;
         }
     }
