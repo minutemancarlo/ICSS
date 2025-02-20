@@ -23,8 +23,8 @@ namespace ICSS.Shared
 
     public class SectionMember
     {
-        public int SectionId { get; set; }
-        public int StudentId { get; set; }
+        public int? SectionId { get; set; }
+        public int? StudentId { get; set; }
     }
 
 

@@ -3,6 +3,7 @@ using Dapper;
 using ICSS.Shared;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Text;
 
 namespace ICSS.Server.Repository
 {
@@ -107,7 +108,47 @@ namespace ICSS.Server.Repository
             return students;
         }
 
-        
+
+        public async Task<IEnumerable<SectionMember>> GetSectionMembers(int? sectionId)
+        {
+            var parameter = new DynamicParameters();
+            parameter.Add("@SectionId",sectionId);
+            var query = @"Select * from SectionMember Where SectionId = @SectionId";
+
+            var members = await _dbConnection.QueryAsync<SectionMember>(query,parameter);
+            return members;
+        }
+
+        public async Task UpdateSectionMemberAsync(List<SectionMember> members, string action)
+        {
+            var query = new StringBuilder();
+            var parameters = new DynamicParameters();
+
+            for (int i = 0; i < members.Count; i++)
+            {
+                if (action.Equals("insert", StringComparison.OrdinalIgnoreCase))
+                {
+                    query.AppendLine($@"
+                    INSERT INTO SectionMember (StudentId, SectionId)
+                    VALUES (@StudentId{i}, @SectionId{i});");
+
+                    parameters.Add($"StudentId{i}", members[i].StudentId);
+                    parameters.Add($"SectionId{i}", members[i].SectionId);
+                }
+                else if (action.Equals("delete", StringComparison.OrdinalIgnoreCase))
+                {
+                    query.AppendLine($@"
+                    DELETE FROM SectionMember 
+                    WHERE StudentId = @StudentId{i} AND SectionId = @SectionId{i};");
+
+                    parameters.Add($"StudentId{i}", members[i].StudentId);
+                    parameters.Add($"SectionId{i}", members[i].SectionId);
+                }
+            }
+
+            await _dbConnection.ExecuteAsync(query.ToString(), parameters);
+        }
+
 
     }
 }

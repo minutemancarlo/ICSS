@@ -177,6 +177,7 @@
     private string? selectedSchoolYear;
     private YearLevel? selectedYearLevel;
     private string? selectedSection;
+    private int? selectedSectionId;
 
     private List<Course> courses = new();
     private List<string> schoolYear = new();
@@ -284,8 +285,7 @@
                     else
                     {
                         Snackbar.Add($"Error: {response.Message}", Severity.Error);
-                    }
-                    Snackbar.Add("Section successfully updated", Severity.Success);
+                    }                    
                 }
             }
         }
@@ -378,7 +378,8 @@
             courses = sections.Where(s => s.Course != null).DistinctBy(s => s.Course.CourseName).Select(s => s.Course).ToList();
             schoolYear = sections.Where(s => !string.IsNullOrEmpty(s.SchoolYear)).Select(s => s.SchoolYear).Distinct().ToList();
             yearLevel = sections.Where(s => s.YearLevel != null).Select(s => s.YearLevel).Distinct().ToList();
-            sectionFilter = sections.Where(s => !string.IsNullOrEmpty(s.SectionName)).Select(s => s.SectionName!).Distinct().ToList();
+            sectionFilter = sections.Where(s => !string.IsNullOrEmpty(s.SectionName) && !s.IsDeleted).Select(s => s.SectionName!).Distinct().OrderBy(s => s).ToList();
+
             await OnGetStudents();
             isLoading = false;
         }
@@ -412,6 +413,7 @@
                 else
                 {
                     _endCollection = response.Data.Students;
+                    selectedSectionId = response.Data.Sections.SectionId;
                     sectionFound = true;
                 }
 
@@ -437,13 +439,45 @@
         selectedSchoolYear = null;
         selectedYearLevel = null;
         selectedSection = null;
+        selectedSectionId = null;
         sectionFound = false;
         _endCollection.Clear();
     }
 
     private async Task OnSaveChanges()
     {
+        try
+        {
+            List<SectionMember> members = new();
 
+            foreach (var item in _endCollection)
+            {                
+                members.Add(new SectionMember
+                    {
+                        SectionId = selectedSectionId,
+                        StudentId = item.Id
+                    });
+            }
+
+            var response = await ApiHelper.PostAsync<List<SectionMember>, ApiResponse<int>>($"SectionManagement/UpdateSectionMembers", members);
+
+            if (response.IsSuccess)
+            {
+                Snackbar.Add("Section Members successfully updated", Severity.Success);
+            }
+            else
+            {
+                Snackbar.Add($"Error: {response.Message}", Severity.Error);
+            }
+
+
+
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
+
+        }
     }
 
 

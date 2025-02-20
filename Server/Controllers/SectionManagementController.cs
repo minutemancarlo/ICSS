@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using ICSS.Server.Repository;
 using TagLib.Ape;
+using Markdig.Renderers.Html;
 
 namespace ICSS.Server.Controllers
 {
@@ -108,6 +109,42 @@ namespace ICSS.Server.Controllers
                 return StatusCode(500, new { Message = ex.Message });
             }
         }
+
+        [HttpPost("UpdateSectionMembers")]
+        public async Task<IActionResult> UpdateSectionMembers([FromBody] List<SectionMember> member)
+        {
+            if (member == null || !member.Any())
+                return BadRequest("Invalid section member data.");
+
+            try
+            {
+                var sectionId = member.First().SectionId;
+                var currentMembers = await _sectionRepository.GetSectionMembers(sectionId);
+
+                var newMembers = member.Select(m => m.StudentId).ToList();
+                var existingMembers = currentMembers.Select(m => m.StudentId).ToList();
+
+                var membersToDelete = existingMembers
+                                        .Where(em => !newMembers.Contains(em))
+                                        .Select(id => new SectionMember { StudentId = id, SectionId = sectionId })
+                                        .ToList();
+
+                if (membersToDelete.Any())
+                    await _sectionRepository.UpdateSectionMemberAsync(membersToDelete, "delete");
+
+                await _sectionRepository.UpdateSectionMemberAsync(member, "insert");
+
+                return Ok(new { Message = "Section Members updated successfully." });
+            }
+            catch (Exception ex)
+            {
+                
+                return StatusCode(500, new { Message = ex.Message });
+            }
+        }
+
+
+
 
     }
 }
