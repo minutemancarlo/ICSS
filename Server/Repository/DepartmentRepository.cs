@@ -2,6 +2,7 @@
 using ICSS.Client.Pages.Admin;
 using ICSS.Shared;
 using System.Data;
+using System.Text;
 
 namespace ICSS.Server.Repository
 {
@@ -31,22 +32,41 @@ namespace ICSS.Server.Repository
             return await _dbConnection.ExecuteScalarAsync<int>("InsertUpdateDepartment", parameters, commandType: CommandType.StoredProcedure);
         }
 
-        public async Task SaveDepartmentMembersAsync(List<DepartmentMember> departmentMembers)
+        public async Task SaveDepartmentMembersAsync(List<DepartmentMember> members, string action)
         {
-            var departmentMemberTable = new DataTable();
-            departmentMemberTable.Columns.Add("DepartmentId", typeof(int));
-            departmentMemberTable.Columns.Add("FacultyId", typeof(int));
+            var query = new StringBuilder();
+            var parameters = new DynamicParameters();
 
-            foreach (var member in departmentMembers)
+            for (int i = 0; i < members.Count; i++)
             {
-                departmentMemberTable.Rows.Add(member.Departments.DepartmentId, member.FacultyModel.FacultyId);
+                if (action.Equals("insert", StringComparison.OrdinalIgnoreCase))
+                {
+                    query.AppendLine($@"
+                    INSERT INTO DepartmentMember (FacultyId, DepartmentId)
+                    VALUES (@FacultyId{i}, @DepartmentId{i});");
+
+                    parameters.Add($"FacultyId{i}", members[i].FacultyModel.FacultyId);
+                    parameters.Add($"DepartmentId{i}", members[i].Departments.DepartmentId);
+                }
+                else if (action.Equals("delete", StringComparison.OrdinalIgnoreCase))
+                {
+                    query.AppendLine($@"
+                    DELETE FROM DepartmentMember 
+                    WHERE FacultyId = @FacultyId{i} AND DepartmentId = @DepartmentId{i};");
+
+                    parameters.Add($"FacultyId{i}", members[i].FacultyModel.FacultyId);
+                    parameters.Add($"DepartmentId{i}", members[i].Departments.DepartmentId);
+                }
             }
 
-            await _dbConnection.ExecuteAsync(
-                "InsertOrUpdateDepartmentMembers",
-                new { DepartmentMembers = departmentMemberTable.AsTableValuedParameter("DepartmentMemberType") },
-                commandType: CommandType.StoredProcedure
-            );
+            await _dbConnection.ExecuteAsync(query.ToString(), parameters);
+        }
+
+        public async Task<IEnumerable<FacultyModel>> GetDepartmentMembers(int? departmentId)
+        {
+            var query = "SELECT FacultyId, DepartmentId FROM DepartmentMember WHERE DepartmentId = @DepartmentId";
+                        
+            return await _dbConnection.QueryAsync<FacultyModel>(query, new { DepartmentId = departmentId });
         }
 
 

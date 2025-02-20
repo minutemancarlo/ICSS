@@ -129,19 +129,25 @@ namespace ICSS.Server.Controllers
                                         .Select(id => new SectionMember { StudentId = id, SectionId = sectionId })
                                         .ToList();
 
+                var membersToInsert = newMembers
+                                        .Where(nm => !existingMembers.Contains(nm))
+                                        .Select(id => new SectionMember { StudentId = id, SectionId = sectionId })
+                                        .ToList();
+
                 if (membersToDelete.Any())
                     await _sectionRepository.UpdateSectionMemberAsync(membersToDelete, "delete");
 
-                await _sectionRepository.UpdateSectionMemberAsync(member, "insert");
+                if (membersToInsert.Any())
+                    await _sectionRepository.UpdateSectionMemberAsync(membersToInsert, "insert");
 
                 return Ok(new { Message = "Section Members updated successfully." });
             }
             catch (Exception ex)
             {
-                
                 return StatusCode(500, new { Message = ex.Message });
             }
         }
+
 
 
 

@@ -75,6 +75,7 @@ namespace ICSS.Server.Controllers
         }
 
 
+        
         [HttpPost("SaveDepartmentMembers")]
         public async Task<IActionResult> SaveDepartmentMembers([FromBody] List<DepartmentMember> departmentMembers)
         {
@@ -85,7 +86,30 @@ namespace ICSS.Server.Controllers
                     return BadRequest("Invalid department members data or no members provided.");
                 }
 
-                await _departmentRepository.SaveDepartmentMembersAsync(departmentMembers);
+                var departmentId = departmentMembers.First().Departments!.DepartmentId;
+                var currentMembers = await _departmentRepository.GetDepartmentMembers(departmentId);
+
+                var newMembers = departmentMembers.Select(m => m.FacultyModel!.FacultyId).ToList();
+                var existingMembers = currentMembers.Select(m => m.FacultyId).ToList();
+
+                var membersToDelete = existingMembers
+                                      .Where(em => !newMembers.Contains(em))
+                                      .Select(id => new DepartmentMember
+                                      {
+                                          FacultyModel = new FacultyModel { FacultyId = id },
+                                          Departments = new Departments { DepartmentId = departmentId }
+                                      })
+                                      .ToList();
+
+                if (membersToDelete.Any())
+                    await _departmentRepository.SaveDepartmentMembersAsync(membersToDelete, "delete");
+
+                var membersToInsert = departmentMembers
+                                        .Where(m => !existingMembers.Contains(m.FacultyModel!.FacultyId))
+                                        .ToList();
+
+                if (membersToInsert.Any())
+                    await _departmentRepository.SaveDepartmentMembersAsync(membersToInsert, "insert");
 
                 return Ok(new { Message = "Department members saved successfully." });
             }
@@ -94,5 +118,6 @@ namespace ICSS.Server.Controllers
                 return StatusCode(500, $"An error occurred while saving department members. Error: {ex.Message}");
             }
         }
+
     }
 }
