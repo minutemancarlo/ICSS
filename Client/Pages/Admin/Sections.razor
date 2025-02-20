@@ -94,7 +94,7 @@
                     </MudDataGrid>
                 </MudTabPanel>
                 <MudTabPanel Text="Student Section Assignment" Icon="fa-solid fa-house-medical" OnClick="OnGetSections">
-                    <MudStack Row>
+                    <MudStack Row Class="pb-3">
                         <MudSelect Disabled="!MainLayout.IsOnline" @bind-Value="selectedCourse" T="int?" Clearable Label="Select Course" AdornmentIcon="fa-solid fa-graduation-cap" Variant="Variant.Outlined" Margin="Margin.Dense" AdornmentColor="Color.Primary">
                             @foreach (var item in courses)
                             {
@@ -122,10 +122,38 @@
                                 <MudSelectItem Value="@(item)">@item</MudSelectItem>
                             }
                         </MudSelect>
-                        <MudButton Size="Size.Small" StartIcon="fa-solid fa-search" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Info" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
+                        <MudButton OnClick="OnGetFilteredSection" Size="Size.Small" StartIcon="fa-solid fa-search" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Info" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
                             Search
                         </MudButton>
                     </MudStack>
+                    <MudStack Row>
+                        @if (sectionFound)
+                        {
+                            <MudBreakpointProvider>
+                                <MudHidden Breakpoint="Breakpoint.MdAndUp" Invert="true">
+                                    <MudButton Size="Size.Small" OnClick="OnDiscardChanges" StartIcon="fa-solid fa-ban" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Warning" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
+                                        Discard Changes
+                                    </MudButton>
+                                    <MudButton Size="Size.Small" OnClick="OnSaveChanges" StartIcon="fa-solid fa-floppy-disk" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Success" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
+                                        Save Changes
+                                    </MudButton>
+                                </MudHidden>
+                                <MudHidden Breakpoint="Breakpoint.MdAndDown" Invert="true">
+                                    <MudIconButton ButtonType="ButtonType.Button" OnClick="OnDiscardChanges" Variant="Variant.Filled" Class="my-2 mx-1" Size="Size.Small" Icon="fa-solid fa-ban" Color="Color.Warning" Disabled="!MainLayout.IsOnline" />
+                                    <MudIconButton ButtonType="ButtonType.Button" OnClick="OnSaveChanges" Variant="Variant.Filled" Class="my-2 mx-1" Size="Size.Small" Icon="fa-solid fa-floppy-disk" Color="Color.Success" Disabled="!MainLayout.IsOnline" />
+                                </MudHidden>
+                            </MudBreakpointProvider>
+                        }
+                    </MudStack>
+
+                    <MudTransferList @ref="_transferList" T="StudentModel" @bind-StartCollection="_startCollection" @bind-EndCollection="_endCollection" Color="Color.Primary"
+                    StyleListCommon="background-color: var(--mud-palette-background-gray); width: 100%" MultiSelection="true" MaxItems="10" SelectAllType="SelectAllType.Buttons"
+                    ClassStartList="w-100" ClassEndList="w-100" ToStringFunc="@(e => e?.Name)"
+                    ButtonVariant="Variant.Filled"
+                    AllowDoubleClick="false" SearchBoxStart SearchBoxEnd
+                    StartTitle="Available Students" EndTitle="Added Students" />
+
+
                 </MudTabPanel>
             </MudTabs>
         </MudItem>
@@ -154,6 +182,13 @@
     private List<string> schoolYear = new();
     private List<YearLevel?> yearLevel = new();
     private List<string?> sectionFilter = new();
+
+    MudTransferList<StudentModel> _transferList = new();
+    ICollection<StudentModel> _startCollection = new List<StudentModel>();
+
+    ICollection<StudentModel> _endCollection = new List<StudentModel>();
+
+    private bool sectionFound = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -314,7 +349,7 @@
                 var response = await ApiHelper.GetAsync<List<SectionsModel>>("SectionManagement/GetSections");
                 if (response.IsSuccess)
                 {
-                    sections = response.Data;                    
+                    sections = response.Data;
                     await LocalStorage.SetItemAsync("sections", sections);
                     await LocalStorage.SetItemAsync("filteredCourses", courses);
                     StateHasChanged();
@@ -344,8 +379,96 @@
             schoolYear = sections.Where(s => !string.IsNullOrEmpty(s.SchoolYear)).Select(s => s.SchoolYear).Distinct().ToList();
             yearLevel = sections.Where(s => s.YearLevel != null).Select(s => s.YearLevel).Distinct().ToList();
             sectionFilter = sections.Where(s => !string.IsNullOrEmpty(s.SectionName)).Select(s => s.SectionName!).Distinct().ToList();
-
+            await OnGetStudents();
             isLoading = false;
+        }
+    }
+
+
+    private async Task OnGetFilteredSection()
+    {
+
+
+        try
+        {
+            if (selectedCourse is null || selectedSchoolYear is null || selectedYearLevel is null || selectedSection is null)
+            {
+                Snackbar.Add("Please apply all filter", Severity.Warning);
+                return;
+            }
+
+
+            var queryString = $"SectionManagement/GetFilteredSection?CourseId={selectedCourse}&SectionName={selectedSection}&YearLevel={selectedYearLevel}&SchoolYear={selectedSchoolYear}";
+            var response = await ApiHelper.GetAsync<SectionResponse>(queryString);
+
+            if (response.IsSuccess)
+            {
+                if (response.Data.Sections is null)
+                {
+                    Snackbar.Add("Section Not Found", Severity.Error);
+                    sectionFound = false;
+
+                }
+                else
+                {
+                    _endCollection = response.Data.Students;
+                    sectionFound = true;
+                }
+
+                StateHasChanged();
+            }
+            else
+            {
+                Snackbar.Add($"Failed to filter: {response.Message}", Severity.Error);
+            }
+
+
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
+        }
+
+    }
+
+    private void OnDiscardChanges()
+    {
+        selectedCourse = null;
+        selectedSchoolYear = null;
+        selectedYearLevel = null;
+        selectedSection = null;
+        sectionFound = false;
+        _endCollection.Clear();
+    }
+
+    private async Task OnSaveChanges()
+    {
+
+    }
+
+
+    private async Task OnGetStudents()
+    {
+        try
+        {
+
+            var response = await ApiHelper.GetAsync<List<StudentModel>>("SectionManagement/GetAvailableStudents");
+            if (response.IsSuccess)
+            {
+                _startCollection = response.Data;
+
+                StateHasChanged();
+            }
+            else
+            {
+                Snackbar.Add($"Failed to load students: {response.Message}", Severity.Error);
+            }
+
+
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
         }
     }
 

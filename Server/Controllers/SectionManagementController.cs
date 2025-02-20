@@ -76,5 +76,38 @@ namespace ICSS.Server.Controllers
                 return StatusCode(500, $"An error occurred: {ex.Message}");
             }
         }
+
+        [HttpGet("GetAvailableStudents")]
+        public async Task<ActionResult<IEnumerable<StudentModel>>> GetAvailableStudents()
+        {
+            try
+            {
+
+                var students = await _sectionRepository.GetAvailableStudents();
+
+                return Ok(students);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
+        }
+
+        [HttpGet("GetFilteredSection")]
+        public async Task<ActionResult<SectionResponse>> GetFilteredSection([FromQuery] Sections section)
+        {
+            try
+            {
+
+                var sections = await _sectionRepository.GetSectionsSingleAsync(section);
+
+                return Ok(sections);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
+        }
+
     }
 }

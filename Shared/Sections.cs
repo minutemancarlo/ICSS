@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ICSS.Shared
 {
-    public class Sections: BaseModel
+    public class Sections : BaseModel
     {
         public int? SectionId { get; set; }
         public string? SchoolYear { get; set; }
@@ -21,20 +21,25 @@ namespace ICSS.Shared
     }
 
 
-    public class SectionRequest
+    public class SectionMember
     {
-        public int? CourseId { get; set; }
-        public YearLevel? YearLevel { get; set; }
-        public bool IsSummer { get; set; }
-        public string? SchoolYear { get; set; }
+        public int SectionId { get; set; }
+        public int StudentId { get; set; }
+    }
+
+
+    public class SectionResponse
+    {
+        public Sections? Sections { get; set; }
+        public List<StudentModel>? Students { get; set; }
     }
 
     public enum YearLevel
-    {        
-        First_Year=1,
-        Second_Year=2,
-        Third_Year=3,
-        Fourth_Year=4
-        
+    {
+        First_Year = 1,
+        Second_Year = 2,
+        Third_Year = 3,
+        Fourth_Year = 4
+
     }
 }

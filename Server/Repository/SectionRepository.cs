@@ -69,25 +69,45 @@ namespace ICSS.Server.Repository
             return affectedRows > 0;
         }
 
-        public async Task<int> GetSectionsSingleAsync(Sections sections)
+        public async Task<SectionResponse> GetSectionsSingleAsync(Sections sections)
         {
-            var query = @"SELECT COUNT(*) FROM Sections 
-                  WHERE SchoolYear = @SchoolYear 
-                  AND YearLevel = @YearLevel 
-                  AND CourseId = @CourseId 
-                  AND IsSummer = @IsSummer
-                  AND IsDeleted = 0";
+            var query = "GetFilteredSectionsWithStudents";
 
             var parameters = new DynamicParameters();
             parameters.Add("@SchoolYear", sections.SchoolYear);
             parameters.Add("@YearLevel", sections.YearLevel);
             parameters.Add("@CourseId", sections.CourseId);
-            parameters.Add("@IsSummer", sections.IsSummer);
+            parameters.Add("@SectionName", sections.SectionName);
 
-            return await _dbConnection.ExecuteScalarAsync<int>(query, parameters);
+            using (var multi = await _dbConnection.QueryMultipleAsync(query, parameters, commandType: CommandType.StoredProcedure))
+            {
+                var section = multi.ReadFirstOrDefault<Sections>();
+                var students = multi.Read<StudentModel>().ToList();
+
+                var response = new SectionResponse
+                {
+                    Sections = section,
+                    Students = students
+                };
+
+                return response;
+            }
         }
 
 
+
+        public async Task<IEnumerable<StudentModel>> GetAvailableStudents()
+        {
+            var query = @"SELECT A.*
+                        FROM Students A 
+                        LEFT JOIN SectionMember B ON A.Id = B.StudentId 
+                        LEFT JOIN Sections C on B.SectionId = C.SectionId
+                        WHERE B.StudentId IS NULL AND (C.IsActive = 0 OR C.IsActive IS NULL)";
+            var students = await _dbConnection.QueryAsync<StudentModel>(query);
+            return students;
+        }
+
+        
 
     }
 }
