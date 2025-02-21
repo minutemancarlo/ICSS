@@ -105,6 +105,7 @@
                             </TemplateColumn>
                             <PropertyColumn Property="x => x.SubjectCode" Title="Subject Code" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
                             <PropertyColumn Property="x => x.SubjectName" Title="Subject Name" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
+                            <PropertyColumn Property="x => x.Departments.DepartmentName" Title="Department" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
                             <PropertyColumn Property="x => x.LectureHour" Title="Lecture Hour" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
                             <PropertyColumn Property="x => x.LabHour" Title="Laboratory Hour" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
                             <PropertyColumn Property="x => x.MaxStudent" Title="Maximum Student" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
@@ -232,12 +233,12 @@
                 };
 
             var parameters = new DialogParameters<SubjectDialog>
-            {
-                { x => x.Action, "Add" },
-                { x => x.Icon, "circle-plus" },
-                {x => x.subjects, new Subjects()},
-                { x => x.currentUserId, MainLayout.CurrentUserId }
-            };
+{
+    { x => x.Action, "Add" },
+    { x => x.Icon, "circle-plus" },
+    { x => x.subjects, new Subjects { Departments = new Departments() }},
+    { x => x.currentUserId, MainLayout.CurrentUserId }
+};
 
             var dialog = await DialogService.ShowAsync<SubjectDialog>("", parameters, options);
             var result = await dialog.Result;

@@ -52,6 +52,7 @@ namespace ICSS.Server.Repository
             parameters.Add("@Units", subject.Units, DbType.Decimal);
             parameters.Add("@MaxStudent", subject.MaxStudent, DbType.Int32);
             parameters.Add("@IsActive", subject.IsActive, DbType.Boolean);
+            parameters.Add("@DepartmentId", subject.Departments.DepartmentId, DbType.Int32);
             parameters.Add("@User", subject.UpdatedBy ?? subject.CreatedBy, DbType.String);
 
             return await _dbConnection.ExecuteScalarAsync<int>("InsertUpdateSubject", parameters, commandType: CommandType.StoredProcedure);
@@ -59,7 +60,18 @@ namespace ICSS.Server.Repository
 
         public async Task<IEnumerable<Subjects>> GetSubjectsAsync()
         {
-            return await _dbConnection.QueryAsync<Subjects>("GetSubjects", commandType: CommandType.StoredProcedure);
+            var result = await _dbConnection.QueryAsync<Subjects, Departments, Subjects>(
+       "GetSubjects",
+       (subject, department) =>
+       {
+           subject.Departments = department;
+           return subject;
+       },
+       commandType: CommandType.StoredProcedure,
+       splitOn: "DepartmentId"
+   );
+
+            return result;
         }
 
     }
