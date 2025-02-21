@@ -22,4 +22,14 @@ namespace ICSS.Shared
         public Departments? Departments { get; set; }
     }
 
+
+    public class Rooms : BaseModel
+    {
+        public int? RoomId { get; set; }
+        public string? RoomCode { get; set; }
+        public string? RoomName { get; set; }
+        public bool IsAvailable { get; set; } = true;
+        public bool IsDeleted { get; set; } = false;
+        public Departments? Departments { get; set; }
+    }
 }

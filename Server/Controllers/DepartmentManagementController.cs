@@ -58,6 +58,70 @@ namespace ICSS.Server.Controllers
 
         }
 
+
+        [HttpPost("InsertRoom")]
+        public async Task<IActionResult> InsertRoom([FromBody] Rooms rooms)
+        {
+            try
+            {
+                if (rooms == null)
+                {
+                    return BadRequest("Invalid room data.");
+                }
+
+                var result = await _departmentRepository.InsertRoomAsync(rooms);
+
+                return Ok(new { Message = "Room inserted successfully."});
+
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred while inserting room. Error: {ex.Message}");
+            }
+        }
+
+
+        [HttpPut("UpdateRoom")]
+        public async Task<IActionResult> UpdateRoom([FromBody] Rooms rooms)
+        {
+            try
+            {
+                if (rooms == null || rooms.RoomId <= 0)
+                {
+                    return BadRequest("Invalid room data.");
+                }
+
+                var result = await _departmentRepository.UpdateRoomAsync(rooms);
+
+                return Ok(new { Message = "Room updated successfully.", RowsAffected = result });
+
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred while updating room.Error: {ex.Message}");
+            }
+
+
+        }
+
+
+        [HttpGet("GetAllRooms")]
+        public async Task<ActionResult<IEnumerable<Rooms>>> GetAllRooms()
+        {
+            try
+            {
+
+                var rooms = await _departmentRepository.GetRoomsAsync();
+
+                return Ok(rooms);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
+        }
+
+
         [HttpGet("GetAllDepartments")]
         public async Task<ActionResult<IEnumerable<Departments>>> GetAllDepartments()
         {

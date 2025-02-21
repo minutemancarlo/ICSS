@@ -70,6 +70,49 @@ namespace ICSS.Server.Repository
         }
 
 
+        public async Task<IEnumerable<Rooms>> GetRoomsAsync()
+        {
+            var sql = "GetRooms";
+            var result = await _dbConnection.QueryAsync<Rooms, Departments, Rooms>(
+                sql,
+                (room, department) =>
+                {
+                    room.Departments = department;
+                    return room;
+                },
+                splitOn: "DepartmentId",
+                commandType: CommandType.StoredProcedure
+            );
+            return result;
+        }
+
+        public async Task<int> InsertRoomAsync(Rooms rooms)
+        {
+            var parameters = new DynamicParameters();            
+            parameters.Add("@RoomCode", rooms.RoomCode, DbType.String);
+            parameters.Add("@RoomName", rooms.RoomName, DbType.String);            
+            parameters.Add("@IsAvailable", rooms.IsAvailable, DbType.Boolean);
+            parameters.Add("@DepartmentId", rooms.Departments.DepartmentId, DbType.Int32);
+            parameters.Add("@CreatedBy",  rooms.CreatedBy, DbType.String);
+
+            return await _dbConnection.ExecuteScalarAsync<int>("InsertRoom", parameters, commandType: CommandType.StoredProcedure);
+        }
+
+        public async Task<int> UpdateRoomAsync(Rooms rooms)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("@RoomId", rooms.RoomId, DbType.Int32);
+            parameters.Add("@RoomCode", rooms.RoomCode, DbType.String);
+            parameters.Add("@RoomName", rooms.RoomName, DbType.String);
+            parameters.Add("@IsAvailable", rooms.IsAvailable, DbType.Boolean);
+            parameters.Add("@IsDeleted", rooms.IsDeleted, DbType.Boolean);
+            parameters.Add("@DepartmentId", rooms.Departments.DepartmentId, DbType.Int32);
+            parameters.Add("@UpdatedBy", rooms.UpdatedBy, DbType.String);
+
+            return await _dbConnection.ExecuteScalarAsync<int>("UpdateRoom", parameters, commandType: CommandType.StoredProcedure);
+        }
+
+
 
     }
 }
