@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using ICSS.Shared;
 using System.Data;
 
 namespace ICSS.Server.Repository
@@ -23,6 +24,32 @@ namespace ICSS.Server.Repository
 
             return true; 
         }
+
+        public async Task<bool> UpdateAdminDepartmentAsync(int? departmentId,string? userId)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("@UserId", userId, DbType.String);
+            parameters.Add("@DepartmentId", departmentId, DbType.Int32);            
+
+            await _dbConnection.ExecuteAsync("UpdateAdminDepartment", parameters, commandType: CommandType.StoredProcedure);
+
+            return true;
+        }
+
+        public async Task<Departments?> CheckUserDepartment(string? userId)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("@UserId", userId, DbType.String);
+
+            return await _dbConnection.QueryFirstOrDefaultAsync<Departments>(
+                "GetAdminDepartment",
+                parameters,
+                commandType: CommandType.StoredProcedure
+            );
+        }
+ 
+
+
     }
 }
  

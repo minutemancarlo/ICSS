@@ -36,8 +36,8 @@ namespace ICSS.Server.Controllers
                 foreach (var user in users)
                 {
                     var roles = await _managementApiClient.Users.GetRolesAsync(user.UserId, new PaginationInfo());
-                    var role = roles.FirstOrDefault()?.Name; 
-
+                    var role = roles.FirstOrDefault()?.Name;
+                    var department = await _userRepository.CheckUserDepartment(user.UserId);
                     userslist.Add(new UserProperties
                     {
                         Email = user.Email,
@@ -53,7 +53,8 @@ namespace ICSS.Server.Controllers
                                    user.UserId.ToLower().Contains("google-oauth2") ? "Google" :
                                    "Unknown Provider",
                         Picture = user.Picture,
-                        Role = role 
+                        Role = role,
+                        Departments = department
                     });
                 }
 
@@ -154,7 +155,12 @@ namespace ICSS.Server.Controllers
                 {
                     Roles = new string[] { user.RoleId }
                 };
-                   await _managementApiClient.Users.AssignRolesAsync(user.UserId, currentData);                
+                   await _managementApiClient.Users.AssignRolesAsync(user.UserId, currentData);
+
+               _ = await _userRepository.CheckAndInsertSystemIdAsync(user.UserId, user.Name, user.Email);
+                
+
+               _ = await _userRepository.UpdateAdminDepartmentAsync(user.DepartmentId, user.UserId);
                 return Ok(new { Message = "Operation completed successfully." });
             }
             catch (Exception ex)

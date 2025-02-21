@@ -15,6 +15,15 @@
                 <MudToggleItem Value="@item.Id" Text="@item.Name" />
             }
         </MudToggleGroup>
+        @if (RoleValue != Roles.FirstOrDefault(x => x.Name == "Student")?.Id)
+        {
+            <MudSelect @bind-Value="userDepartment" Required RequiredError="Department is Required" T="int?" Clearable Label="Select Department" AdornmentIcon="fa-solid fa-graduation-cap" Variant="Variant.Outlined" Margin="Margin.Dense" AdornmentColor="Color.Primary">
+                @foreach (var item in departments)
+                {
+                    <MudSelectItem T="int?" Value="@(item.DepartmentId)">@item.DepartmentName</MudSelectItem>
+                }
+            </MudSelect>
+        }
     </DialogContent>
     <DialogActions>
         <MudButton Disabled="_loading" Size="Size.Medium" OnClick="Cancel">Cancel</MudButton>
@@ -38,11 +47,14 @@
 
     [Parameter] public string CurrentRole { get; set; }
     [Parameter] public List<RolesProperty> Roles { get; set; }
+    [Parameter] public int? userDepartment { get; set; }
     [Parameter] public string? userId { get; set; }
+    [Parameter] public string? name { get; set; }
+    [Parameter] public string? email { get; set; }
     private string? RoleValue;
 
     private bool _loading = false;
-
+    private List<Departments> departments = new();
 
     void Cancel() => MudDialog.Cancel();
 
@@ -51,6 +63,7 @@
         await base.OnParametersSetAsync();
         var role = Roles.FirstOrDefault(x => x.Name == CurrentRole);
         RoleValue = role?.Id;
+        await OnLoadDepartments();
     }
 
     private async Task OnSubmit()
@@ -61,8 +74,10 @@
             var payload = new SetUserRole
                 {
                     RoleId = RoleValue,
-                    UserId = userId
-
+                    UserId = userId,
+                    Name = name,
+                    Email = email,
+                    DepartmentId = userDepartment
                 };
             var response = await ApiHelper.PostAsync<SetUserRole, ApiResponse<int>>("UserManagement/SetUserRole", payload);
 
@@ -83,6 +98,36 @@
         {
             _loading = false;
         }
+    }
+
+
+    private async Task OnLoadDepartments()
+    {
+
+
+        try
+        {
+
+            var response = await ApiHelper.GetAsync<List<Departments>>("DepartmentManagement/GetAllDepartments");
+            if (response.IsSuccess)
+            {
+                departments = response.Data;
+
+                StateHasChanged();
+            }
+            else
+            {
+                Snackbar.Add($"Failed to load departments: {response.Message}", Severity.Error);
+            }
+
+
+
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
+        }
+
     }
 
 

@@ -16,6 +16,6 @@ namespace ICSS.Shared
     }
 
     public enum TaskStatus { On_Queue,Processing,Success, Failed, Cancelled }
-    public enum TaskType {Student,Faculty }
+    public enum TaskType {Student,Faculty,Schedule,Per_Department_Schedule }
 
 }

@@ -45,7 +45,7 @@
                         <CellTemplate>
                             <MudStack Row>
                                 <MudTooltip Text="Update Role">
-                                    <MudIconButton Icon="fa-solid fa-user-shield" Size="Size.Medium" Color="Color.Info" Variant="Variant.Filled" Disabled="@(context.Item.User_Id==MainLayout.CurrentUserId||!MainLayout.IsOnline)" OnClick="@(async () => await OnShowUpdateRole(context.Item.Role,context.Item.User_Id))" />
+                                    <MudIconButton Icon="fa-solid fa-user-shield" Size="Size.Medium" Color="Color.Info" Variant="Variant.Filled" Disabled="@(context.Item.User_Id==MainLayout.CurrentUserId||!MainLayout.IsOnline)" OnClick="@(async () => await OnShowUpdateRole(context.Item.Role,context.Item.User_Id,context.Item.Departments?.DepartmentId,$"{context.Item.FirstName} {context.Item.LastName}",context.Item.Email))" />
                                 </MudTooltip>
                                 <MudTooltip Text="@(context.Item.Blocked?"Enable Access":"Disable Access")">
                                     <MudIconButton Icon="@(!context.Item.Blocked?"fa-solid fa-user-slash":"fa-solid fa-user")" Size="Size.Medium" Color="@(context.Item.Blocked?Color.Success:Color.Error)" Variant="Variant.Filled" Disabled="@(context.Item.User_Id==MainLayout.CurrentUserId||!MainLayout.IsOnline)" OnClick="@(() => OnUpdateUserAccess(context.Item.User_Id,context.Item.Blocked?"enable":"disable"))" />
@@ -73,6 +73,7 @@
                     <PropertyColumn Property="x => x.Email" Title="Email Address" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
                     <PropertyColumn Property="x => x.Provider" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
                     <PropertyColumn Property="x => x.Role" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
+                    <PropertyColumn Property="x => x.Departments.DepartmentName" Title="Department Access" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
                     <PropertyColumn Property="x => x.Blocked" Title="Access Status" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
                         <CellTemplate>
                             @if (context.Item.Blocked)
@@ -142,7 +143,7 @@
            }).ToList();
     }
 
-    private async Task OnShowUpdateRole(string role,string userid)
+    private async Task OnShowUpdateRole(string role,string userid,int? departmentId,string? name, string? email)
     {
         var options = new DialogOptions
             {
@@ -158,7 +159,10 @@
             {
                 { x => x.CurrentRole, role },
                 {x => x.Roles, rolesProperty},
-                {x => x.userId, userid }
+                {x => x.userId, userid },
+                {x => x.userDepartment, departmentId},
+                {x => x.name, name},
+                {x => x.email, email}
             };
 
         var dialog = await DialogService.ShowAsync<UpdateRoleDialog>("",parameters, options);

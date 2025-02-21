@@ -18,6 +18,7 @@ namespace ICSS.Shared
         public string Provider { get; set; }
         public string? Picture { get; set; }
         public bool isBinded { get; set; } = false;
+        public Departments? Departments { get; set; }
         public string? Role { get; set; }
     }
 
@@ -32,6 +33,9 @@ namespace ICSS.Shared
     {
         public string UserId { get; set; }
         public string RoleId { get; set; }
+        public string? Name { get; set; }
+        public string? Email { get; set; }
+        public int? DepartmentId { get; set; }
     }
 
 }
