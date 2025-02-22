@@ -1,9 +1,9 @@
 ﻿@page "/manage-schedules"
 @attribute [Authorize(Roles = "Admin,Faculty")]
 @layout MainLayout
-
-
-
+@using ICSS.Shared
+@using SectionsModel = ICSS.Shared.Sections
+@using TaskStatus = ICSS.Shared.TaskStatus
 <MudContainer Class="py-4 py-sm-8 py-md-12 py-lg-16 py-xl-20">
     <MudGrid>
         <MudItem xs="12">
@@ -22,17 +22,103 @@
             <MudDivider />
         </MudItem>
         <MudItem xs="12">
-            <MudAlert Severity="Severity.Info" Variant="Variant.Filled" Style="margin-bottom: 16px;">
+            @* <MudAlert Severity="Severity.Info" Variant="Variant.Filled" Style="margin-bottom: 16px;">
                 Note: You are generating schedule for all departments.
-            </MudAlert>
-            <MudPaper Class="w-100 pt-3" >
-              
-                <MudButton Size="Size.Small" StartIcon="fa-solid fa-calendar-days" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Success" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
-                    Generate
-                </MudButton>
-            </MudPaper>
+            </MudAlert> *@
+
+            <MudDataGrid Items="scheduleRequests" Dense Hover Filterable Striped Virtualize ShowColumnOptions Hideable ShowMenuIcon Loading="isLoading">
+                <ToolBarContent>
+                    <MudBreakpointProvider>
+                        <MudHidden Breakpoint="Breakpoint.MdAndUp" Invert="true">
+                            <MudButton Size="Size.Small" StartIcon="fa-solid fa-calendar-days" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Success" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
+                                Generate
+                            </MudButton>
+                            <MudButton Size="Size.Small" StartIcon="fa-solid fa-refresh" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Primary" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
+                                Refresh
+                            </MudButton>
+                        </MudHidden>
+                        <MudHidden Breakpoint="Breakpoint.MdAndDown" Invert="true">
+                            <MudIconButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Class="my-2 mx-1" Size="Size.Small" Icon="fa-solid fa-user-plus" Color="Color.Success" Disabled="!MainLayout.IsOnline" />
+                            <MudIconButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Class="my-2 mx-1" Size="Size.Small" Icon="fa-solid fa-refresh" Color="Color.Primary" Disabled="!MainLayout.IsOnline" />
+                        </MudHidden>
+                    </MudBreakpointProvider>
+                    <MudSpacer />
+                </ToolBarContent>
+                <Columns>
+                    <HierarchyColumn T="ScheduleRequest" Class="data-grid text-nowrap text-white" />
+                    <PropertyColumn Property="x => x.Course.CourseName" Title="Course" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
+                    <PropertyColumn Property="x => x.Section.SchoolYear" Title="School Year" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
+                    <PropertyColumn Property="x => x.YearLevel" Title="Year Level" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
+                    <PropertyColumn Property="x => x.Semester" Title="Semester" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
+                    <PropertyColumn Property="x => x.Semester" Title="Semester" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
+                        <CellTemplate>
+                            @if (context.Item.IsActive)
+                            {
+                                <MudChip Variant="Variant.Filled" Size="Size.Small" Color="Color.Success">Active</MudChip>
+                            }
+                            else
+                            {
+                                <MudChip Variant="Variant.Filled" Size="Size.Small" Color="Color.Error">In Active</MudChip>
+                            }
+                        </CellTemplate>
+                    </PropertyColumn>
+                    <PropertyColumn Property="x => x.TaskStatus" Title="Status" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
+                        <CellTemplate>
+                            @if (context.Item.TaskStatus == ICSS.Shared.TaskStatus.On_Queue)
+                            {
+                                <MudChip Variant="Variant.Filled" Size="Size.Small" Color="Color.Default">On Queue</MudChip>
+                            }
+                            else if (context.Item.TaskStatus == ICSS.Shared.TaskStatus.Processing)
+                            {
+                                <MudChip Variant="Variant.Filled" Size="Size.Small" Color="Color.Info">Processing</MudChip>
+                            }
+                            else if (context.Item.TaskStatus == ICSS.Shared.TaskStatus.Success)
+                            {
+                                <MudChip Variant="Variant.Filled" Size="Size.Small" Color="Color.Success">Success</MudChip>
+                            }
+                            else if (context.Item.TaskStatus == ICSS.Shared.TaskStatus.Failed)
+                            {
+                                <MudChip Variant="Variant.Filled" Size="Size.Small" Color="Color.Error">Failed</MudChip>
+                            }
+                            else if (context.Item.TaskStatus == ICSS.Shared.TaskStatus.Cancelled)
+                            {
+                                <MudChip Variant="Variant.Filled" Size="Size.Small" Color="Color.Warning">Cancelled</MudChip>
+                            }
+                        </CellTemplate>
+                    </PropertyColumn>
+                    <PropertyColumn Property="x => x.Semester" Title="Semester" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
+                    <PropertyColumn Property="x => x.CreatedBy" Title="Created By" Sortable="true" Hideable="true" HeaderClass="data-grid text-nowrap text-white" Hidden>
+                        <CellTemplate> 
+                            <MudStack Spacing="0">
+                                <MudText Typo="Typo.body2" Class="fw-bold">@context.Item.CreatedBy</MudText>
+                                <MudText Typo="Typo.body2" Class="fw-italic">@context.Item.CreatedOn</MudText>
+                            </MudStack>
+                        </CellTemplate>
+                    </PropertyColumn>
+                    <PropertyColumn Property="x => x.UpdatedBy" Title="Updated By" Sortable="true" Hideable="true" HeaderClass="data-grid text-nowrap text-white" Hidden>
+                        <CellTemplate>
+                            <MudStack Spacing="0">
+                                <MudText Typo="Typo.body2" Class="fw-bold">@context.Item.UpdatedBy</MudText>
+                                <MudText Typo="Typo.body2" Class="fw-italic">@context.Item.UpdatedOn</MudText>
+                            </MudStack>
+                        </CellTemplate>
+                    </PropertyColumn>
+                </Columns>
+                <ChildRowContent>
+
+                </ChildRowContent>
+                <NoRecordsContent>
+                    <MudText>No Records to show</MudText>
+                </NoRecordsContent>
+                <LoadingContent>
+                    <MudText>Loading Content...</MudText>
+                </LoadingContent>
+                <PagerContent>
+                    <MudDataGridPager T="ScheduleRequest" />
+                </PagerContent>
+            </MudDataGrid>
         </MudItem>
-      
+
     </MudGrid>
 </MudContainer>
 
@@ -40,10 +126,79 @@
     [CascadingParameter]
     public MainLayout MainLayout { get; private set; }
 
+    private List<ScheduleRequest> scheduleRequests = new();
+    private bool isLoading = false;
+
     protected override async Task OnInitializedAsync()
     {
         MainLayout.SubTitle = "Schedule Management";
         await base.OnInitializedAsync();
     }
+
+    protected override void OnInitialized()
+    {
+        scheduleRequests = new List<ScheduleRequest>
+    {
+        new ScheduleRequest
+        {
+            ScheduleId = 1,
+            Course = new Course { CourseId = 101, CourseName = "Bachelor of Computer Science" },
+            YearLevel = YearLevel.First_Year,
+            Section = new SectionsModel {  SectionName = "A" },
+            Semester = Semester.First_Semester ,
+            Departments = new Departments { DepartmentName = "Information Technology" },
+            IsActive = true,
+            TaskStatus = TaskStatus.On_Queue,
+            TimeSlots = new List<ScheduleTimeSlot>
+            {
+                new ScheduleTimeSlot
+                {
+                    TimeSlotId = 1,
+                    SubjectId = 201,
+                    RoomId = 301,
+                    FacultyId = 401,
+                    Day = DayOfWeek.Monday,
+                    StartTime = new TimeSpan(8, 0, 0),
+                    EndTime = new TimeSpan(10, 0, 0)
+                },
+                new ScheduleTimeSlot
+                {
+                    TimeSlotId = 2,
+                    SubjectId = 202,
+                    RoomId = 302,
+                    FacultyId = 402,
+                    Day = DayOfWeek.Wednesday,
+                    StartTime = new TimeSpan(10, 0, 0),
+                    EndTime = new TimeSpan(12, 0, 0)
+                }
+            }
+        },
+        new ScheduleRequest
+        {
+            ScheduleId = 2,
+            Course = new Course { CourseId = 102, CourseName = "Bachelor of Business Administration" },
+            YearLevel = YearLevel.Second_Year,
+            Section = new SectionsModel {  SectionName = "B" },
+            Semester =Semester.Second_Semester,
+            Departments = new Departments { DepartmentName = "Business Administration" },
+            IsActive = true,
+            TaskStatus = TaskStatus.Processing,
+            TimeSlots = new List<ScheduleTimeSlot>
+            {
+                new ScheduleTimeSlot
+                {
+                    TimeSlotId = 3,
+                    SubjectId = 203,
+                    RoomId = 303,
+                    FacultyId = 403,
+                    Day = DayOfWeek.Friday,
+                    StartTime = new TimeSpan(1, 0, 0),
+                    EndTime = new TimeSpan(3, 0, 0)
+                }
+            }
+        }
+    };
+    }
+
 
 }
