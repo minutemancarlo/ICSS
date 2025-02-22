@@ -58,6 +58,7 @@ builder.Services.AddTransient<FacultyRepository>();
 builder.Services.AddTransient<SectionRepository>();
 
 builder.Services.AddHostedService<StudentInfoUploader>();
+builder.Services.AddHostedService<ScheduleGenerator>();
 
 builder.Services.AddHttpContextAccessor();
 
