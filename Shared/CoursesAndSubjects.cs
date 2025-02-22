@@ -27,6 +27,7 @@ namespace ICSS.Shared
         public int? CourseId { get; set; }
         public bool IsActive { get; set; } = true;
         public Departments? Departments { get; set; }
+        public YearLevel? YearLevel { get; set; }
 
     }
 }

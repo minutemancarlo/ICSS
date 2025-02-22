@@ -22,6 +22,15 @@
                 <MudNumericField HideSpinButtons @bind-Value="subjects.LectureHour" Label="Lecture Hours" Min="0" Variant="Variant.Outlined" Margin="Margin.Dense"></MudNumericField>
                 <MudNumericField HideSpinButtons @bind-Value="subjects.LabHour" Label="Laboratory Hours" Min="0" Variant="Variant.Outlined" Margin="Margin.Dense"></MudNumericField>
                 <MudNumericField HideSpinButtons @bind-Value="subjects.MaxStudent" Label="Student Capacity" Min="0" Variant="Variant.Outlined" Margin="Margin.Dense"></MudNumericField>
+                <MudSelect  T="YearLevel?" @bind-Value="subjects.YearLevel" Label="Select Year Level" Clearable="true"
+                           AdornmentIcon="fa-solid fa-hashtag" Variant="Variant.Outlined"
+                           Margin="Margin.Dense" AdornmentColor="Color.Primary">
+                    @foreach (var item in Enum.GetValues<YearLevel>())
+                    {
+                        <MudSelectItem T="YearLevel?" Value="@item">@item.ToString().Replace("_", " ")</MudSelectItem>
+                    }
+                </MudSelect>
+
                 <MudSwitch @bind-Value="subjects.IsActive" Label="Is Active" Color="Color.Success" />
 
             </MudStack>

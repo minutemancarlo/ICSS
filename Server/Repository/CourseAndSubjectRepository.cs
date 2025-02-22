@@ -53,6 +53,7 @@ namespace ICSS.Server.Repository
             parameters.Add("@MaxStudent", subject.MaxStudent, DbType.Int32);
             parameters.Add("@IsActive", subject.IsActive, DbType.Boolean);
             parameters.Add("@DepartmentId", subject.Departments.DepartmentId, DbType.Int32);
+            parameters.Add("@YearLevel", subject.YearLevel, DbType.Int32);
             parameters.Add("@User", subject.UpdatedBy ?? subject.CreatedBy, DbType.String);
 
             return await _dbConnection.ExecuteScalarAsync<int>("InsertUpdateSubject", parameters, commandType: CommandType.StoredProcedure);

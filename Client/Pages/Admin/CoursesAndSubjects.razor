@@ -105,6 +105,11 @@
                             </TemplateColumn>
                             <PropertyColumn Property="x => x.SubjectCode" Title="Subject Code" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
                             <PropertyColumn Property="x => x.SubjectName" Title="Subject Name" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
+                            <PropertyColumn Property="x => x.YearLevel" Title="Year Level" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
+                                <CellTemplate>
+                                    <MudText Typo="Typo.body2">@context.Item.YearLevel.ToString().Replace("_", " ")</MudText>
+                                </CellTemplate>
+                            </PropertyColumn>
                             <PropertyColumn Property="x => x.Departments.DepartmentName" Title="Department" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
                             <PropertyColumn Property="x => x.LectureHour" Title="Lecture Hour" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
                             <PropertyColumn Property="x => x.LabHour" Title="Laboratory Hour" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
