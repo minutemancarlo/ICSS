@@ -1,21 +1,38 @@
 ﻿@page "/manage-schedules"
-@attribute [Authorize]
+@attribute [Authorize(Roles = "Admin,Faculty")]
 @layout MainLayout
 
 
 
 <MudContainer Class="py-4 py-sm-8 py-md-12 py-lg-16 py-xl-20">
     <MudGrid>
-        <MudItem xs="6">
-            <MudPaper Elevation="4">
+        <MudItem xs="12">
+            @if (!MainLayout.IsOnline)
+            {
+                <MudAlert Severity="Severity.Error" Variant="Variant.Filled" Style="margin-bottom: 16px;" Visible="!isOnline">
+                    You are currently offline. Data may not be up-to-date.
+                </MudAlert>
+            }
+        </MudItem>
+        <MudItem xs="12">
+            <MudPaper Class="w-100" Style="background-color: #1abc9c; color: white">
+                <MudText Typo="Typo.h6" Class="fw-bold p-2">Schedule Generation</MudText>
+            </MudPaper>
 
+            <MudDivider />
+        </MudItem>
+        <MudItem xs="12">
+            <MudAlert Severity="Severity.Info" Variant="Variant.Filled" Style="margin-bottom: 16px;">
+                Note: You are generating schedule for all departments.
+            </MudAlert>
+            <MudPaper Class="w-100 pt-3" >
+              
+                <MudButton Size="Size.Small" StartIcon="fa-solid fa-calendar-days" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Success" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
+                    Generate
+                </MudButton>
             </MudPaper>
         </MudItem>
-        <MudItem xs="6">
-            <MudPaper Elevation="4">
-
-            </MudPaper>
-        </MudItem>
+      
     </MudGrid>
 </MudContainer>
 
