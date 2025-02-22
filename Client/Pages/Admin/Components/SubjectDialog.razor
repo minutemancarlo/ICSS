@@ -9,26 +9,32 @@
     </TitleContent>
     <DialogContent>
         <MudForm @ref="_form" Model="subjects">
-            <MudStack>                
+            <MudStack>
+                <MudSelect @bind-Value="subjects.CourseId" Required RequiredError="Subject Course is Required" T="int?" Clearable Label="Select Course" AdornmentIcon="fa-solid fa-graduation-cap" Variant="Variant.Outlined" Margin="Margin.Dense" AdornmentColor="Color.Primary">
+                    @foreach (var item in courses)
+                    {
+                        <MudSelectItem T="int?" Value="@(item.CourseId)">@item.CourseName</MudSelectItem>
+                    }
+                </MudSelect>
                 <MudTextField @bind-Value="subjects.SubjectCode" Label="Subject Code" Variant="Variant.Outlined" Required RequiredError="Subject Code is Required" Margin="Margin.Dense"></MudTextField>
                 <MudTextField @bind-Value="subjects.SubjectName" Label="Subject Description" Variant="Variant.Outlined" Required RequiredError="Subject Description is Required" Margin="Margin.Dense"></MudTextField>
-                <MudSelect @bind-Value="subjects.Departments.DepartmentId" Required RequiredError="Subject Department is Required" T="int?" Clearable Label="Select Department" AdornmentIcon="fa-solid fa-graduation-cap" Variant="Variant.Outlined" Margin="Margin.Dense" AdornmentColor="Color.Primary">
+                <MudSelect @bind-Value="subjects.Departments.DepartmentId" HelperText="Department where the Faculty will be pulled." HelperTextOnFocus="false" Required RequiredError="Subject Department is Required" T="int?" Clearable Label="Select Department" AdornmentIcon="fa-solid fa-school" Variant="Variant.Outlined" Margin="Margin.Dense" AdornmentColor="Color.Primary">
                     @foreach (var item in departments)
                     {
                         <MudSelectItem T="int?" Value="@(item.DepartmentId)">@item.DepartmentName</MudSelectItem>
                     }
                 </MudSelect>
                 <MudSelect T="YearLevel?" @bind-Value="subjects.YearLevel" Label="Select Year Level" Clearable="true" Required RequiredError="Subject Year Level is Required"
-                           AdornmentIcon="fa-solid fa-hashtag" Variant="Variant.Outlined"
-                           Margin="Margin.Dense" AdornmentColor="Color.Primary">
+                AdornmentIcon="fa-solid fa-hashtag" Variant="Variant.Outlined"
+                Margin="Margin.Dense" AdornmentColor="Color.Primary">
                     @foreach (var item in Enum.GetValues<YearLevel>())
                     {
                         <MudSelectItem T="YearLevel?" Value="@item">@item.ToString().Replace("_", " ")</MudSelectItem>
                     }
                 </MudSelect>
                 <MudSelect T="Semester?" @bind-Value="subjects.Semester" Label="Select Semester" Clearable="true" Required RequiredError="Subject Semester is Required"
-                           AdornmentIcon="fa-solid fa-hashtag" Variant="Variant.Outlined"
-                           Margin="Margin.Dense" AdornmentColor="Color.Primary">
+                AdornmentIcon="fa-solid fa-hashtag" Variant="Variant.Outlined"
+                Margin="Margin.Dense" AdornmentColor="Color.Primary">
                     @foreach (var item in Enum.GetValues<Semester>())
                     {
                         <MudSelectItem T="Semester?" Value="@item">@item.ToString().Replace("_", " ")</MudSelectItem>
@@ -38,7 +44,7 @@
                 <MudNumericField HideSpinButtons @bind-Value="subjects.LectureHour" Label="Lecture Hours" Min="0" Variant="Variant.Outlined" Margin="Margin.Dense"></MudNumericField>
                 <MudNumericField HideSpinButtons @bind-Value="subjects.LabHour" Label="Laboratory Hours" Min="0" Variant="Variant.Outlined" Margin="Margin.Dense"></MudNumericField>
                 <MudNumericField HideSpinButtons @bind-Value="subjects.MaxStudent" Label="Student Capacity" Min="0" Variant="Variant.Outlined" Margin="Margin.Dense"></MudNumericField>
-            
+
 
                 <MudSwitch @bind-Value="subjects.IsActive" Label="Is Active" Color="Color.Success" />
 
@@ -69,7 +75,7 @@
     [Parameter] public string? Icon { get; set; }
     [Parameter] public Subjects subjects { get; set; }
     [Parameter] public string? currentUserId { get; set; }
-
+    [Parameter] public List<Course>? courses { get; set; }
     MudForm? _form;
     private bool _loading = false;
     private List<Departments> departments = new();

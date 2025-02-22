@@ -105,6 +105,11 @@
                             </TemplateColumn>
                             <PropertyColumn Property="x => x.SubjectCode" Title="Subject Code" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
                             <PropertyColumn Property="x => x.SubjectName" Title="Subject Name" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
+                            <PropertyColumn Property="x => x.CourseId" Title="Course" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
+                                <CellTemplate>
+                                    <MudText Typo="Typo.body2">@courses.FirstOrDefault(x => x.CourseId == context.Item.CourseId)?.CourseName</MudText>
+                                </CellTemplate>
+                            </PropertyColumn>
                             <PropertyColumn Property="x => x.YearLevel" Title="Year Level" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
                                 <CellTemplate>
                                     <MudText Typo="Typo.body2">@context.Item.YearLevel.ToString().Replace("_", " ")</MudText>
@@ -247,7 +252,8 @@
     { x => x.Action, "Add" },
     { x => x.Icon, "circle-plus" },
     { x => x.subjects, new Subjects { Departments = new Departments() }},
-    { x => x.currentUserId, MainLayout.CurrentUserId }
+    { x => x.currentUserId, MainLayout.CurrentUserId },
+    { x => x.courses, courses },
 };
 
             var dialog = await DialogService.ShowAsync<SubjectDialog>("", parameters, options);
@@ -284,7 +290,8 @@
                 { x => x.Action, "Update" },
                 { x => x.Icon, "pen-to-square" },
                 {x => x.subjects, subjects},
-                { x => x.currentUserId, MainLayout.CurrentUserId }
+                { x => x.currentUserId, MainLayout.CurrentUserId },
+                { x => x.courses, courses },
             };
 
             var dialog = await DialogService.ShowAsync<SubjectDialog>("", parameters, options);
