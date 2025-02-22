@@ -30,6 +30,8 @@ namespace ICSS.Shared
         public string? RoomName { get; set; }
         public bool IsAvailable { get; set; } = true;
         public bool IsDeleted { get; set; } = false;
+
+        public bool IsLab { get; set; } = false;
         public Departments? Departments { get; set; }
     }
 }

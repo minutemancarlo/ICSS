@@ -93,6 +93,7 @@ namespace ICSS.Server.Repository
             parameters.Add("@RoomName", rooms.RoomName, DbType.String);            
             parameters.Add("@IsAvailable", rooms.IsAvailable, DbType.Boolean);
             parameters.Add("@DepartmentId", rooms.Departments.DepartmentId, DbType.Int32);
+            parameters.Add("@IsLab", rooms.IsLab, DbType.Boolean);
             parameters.Add("@CreatedBy",  rooms.CreatedBy, DbType.String);
 
             return await _dbConnection.ExecuteScalarAsync<int>("InsertRoom", parameters, commandType: CommandType.StoredProcedure);
@@ -107,6 +108,7 @@ namespace ICSS.Server.Repository
             parameters.Add("@IsAvailable", rooms.IsAvailable, DbType.Boolean);
             parameters.Add("@IsDeleted", rooms.IsDeleted, DbType.Boolean);
             parameters.Add("@DepartmentId", rooms.Departments.DepartmentId, DbType.Int32);
+            parameters.Add("@IsLab", rooms.IsLab, DbType.Boolean);
             parameters.Add("@UpdatedBy", rooms.UpdatedBy, DbType.String);
 
             return await _dbConnection.ExecuteScalarAsync<int>("UpdateRoom", parameters, commandType: CommandType.StoredProcedure);

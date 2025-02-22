@@ -78,19 +78,19 @@
                 <MudTabPanel Text="Members" Icon="fa-solid fa-chalkboard-user">
                     <MudItem xs="6">
                         <MudAutocomplete T="Departments"
-                        Class="p-2"
-                        Label="Select Department"
-                        @ref="_mudAutoComplete"
-                        @bind-Value="SelectedDepartment"
-                        SearchFunc="SearchDepartments"
-                        ToStringFunc="(dept) => dept.DepartmentName"
-                        ResetValueOnEmptyText
-                        CoerceText CoerceValue ShowProgressIndicator
-                        AdornmentIcon="@Icons.Material.Filled.Search"
-                        Variant="Variant.Outlined"
-                        Clearable
-                        Margin="Margin.Dense"
-                        AdornmentColor="Color.Primary" />
+                                         Class="p-2"
+                                         Label="Select Department"
+                                         @ref="_mudAutoComplete"
+                                         @bind-Value="SelectedDepartment"
+                                         SearchFunc="SearchDepartments"
+                                         ToStringFunc="(dept) => dept.DepartmentName"
+                                         ResetValueOnEmptyText
+                                         CoerceText CoerceValue ShowProgressIndicator
+                                         AdornmentIcon="@Icons.Material.Filled.Search"
+                                         Variant="Variant.Outlined"
+                                         Clearable
+                                         Margin="Margin.Dense"
+                                         AdornmentColor="Color.Primary" />
                     </MudItem>
                     <MudItem xs="12">
 
@@ -104,11 +104,11 @@
                             </MudCardHeader>
                             <MudCardContent>
                                 <MudTransferList @ref="_transferList" T="DepartmentMember" @bind-StartCollection="_startCollection" @bind-EndCollection="_endCollection" Color="Color.Primary"
-                                StyleListCommon="background-color: var(--mud-palette-background-gray); width: 100%" MultiSelection="true" MaxItems="10" SelectAllType="SelectAllType.Buttons"
-                                ClassStartList="w-100" ClassEndList="w-100" ToStringFunc="@(e => e?.FacultyModel?.FacultyName)" Class=""
-                                ButtonVariant="Variant.Filled"
-                                AllowDoubleClick="false" SearchBoxStart SearchBoxEnd
-                                StartTitle="Available Members" EndTitle="Added Members" />
+                                                 StyleListCommon="background-color: var(--mud-palette-background-gray); width: 100%" MultiSelection="true" MaxItems="10" SelectAllType="SelectAllType.Buttons"
+                                                 ClassStartList="w-100" ClassEndList="w-100" ToStringFunc="@(e => e?.FacultyModel?.FacultyName)" Class=""
+                                                 ButtonVariant="Variant.Filled"
+                                                 AllowDoubleClick="false" SearchBoxStart SearchBoxEnd
+                                                 StartTitle="Available Members" EndTitle="Added Members" />
                             </MudCardContent>
                             <MudCardActions>
                                 <MudStack Row>
@@ -165,6 +165,7 @@
                             </TemplateColumn>
                             <PropertyColumn Property="x => x.RoomCode" Title="Room Code" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
                             <PropertyColumn Property="x => x.RoomName" Title="Room Name" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
+                            <PropertyColumn Property="x => x.Departments.DepartmentName" Title="Department" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
                             <PropertyColumn Property="x => x.CreatedBy" Title="Created By" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
                                 <CellTemplate>
                                     <MudStack Spacing="0">
@@ -386,6 +387,7 @@
         MainLayout.SubTitle = "Department Management";
         await OnLoadDepartments();
         await OnLoadFacultyList();
+        await OnLoadRooms();
         await base.OnInitializedAsync();
     }
 
@@ -639,7 +641,7 @@
             {
                 var cachedData = await LocalStorage.GetItemAsync<List<Rooms>>("rooms");
                 rooms = cachedData ?? new List<Rooms>();
-                roomsTemp =rooms;
+                roomsTemp = rooms;
                 StateHasChanged();
             }
 
