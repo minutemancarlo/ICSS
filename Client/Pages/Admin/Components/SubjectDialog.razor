@@ -18,11 +18,7 @@
                         <MudSelectItem T="int?" Value="@(item.DepartmentId)">@item.DepartmentName</MudSelectItem>
                     }
                 </MudSelect>
-                <MudNumericField HideSpinButtons @bind-Value="subjects.Units" Label="Units" Variant="Variant.Outlined" Min="0" Margin="Margin.Dense"></MudNumericField>
-                <MudNumericField HideSpinButtons @bind-Value="subjects.LectureHour" Label="Lecture Hours" Min="0" Variant="Variant.Outlined" Margin="Margin.Dense"></MudNumericField>
-                <MudNumericField HideSpinButtons @bind-Value="subjects.LabHour" Label="Laboratory Hours" Min="0" Variant="Variant.Outlined" Margin="Margin.Dense"></MudNumericField>
-                <MudNumericField HideSpinButtons @bind-Value="subjects.MaxStudent" Label="Student Capacity" Min="0" Variant="Variant.Outlined" Margin="Margin.Dense"></MudNumericField>
-                <MudSelect  T="YearLevel?" @bind-Value="subjects.YearLevel" Label="Select Year Level" Clearable="true"
+                <MudSelect T="YearLevel?" @bind-Value="subjects.YearLevel" Label="Select Year Level" Clearable="true" Required RequiredError="Subject Year Level is Required"
                            AdornmentIcon="fa-solid fa-hashtag" Variant="Variant.Outlined"
                            Margin="Margin.Dense" AdornmentColor="Color.Primary">
                     @foreach (var item in Enum.GetValues<YearLevel>())
@@ -30,6 +26,19 @@
                         <MudSelectItem T="YearLevel?" Value="@item">@item.ToString().Replace("_", " ")</MudSelectItem>
                     }
                 </MudSelect>
+                <MudSelect T="Semester?" @bind-Value="subjects.Semester" Label="Select Semester" Clearable="true" Required RequiredError="Subject Semester is Required"
+                           AdornmentIcon="fa-solid fa-hashtag" Variant="Variant.Outlined"
+                           Margin="Margin.Dense" AdornmentColor="Color.Primary">
+                    @foreach (var item in Enum.GetValues<Semester>())
+                    {
+                        <MudSelectItem T="Semester?" Value="@item">@item.ToString().Replace("_", " ")</MudSelectItem>
+                    }
+                </MudSelect>
+                <MudNumericField HideSpinButtons @bind-Value="subjects.Units" Label="Units" Variant="Variant.Outlined" Min="0" Margin="Margin.Dense"></MudNumericField>
+                <MudNumericField HideSpinButtons @bind-Value="subjects.LectureHour" Label="Lecture Hours" Min="0" Variant="Variant.Outlined" Margin="Margin.Dense"></MudNumericField>
+                <MudNumericField HideSpinButtons @bind-Value="subjects.LabHour" Label="Laboratory Hours" Min="0" Variant="Variant.Outlined" Margin="Margin.Dense"></MudNumericField>
+                <MudNumericField HideSpinButtons @bind-Value="subjects.MaxStudent" Label="Student Capacity" Min="0" Variant="Variant.Outlined" Margin="Margin.Dense"></MudNumericField>
+            
 
                 <MudSwitch @bind-Value="subjects.IsActive" Label="Is Active" Color="Color.Success" />
 

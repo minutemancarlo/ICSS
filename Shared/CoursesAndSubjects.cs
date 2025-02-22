@@ -28,6 +28,14 @@ namespace ICSS.Shared
         public bool IsActive { get; set; } = true;
         public Departments? Departments { get; set; }
         public YearLevel? YearLevel { get; set; }
+        public Semester? Semester { get; set; }
 
+    }
+
+
+    public enum Semester
+    {
+        First_Semester = 1,
+        Second_Semester = 2
     }
 }

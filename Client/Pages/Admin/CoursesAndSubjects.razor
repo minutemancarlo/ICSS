@@ -14,7 +14,7 @@
             }
         </MudItem>
         <MudItem xs="12">
-             <MudTabs Elevation="2" Rounded="true" Outlined="true" Color="Color.Tertiary">
+            <MudTabs Elevation="2" Rounded="true" Outlined="true" Color="Color.Tertiary">
                 <MudTabPanel Text="Courses" Icon="fa-solid fa-graduation-cap">
                     <MudDataGrid Items="coursesTemp" Dense Hover Filterable Striped Virtualize ShowColumnOptions Hideable ShowMenuIcon Loading="isLoading">
                         <ToolBarContent>
@@ -61,7 +61,7 @@
                                         <MudText Typo="Typo.body2" Class="fw-italic">@context.Item.UpdatedOn</MudText>
                                     </MudStack>
                                 </CellTemplate>
-                            </PropertyColumn>                            
+                            </PropertyColumn>
                         </Columns>
                         <NoRecordsContent>
                             <MudText>No Records to show</MudText>
@@ -110,6 +110,11 @@
                                     <MudText Typo="Typo.body2">@context.Item.YearLevel.ToString().Replace("_", " ")</MudText>
                                 </CellTemplate>
                             </PropertyColumn>
+                            <PropertyColumn Property="x => x.Semester" Title="Semester" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
+                                <CellTemplate>                                    
+                                        <MudText Typo="Typo.body2">@context.Item.Semester.ToString().Replace("_", " ")</MudText>                                    
+                                </CellTemplate>
+                            </PropertyColumn>
                             <PropertyColumn Property="x => x.Departments.DepartmentName" Title="Department" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
                             <PropertyColumn Property="x => x.LectureHour" Title="Lecture Hour" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
                             <PropertyColumn Property="x => x.LabHour" Title="Laboratory Hour" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
@@ -154,8 +159,8 @@
                             <MudDataGridPager T="Subjects" />
                         </PagerContent>
                     </MudDataGrid>
-                    </MudTabPanel>
-            </MudTabs>          
+                </MudTabPanel>
+            </MudTabs>
         </MudItem>
     </MudGrid>
 </MudContainer>
@@ -400,7 +405,7 @@
             else
             {
                 var cachedData = await LocalStorage.GetItemAsync<List<Subjects>>("subjects");
-                subjects= cachedData ?? new List<Subjects>();
+                subjects = cachedData ?? new List<Subjects>();
                 subjectsTemp = subjects;
                 StateHasChanged();
             }
@@ -434,7 +439,7 @@
     private async Task OnsearchSubjects(string query)
     {
 
-        subjectsTemp= subjects.Where(data =>
+        subjectsTemp = subjects.Where(data =>
            {
                if (string.IsNullOrWhiteSpace(query))
                    return true;
