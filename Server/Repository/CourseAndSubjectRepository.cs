@@ -19,6 +19,7 @@ namespace ICSS.Server.Repository
             var parameters = new DynamicParameters();
             parameters.Add("@CourseCode", course.CourseCode);
             parameters.Add("@CourseName", course.CourseName);
+            parameters.Add("@DepartmentId", course.Departments?.DepartmentId);
             parameters.Add("@CreatedBy", course.CreatedBy);
 
             return await _dbConnection.ExecuteScalarAsync<int>("InsertCourse", parameters, commandType: CommandType.StoredProcedure);
@@ -30,6 +31,7 @@ namespace ICSS.Server.Repository
             parameters.Add("@CourseId", course.CourseId);
             parameters.Add("@CourseCode", course.CourseCode);
             parameters.Add("@CourseName", course.CourseName);
+            parameters.Add("@DepartmentId", course.Departments?.DepartmentId);
             parameters.Add("@UpdatedBy", course.UpdatedBy);
 
             return await _dbConnection.ExecuteScalarAsync<int>("UpdateCourse", parameters, commandType: CommandType.StoredProcedure);
@@ -37,7 +39,16 @@ namespace ICSS.Server.Repository
 
         public async Task<IEnumerable<Course>> GetCoursesAsync()
         {
-            return await _dbConnection.QueryAsync<Course>("GetCourses", commandType: CommandType.StoredProcedure);
+            var result = await _dbConnection.QueryAsync<Course, Departments, Course>("GetCourses", (course, department) =>
+            {
+                course.Departments = department;
+                return course;
+            },
+               commandType: CommandType.StoredProcedure,
+               splitOn: "DepartmentId"
+           );
+
+            return result;            
         }
 
 
@@ -63,16 +74,14 @@ namespace ICSS.Server.Repository
 
         public async Task<IEnumerable<Subjects>> GetSubjectsAsync()
         {
-            var result = await _dbConnection.QueryAsync<Subjects, Departments, Subjects>(
-       "GetSubjects",
-       (subject, department) =>
-       {
-           subject.Departments = department;
-           return subject;
-       },
-       commandType: CommandType.StoredProcedure,
-       splitOn: "DepartmentId"
-   );
+            var result = await _dbConnection.QueryAsync<Subjects, Departments, Subjects>("GetSubjects",(subject, department) =>
+            {
+                subject.Departments = department;
+                    return subject;
+            },
+                commandType: CommandType.StoredProcedure,
+                splitOn: "DepartmentId"
+            );
 
             return result;
         }

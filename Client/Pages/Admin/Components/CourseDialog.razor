@@ -12,6 +12,12 @@
             <MudStack>
                 <MudTextField @bind-Value="course.CourseCode" Label="Course Code" Variant="Variant.Outlined" Margin="Margin.Dense" Required RequiredError="Course Code is Required" />
                 <MudTextField @bind-Value="course.CourseName" Label="Course Description" Variant="Variant.Outlined" Margin="Margin.Dense" Required RequiredError="Course Name is Required"></MudTextField>
+                <MudSelect @bind-Value="course.Departments" T="Departments" HelperText="Department where the course belongs." HelperTextOnFocus="false" Required RequiredError="Course Department is Required" T="int?" Clearable Label="Select Department" AdornmentIcon="fa-solid fa-school" Variant="Variant.Outlined" Margin="Margin.Dense" AdornmentColor="Color.Primary">
+                    @foreach (var item in departments)
+                    {
+                        <MudSelectItem Value="item">@item.DepartmentName</MudSelectItem>
+                    }
+                </MudSelect>
             </MudStack>
         </MudForm>
     </DialogContent>
@@ -40,10 +46,17 @@
     [Parameter] public Course course { get; set; }
     [Parameter] public string? currentUserId { get; set; }
 
+    private List<Departments>? departments = new();
     MudForm? _form;
     private bool _loading = false;
 
     void Cancel() => MudDialog.Cancel();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await OnLoadDepartments();
+        await base.OnInitializedAsync();
+    }
 
 
     private async Task OnSubmit()
@@ -105,5 +118,33 @@
         }
     }
 
+    private async Task OnLoadDepartments()
+    {
+
+
+        try
+        {
+
+            var response = await ApiHelper.GetAsync<List<Departments>>("DepartmentManagement/GetAllDepartments");
+            if (response.IsSuccess)
+            {
+                departments = response.Data;
+
+                StateHasChanged();
+            }
+            else
+            {
+                Snackbar.Add($"Failed to load departments: {response.Message}", Severity.Error);
+            }
+
+
+
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
+        }
+
+    }
 
 }

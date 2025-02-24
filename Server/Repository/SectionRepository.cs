@@ -150,5 +150,16 @@ namespace ICSS.Server.Repository
         }
 
 
+        //public async Task<IEnumerable<SectionMember>> GetSectionScheduleFilter(Sections sections)
+        //{
+        //    var parameter = new DynamicParameters();
+        //    parameter.Add("@SectionId", sectionId);
+        //    var query = @"Select * from SectionMember Where SectionId = @SectionId";
+
+        //    var members = await _dbConnection.QueryAsync<SectionMember>(query, parameter);
+        //    return members;
+        //}
+
+
     }
 }

@@ -12,7 +12,7 @@ namespace ICSS.Shared
         public string? CourseName { get; set; }
         public string? CourseCode { get; set; }
         public bool IsDeleted { get; set; } = false;
-
+        public Departments? Departments { get; set; }
     }
 
     public class Subjects : BaseModel

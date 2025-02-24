@@ -46,6 +46,7 @@
                             </TemplateColumn>
                             <PropertyColumn Property="x => x.CourseCode" Title="Course Code" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
                             <PropertyColumn Property="x => x.CourseName" Title="Description" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
+                            <PropertyColumn Property="x => x.Departments.DepartmentName" Title="Department" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
                             <PropertyColumn Property="x => x.CreatedBy" Title="Created By" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
                                 <CellTemplate>
                                     <MudStack Spacing="0">

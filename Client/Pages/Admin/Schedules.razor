@@ -35,6 +35,13 @@
                         }
                     </MudSelect>
 
+                    <MudSelect @bind-Value="selectedCourse" T="int?" Clearable Label="Select Course" AdornmentIcon="fa-solid fa-graduation-cap" Variant="Variant.Outlined" Margin="Margin.Dense" AdornmentColor="Color.Primary">
+                        @foreach (var item in courses)
+                        {
+                            <MudSelectItem T="int?" Value="@(item.CourseId)">@item.CourseName</MudSelectItem>
+                        }
+                    </MudSelect>
+
                     <MudSelect @bind-Value="selectedSchoolYear" Clearable Label="Select School Year" AdornmentIcon="fa-solid fa-calendar-day" Variant="Variant.Outlined" Margin="Margin.Dense" AdornmentColor="Color.Primary">
                         @foreach (var item in schoolYears)
                         {
@@ -176,9 +183,12 @@
     private Departments? userDepartment = new();
     private List<Departments>? departments = new();
     private List<string>? schoolYears = new();
+    private List<Course> courses = new();
+
     private int? selectedDepartment;
     private YearLevel? selectedYearLevel;
     private string? selectedSchoolYear;
+    private int? selectedCourse;
 
     private bool isLoading = false;
     private bool isUserHasDepartment = false;
@@ -377,6 +387,27 @@
 
     }
 
+    private async Task OnGetCourses()
+    {
+        try
+        {
+            var response = await ApiHelper.GetAsync<List<Course>>("CourseAndSubject/GetAllCourses");
+            if (response.IsSuccess)
+            {
+                courses = response.Data;
+                StateHasChanged();
+            }
+            else
+            {
+                Snackbar.Add($"Failed to load courses: {response.Message}", Severity.Error);
+            }
+
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
+        }
+    }
 
 
 }
