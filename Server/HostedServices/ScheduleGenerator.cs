@@ -1,18 +1,23 @@
-﻿namespace ICSS.Server.HostedServices
+﻿using ICSS.Server.Repository;
+
+namespace ICSS.Server.HostedServices
 {
     public class ScheduleGenerator : BackgroundService
     {
         private readonly string BaseLogDirectory;
+        private readonly CourseAndSubjectRepository _courseAndSubjectRepository;
 
-        public ScheduleGenerator(IConfiguration configuration)
+        public ScheduleGenerator(IConfiguration configuration, CourseAndSubjectRepository courseAndSubjectRepository)
         {
             BaseLogDirectory = configuration["LogFileSettings:BaseLogDirectory"];
+            _courseAndSubjectRepository = courseAndSubjectRepository;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             while (!stoppingToken.IsCancellationRequested)
             {
+                var courses = _courseAndSubjectRepository.GetCoursesAsync();
 
             }
         }

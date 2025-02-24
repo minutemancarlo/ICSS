@@ -191,6 +191,24 @@ namespace ICSS.Server.Controllers
             }
         }
 
+
+        [HttpGet("GetUserDepartment/{Id}")]
+        public async Task<ActionResult<Departments>> GetUserDepartment(string Id)
+        {
+            try
+            {
+                var department = await _userRepository.CheckUserDepartment(Id);           
+                return Ok(department);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Exception Occurred: {ex.Message}");
+            }
+        }
+
+
+
+
         private async Task<string> GetUserRole(string userid)
         {
             var result = await _managementApiClient.Users.GetRolesAsync(userid);

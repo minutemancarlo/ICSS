@@ -28,6 +28,28 @@
 
             <MudDataGrid Items="scheduleRequests" Dense Hover Filterable Striped Virtualize ShowColumnOptions Hideable ShowMenuIcon Loading="isLoading">
                 <ToolBarContent>
+                    <MudSelect @bind-Value="selectedDepartment" T="int?" ReadOnly="isUserHasDepartment" Clearable="!isUserHasDepartment" Label="Select Department" AdornmentIcon="fa-solid fa-school" Variant="Variant.Outlined" Margin="Margin.Dense" AdornmentColor="Color.Primary">
+                        @foreach (var item in departments)
+                        {
+                            <MudSelectItem T="int?" Value="@(item.DepartmentId)">@item.DepartmentName</MudSelectItem>
+                        }
+                    </MudSelect>
+
+                    <MudSelect @bind-Value="selectedSchoolYear" Clearable Label="Select School Year" AdornmentIcon="fa-solid fa-calendar-day" Variant="Variant.Outlined" Margin="Margin.Dense" AdornmentColor="Color.Primary">
+                        @foreach (var item in schoolYears)
+                        {
+                            <MudSelectItem Value="@(item)">@item</MudSelectItem>
+                        }
+                    </MudSelect>
+
+                    <MudSelect T="YearLevel?" @bind-Value="selectedYearLevel" Label="Select Year Level" Clearable="true"
+                    AdornmentIcon="fa-solid fa-hashtag" Variant="Variant.Outlined"
+                    Margin="Margin.Dense" AdornmentColor="Color.Primary">
+                        @foreach (var item in Enum.GetValues<YearLevel>())
+                        {
+                            <MudSelectItem T="YearLevel?" Value="@item">@item.ToString().Replace("_", " ")</MudSelectItem>
+                        }
+                    </MudSelect>
                     <MudBreakpointProvider>
                         <MudHidden Breakpoint="Breakpoint.MdAndUp" Invert="true">
                             <MudButton Size="Size.Small" StartIcon="fa-solid fa-calendar-days" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Success" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
@@ -48,9 +70,17 @@
                     <HierarchyColumn T="ScheduleRequest" Class="data-grid text-nowrap text-white" />
                     <PropertyColumn Property="x => x.Course.CourseName" Title="Course" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
                     <PropertyColumn Property="x => x.Section.SchoolYear" Title="School Year" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
-                    <PropertyColumn Property="x => x.YearLevel" Title="Year Level" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
-                    <PropertyColumn Property="x => x.Semester" Title="Semester" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
+                    <PropertyColumn Property="x => x.YearLevel" Title="Year Level" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
+                        <CellTemplate>
+                            <MudText Typo="Typo.body2">@context.Item.YearLevel.ToString().Replace("_", " ")</MudText>
+                        </CellTemplate>
+                    </PropertyColumn>
                     <PropertyColumn Property="x => x.Semester" Title="Semester" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
+                        <CellTemplate>
+                            <MudText Typo="Typo.body2">@context.Item.Semester.ToString().Replace("_", " ")</MudText>
+                        </CellTemplate>
+                    </PropertyColumn>
+                    <PropertyColumn Property="x => x.IsActive" Title="Is Active Schedule" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
                         <CellTemplate>
                             @if (context.Item.IsActive)
                             {
@@ -88,7 +118,7 @@
                     </PropertyColumn>
                     <PropertyColumn Property="x => x.Semester" Title="Semester" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
                     <PropertyColumn Property="x => x.CreatedBy" Title="Created By" Sortable="true" Hideable="true" HeaderClass="data-grid text-nowrap text-white" Hidden>
-                        <CellTemplate> 
+                        <CellTemplate>
                             <MudStack Spacing="0">
                                 <MudText Typo="Typo.body2" Class="fw-bold">@context.Item.CreatedBy</MudText>
                                 <MudText Typo="Typo.body2" Class="fw-italic">@context.Item.CreatedOn</MudText>
@@ -105,7 +135,16 @@
                     </PropertyColumn>
                 </Columns>
                 <ChildRowContent>
-
+                    <MudCalendar Class="w-100" DayStartTime="@TimeOnly.Parse(" 08:00")" ShowMonth="false" ShowTodayButton="false" ShowDatePicker="false" ShowPrevNextButtons="false" ShowDay="false" ShowWeek="true"
+                    DayTimeInterval="CalendarTimeInterval.Minutes30" ShowCurrentTime="true" Use24HourClock="false" Items="@GetCalendarItems(context.Item.TimeSlots)" Context="tableContext"
+                    FirstDayOfWeek="DayOfWeek.Monday">
+                        <CellTemplate>
+                            <div style="width: 100%; height: 100%; border: 2px solid #594AE2">
+                                <div style="background-color: #594AE2"><MudText Style="color: #ffffff;" Typo="Typo.body1" Align="Align.Center">@(((CustomItem)tableContext).Title)</MudText></div>
+                                <div class="pa-2"><MudText Typo="Typo.body2">@tableContext.Text</MudText></div>
+                            </div>
+                        </CellTemplate>
+                    </MudCalendar>
                 </ChildRowContent>
                 <NoRecordsContent>
                     <MudText>No Records to show</MudText>
@@ -125,13 +164,37 @@
 @code {
     [CascadingParameter]
     public MainLayout MainLayout { get; private set; }
+    [Inject] private ISnackbar Snackbar { get; set; }
+    [Inject] private ILocalStorageService LocalStorage { get; set; }
+    [Inject] private HttpClient HttpClient { get; set; }
+    [Inject] private ApiRequestHelper ApiHelper { get; set; }
+    [Inject] private NavigationManager navigationManager { get; set; }
+    [Inject] IDialogService? DialogService { get; set; }
+
 
     private List<ScheduleRequest> scheduleRequests = new();
+    private Departments? userDepartment = new();
+    private List<Departments>? departments = new();
+    private List<string>? schoolYears = new();
+    private int? selectedDepartment;
+    private YearLevel? selectedYearLevel;
+    private string? selectedSchoolYear;
+
     private bool isLoading = false;
+    private bool isUserHasDepartment = false;
 
     protected override async Task OnInitializedAsync()
     {
         MainLayout.SubTitle = "Schedule Management";
+        await OnLoadDepartments();
+        await GetUserDepartment();
+
+        int currentYear = DateTime.UtcNow.Year;
+        schoolYears = new List<string>
+    {
+        $"SY {currentYear}-{currentYear + 1}",
+        $"SY {currentYear + 1}-{currentYear + 2}"
+    };
         await base.OnInitializedAsync();
     }
 
@@ -144,7 +207,7 @@
             ScheduleId = 1,
             Course = new Course { CourseId = 101, CourseName = "Bachelor of Computer Science" },
             YearLevel = YearLevel.First_Year,
-            Section = new SectionsModel {  SectionName = "A" },
+            Section = new SectionsModel {  SectionName = "A", SchoolYear="SY 2025-2026" },
             Semester = Semester.First_Semester ,
             Departments = new Departments { DepartmentName = "Information Technology" },
             IsActive = true,
@@ -178,7 +241,7 @@
             ScheduleId = 2,
             Course = new Course { CourseId = 102, CourseName = "Bachelor of Business Administration" },
             YearLevel = YearLevel.Second_Year,
-            Section = new SectionsModel {  SectionName = "B" },
+            Section = new SectionsModel {  SectionName = "B", SchoolYear="SY 2025-2026" },
             Semester =Semester.Second_Semester,
             Departments = new Departments { DepartmentName = "Business Administration" },
             IsActive = true,
@@ -193,12 +256,127 @@
                     FacultyId = 403,
                     Day = DayOfWeek.Friday,
                     StartTime = new TimeSpan(1, 0, 0),
-                    EndTime = new TimeSpan(3, 0, 0)
+                    EndTime = new TimeSpan(2, 0, 0)
                 }
             }
         }
     };
     }
+
+    private List<CustomItem> GetCalendarItems(List<ScheduleTimeSlot> schedule)
+    {
+        var items = new List<CustomItem>();
+        TimeZoneInfo manilaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Manila");
+
+        foreach (var item in schedule)
+        {
+            var today = DateTime.Today;
+            int daysUntilTarget = ((int)item.Day - (int)today.DayOfWeek + 7) % 7;
+            DateTime targetDate = today.AddDays(daysUntilTarget);
+
+            if (item.Day == DayOfWeek.Monday)
+            {
+                targetDate = targetDate.AddDays(-1);
+            }
+
+            DateTime startDate = targetDate.Add(item.StartTime);
+            DateTime endDate = targetDate.Add(item.EndTime);
+
+            DateTime manilaStartDateTime = DateTime.SpecifyKind(startDate, DateTimeKind.Unspecified);
+            DateTime manilaEndDateTime = DateTime.SpecifyKind(endDate, DateTimeKind.Unspecified);
+
+            DateTime utcStartDateTime = TimeZoneInfo.ConvertTimeToUtc(manilaStartDateTime, manilaTimeZone);
+            DateTime utcEndDateTime = TimeZoneInfo.ConvertTimeToUtc(manilaEndDateTime, manilaTimeZone);
+
+            var timeSlot = new CustomItem
+                {
+                    Title = "Room 102",
+                    Text = "CS102 - Programming 1",
+                    Start = utcStartDateTime,
+                    End = utcEndDateTime
+                };
+
+            items.Add(timeSlot);
+        }
+
+        return items;
+    }
+
+
+
+    private class CustomItem : CalendarItem
+    {
+        public string Title { get; set; } = string.Empty;
+        public string Location { get; set; } = string.Empty;
+        public Color Color { get; set; } = Color.Primary;
+    }
+
+
+
+    private async Task GetUserDepartment()
+    {
+        try
+        {
+            var response = await HttpClient.GetAsync($"UserManagement/GetUserDepartment/{MainLayout.CurrentUserId}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                var department = await response.Content.ReadFromJsonAsync<Departments>();
+
+                if (department is not null)
+                {
+                    userDepartment = department;
+                    isUserHasDepartment = true;
+                    selectedDepartment = userDepartment.DepartmentId;
+                }
+                else
+                {
+                    isUserHasDepartment = false;
+                    selectedDepartment = null;
+                }
+            }
+            else
+            {
+                Snackbar.Add($"Error: {response.ReasonPhrase}", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error getting user department data: {ex.Message}", Severity.Error);
+        }
+    }
+
+
+
+    private async Task OnLoadDepartments()
+    {
+
+
+        try
+        {
+
+            var response = await ApiHelper.GetAsync<List<Departments>>("DepartmentManagement/GetAllDepartments");
+            if (response.IsSuccess)
+            {
+                departments = response.Data;
+
+                StateHasChanged();
+            }
+            else
+            {
+                Snackbar.Add($"Failed to load departments: {response.Message}", Severity.Error);
+            }
+
+
+
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
+        }
+
+    }
+
 
 
 }
