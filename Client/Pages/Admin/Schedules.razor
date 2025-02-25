@@ -2,8 +2,11 @@
 @attribute [Authorize(Roles = "Admin,Faculty")]
 @layout MainLayout
 @using ICSS.Shared
+@using System.Net
+
 @using SectionsModel = ICSS.Shared.Sections
 @using TaskStatus = ICSS.Shared.TaskStatus
+
 <MudContainer Class="py-4 py-sm-8 py-md-12 py-lg-16 py-xl-20">
     <MudGrid>
         <MudItem xs="12">
@@ -28,35 +31,39 @@
 
             <MudDataGrid Items="scheduleRequests" Dense Hover Filterable Striped Virtualize ShowColumnOptions Hideable ShowMenuIcon Loading="isLoading">
                 <ToolBarContent>
-                    <MudSelect @bind-Value="selectedDepartment" T="int?" ReadOnly="isUserHasDepartment" Clearable="!isUserHasDepartment" Label="Select Department" AdornmentIcon="fa-solid fa-school" Variant="Variant.Outlined" Margin="Margin.Dense" AdornmentColor="Color.Primary">
-                        @foreach (var item in departments)
-                        {
-                            <MudSelectItem T="int?" Value="@(item.DepartmentId)">@item.DepartmentName</MudSelectItem>
-                        }
-                    </MudSelect>
+                    <MudStack>
+                        <MudStack Row Spacing="1">
+                            <MudSelect T="int?" @bind-Value="SelectedDepartment"  ReadOnly="isUserHasDepartment" Clearable="!isUserHasDepartment" Label="Select Department" AdornmentIcon="fa-solid fa-school" Variant="Variant.Outlined" Margin="Margin.Dense" AdornmentColor="Color.Primary">
+                                @foreach (var item in departments)
+                                {
+                                    <MudSelectItem T="int?" Value="@(item.DepartmentId)">@item.DepartmentName</MudSelectItem>
+                                }
+                            </MudSelect>
 
-                    <MudSelect @bind-Value="selectedCourse" T="int?" Clearable Label="Select Course" AdornmentIcon="fa-solid fa-graduation-cap" Variant="Variant.Outlined" Margin="Margin.Dense" AdornmentColor="Color.Primary">
-                        @foreach (var item in courses)
-                        {
-                            <MudSelectItem T="int?" Value="@(item.CourseId)">@item.CourseName</MudSelectItem>
-                        }
-                    </MudSelect>
-
-                    <MudSelect @bind-Value="selectedSchoolYear" Clearable Label="Select School Year" AdornmentIcon="fa-solid fa-calendar-day" Variant="Variant.Outlined" Margin="Margin.Dense" AdornmentColor="Color.Primary">
-                        @foreach (var item in schoolYears)
+                            <MudSelect @bind-Value="selectedCourse" T="int?" Clearable Label="Select Course" AdornmentIcon="fa-solid fa-graduation-cap" Variant="Variant.Outlined" Margin="Margin.Dense" AdornmentColor="Color.Primary">
+                                @foreach (var item in coursesTemp)
+                                {
+                                    <MudSelectItem T="int?" Value="@(item.CourseId)">@item.CourseName</MudSelectItem>
+                                }
+                            </MudSelect>
+                        </MudStack>                                                                        
+                    </MudStack>
+                    <MudSpacer />
+                    @*   <MudSelect @bind-Value="selectedSchoolYear" Clearable Label="Select School Year" AdornmentIcon="fa-solid fa-calendar-day" Variant="Variant.Outlined" Margin="Margin.Dense" AdornmentColor="Color.Primary">
+                        @foreach (var item in schoolYear)
                         {
                             <MudSelectItem Value="@(item)">@item</MudSelectItem>
                         }
                     </MudSelect>
 
                     <MudSelect T="YearLevel?" @bind-Value="selectedYearLevel" Label="Select Year Level" Clearable="true"
-                    AdornmentIcon="fa-solid fa-hashtag" Variant="Variant.Outlined"
-                    Margin="Margin.Dense" AdornmentColor="Color.Primary">
-                        @foreach (var item in Enum.GetValues<YearLevel>())
+                               AdornmentIcon="fa-solid fa-hashtag" Variant="Variant.Outlined"
+                               Margin="Margin.Dense" AdornmentColor="Color.Primary">
+                        @foreach (var item in yearLevel)
                         {
                             <MudSelectItem T="YearLevel?" Value="@item">@item.ToString().Replace("_", " ")</MudSelectItem>
                         }
-                    </MudSelect>
+                    </MudSelect>    *@                                   
                     <MudBreakpointProvider>
                         <MudHidden Breakpoint="Breakpoint.MdAndUp" Invert="true">
                             <MudButton Size="Size.Small" StartIcon="fa-solid fa-calendar-days" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Success" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
@@ -71,7 +78,7 @@
                             <MudIconButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Class="my-2 mx-1" Size="Size.Small" Icon="fa-solid fa-refresh" Color="Color.Primary" Disabled="!MainLayout.IsOnline" />
                         </MudHidden>
                     </MudBreakpointProvider>
-                    <MudSpacer />
+                   
                 </ToolBarContent>
                 <Columns>
                     <HierarchyColumn T="ScheduleRequest" Class="data-grid text-nowrap text-white" />
@@ -184,8 +191,25 @@
     private List<Departments>? departments = new();
     private List<string>? schoolYears = new();
     private List<Course> courses = new();
+    private List<Course> coursesTemp = new();
+
+    private List<SectionsModel>? sections = new();
+    private List<string>? schoolYear = new();
+    private List<YearLevel?>? yearLevel = new();
+    private List<string>? sectionFilter = new();
 
     private int? selectedDepartment;
+    public int? SelectedDepartment
+    {
+        get => selectedDepartment;
+        set
+        {
+            selectedDepartment = value;
+            OnChangeDepartment(selectedDepartment);
+            InvokeAsync(() => StateHasChanged());
+        }
+    }
+
     private YearLevel? selectedYearLevel;
     private string? selectedSchoolYear;
     private int? selectedCourse;
@@ -198,13 +222,9 @@
         MainLayout.SubTitle = "Schedule Management";
         await OnLoadDepartments();
         await GetUserDepartment();
+        await OnGetCourses();
+        // await OnGetSections();
 
-        int currentYear = DateTime.UtcNow.Year;
-        schoolYears = new List<string>
-    {
-        $"SY {currentYear}-{currentYear + 1}",
-        $"SY {currentYear + 1}-{currentYear + 2}"
-    };
         await base.OnInitializedAsync();
     }
 
@@ -273,6 +293,15 @@
     };
     }
 
+    private void OnChangeDepartment(int? value)
+    {
+       
+        if(courses.Any())
+        {
+            coursesTemp=courses.Where(c => c.Departments?.DepartmentId == value).GroupBy(c => c.CourseName).Select(g => g.First()).ToList();
+        }
+    }
+
     private List<CustomItem> GetCalendarItems(List<ScheduleTimeSlot> schedule)
     {
         var items = new List<CustomItem>();
@@ -331,13 +360,20 @@
 
             if (response.IsSuccessStatusCode)
             {
+                if (response.StatusCode == HttpStatusCode.NoContent)
+                {
+                    isUserHasDepartment = false;
+                    SelectedDepartment = null;
+                    return;
+                }
+
                 var department = await response.Content.ReadFromJsonAsync<Departments>();
 
                 if (department is not null)
                 {
                     userDepartment = department;
                     isUserHasDepartment = true;
-                    selectedDepartment = userDepartment.DepartmentId;
+                    SelectedDepartment = userDepartment.DepartmentId;                    
                 }
                 else
                 {
@@ -355,6 +391,7 @@
             Snackbar.Add($"Error getting user department data: {ex.Message}", Severity.Error);
         }
     }
+
 
 
 
@@ -395,6 +432,10 @@
             if (response.IsSuccess)
             {
                 courses = response.Data;
+                if (isUserHasDepartment)
+                {
+                    OnChangeDepartment(selectedDepartment);
+                }
                 StateHasChanged();
             }
             else
@@ -408,6 +449,65 @@
             Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
         }
     }
+
+
+
+    private async Task OnGetSections()
+    {
+
+
+        try
+        {
+
+            var response = await ApiHelper.GetAsync<List<SectionsModel>>("SectionManagement/GetSections");
+            if (response.IsSuccess)
+            {
+                sections = response.Data;
+                if (isUserHasDepartment)
+                {
+                    // courses = courses.Where(c => c.Departments?.DepartmentId == selectedDepartment).GroupBy(c => c.CourseName).Select(g => g.First()).ToList();
+
+                    var filteredSections = sections.Where(s => courses.Any(fc => fc.CourseId == s.CourseId)).ToList();
+                    // schoolYear = filteredSections.Select(s => s.SchoolYear).Distinct().ToList();
+                    // yearLevel = filteredSections.Where(s => s.YearLevel != null).Select(s => s.YearLevel).Distinct().ToList();
+                    // sectionFilter = filteredSections.GroupBy(s => s.SectionName).Select(g => g.First().SectionName).OrderBy(name => name).ToList();
+                }
+                else
+                {
+                    courses = new();
+                    // courses = sections.Where(s => s.Course != null).DistinctBy(s => s.Course.CourseName).Select(s => s.Course).ToList();
+                    // schoolYear = sections.Where(s => !string.IsNullOrEmpty(s.SchoolYear)).Select(s => s.SchoolYear).Distinct().ToList();
+                    // yearLevel = sections.Where(s => s.YearLevel != null).Select(s => s.YearLevel).Distinct().ToList();
+                    // sectionFilter = sections.Where(s => !string.IsNullOrEmpty(s.SectionName) && !s.IsDeleted).Select(s => s.SectionName!).Distinct().OrderBy(s => s).ToList();
+                }
+                
+                StateHasChanged();
+            }
+            else
+            {
+                Snackbar.Add($"Failed to load sections: {response.Message}", Severity.Error);
+            }
+
+
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+
+
+
+            isLoading = false;
+        }
+    }
+
+
+  
+
+
+
 
 
 }

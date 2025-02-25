@@ -197,7 +197,13 @@ namespace ICSS.Server.Controllers
         {
             try
             {
-                var department = await _userRepository.CheckUserDepartment(Id);           
+                var department = await _userRepository.CheckUserDepartment(Id);
+
+                if (department is null)
+                {
+                    return NoContent();
+                }
+
                 return Ok(department);
             }
             catch (Exception ex)
@@ -205,6 +211,7 @@ namespace ICSS.Server.Controllers
                 return BadRequest($"Exception Occurred: {ex.Message}");
             }
         }
+
 
 
 
