@@ -1,6 +1,7 @@
 ﻿@page "/manage-schedules"
 @attribute [Authorize(Roles = "Admin,Faculty")]
 @layout MainLayout
+@using ICSS.Client.Pages.Admin.Components
 @using ICSS.Shared
 @using System.Net
 
@@ -33,14 +34,14 @@
                 <ToolBarContent>
                     <MudStack>
                         <MudStack Row Spacing="1">
-                            <MudSelect T="int?" @bind-Value="SelectedDepartment"  ReadOnly="isUserHasDepartment" Clearable="!isUserHasDepartment" Label="Select Department" AdornmentIcon="fa-solid fa-school" Variant="Variant.Outlined" Margin="Margin.Dense" AdornmentColor="Color.Primary">
+                            <MudSelect T="int?" @bind-Value="SelectedDepartment" FullWidth ReadOnly="isUserHasDepartment" Clearable="!isUserHasDepartment" Label="Select Department" AdornmentIcon="fa-solid fa-school" Variant="Variant.Outlined" Margin="Margin.Dense" AdornmentColor="Color.Primary">
                                 @foreach (var item in departments)
                                 {
                                     <MudSelectItem T="int?" Value="@(item.DepartmentId)">@item.DepartmentName</MudSelectItem>
                                 }
                             </MudSelect>
 
-                            <MudSelect @bind-Value="selectedCourse" T="int?" Clearable Label="Select Course" AdornmentIcon="fa-solid fa-graduation-cap" Variant="Variant.Outlined" Margin="Margin.Dense" AdornmentColor="Color.Primary">
+                            <MudSelect @bind-Value="selectedCourse" T="int?" FullWidth Clearable Label="Select Course" AdornmentIcon="fa-solid fa-graduation-cap" Variant="Variant.Outlined" Margin="Margin.Dense" AdornmentColor="Color.Primary">
                                 @foreach (var item in coursesTemp)
                                 {
                                     <MudSelectItem T="int?" Value="@(item.CourseId)">@item.CourseName</MudSelectItem>
@@ -78,11 +79,19 @@
                             <MudIconButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Class="my-2 mx-1" Size="Size.Small" Icon="fa-solid fa-refresh" Color="Color.Primary" Disabled="!MainLayout.IsOnline" />
                         </MudHidden>
                     </MudBreakpointProvider>
-                   
+
                 </ToolBarContent>
                 <Columns>
-                    <HierarchyColumn T="ScheduleRequest" Class="data-grid text-nowrap text-white" />
-                    <PropertyColumn Property="x => x.Course.CourseName" Title="Course" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
+                    <TemplateColumn Title="Actions" HeaderClass="data-grid text-nowrap text-white" Hideable="false">
+                        <CellTemplate>
+                            <MudStack Row>
+                                <MudTooltip Text="View Schedule">
+                                    <MudIconButton Icon="fa-solid fa-eye" Size="Size.Medium" Color="Color.Info" Variant="Variant.Filled" OnClick="@(() => OnShowSchedules(context.Item.Section,context.Item.Course, context.Item.YearLevel,context.Item.Semester))" />
+                                </MudTooltip>                                
+                            </MudStack>
+                        </CellTemplate>
+                    </TemplateColumn>
+                    <PropertyColumn Property="x => x.Course.CourseName" Title="Course" Sortable="true" HeaderClass="data-grid text-nowrap text-center text-white" CellClass="text-nowrap text-center" />
                     <PropertyColumn Property="x => x.Section.SchoolYear" Title="School Year" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
                     <PropertyColumn Property="x => x.YearLevel" Title="Year Level" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
                         <CellTemplate>
@@ -129,9 +138,8 @@
                                 <MudChip Variant="Variant.Filled" Size="Size.Small" Color="Color.Warning">Cancelled</MudChip>
                             }
                         </CellTemplate>
-                    </PropertyColumn>
-                    <PropertyColumn Property="x => x.Semester" Title="Semester" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
-                    <PropertyColumn Property="x => x.CreatedBy" Title="Created By" Sortable="true" Hideable="true" HeaderClass="data-grid text-nowrap text-white" Hidden>
+                    </PropertyColumn>                    
+                    <PropertyColumn Property="x => x.CreatedBy" Title="Created By" Sortable="true" Hideable="true" HeaderClass="data-grid text-nowrap text-white">
                         <CellTemplate>
                             <MudStack Spacing="0">
                                 <MudText Typo="Typo.body2" Class="fw-bold">@context.Item.CreatedBy</MudText>
@@ -139,7 +147,7 @@
                             </MudStack>
                         </CellTemplate>
                     </PropertyColumn>
-                    <PropertyColumn Property="x => x.UpdatedBy" Title="Updated By" Sortable="true" Hideable="true" HeaderClass="data-grid text-nowrap text-white" Hidden>
+                    <PropertyColumn Property="x => x.UpdatedBy" Title="Updated By" Sortable="true" Hideable="true" HeaderClass="data-grid text-nowrap text-white">
                         <CellTemplate>
                             <MudStack Spacing="0">
                                 <MudText Typo="Typo.body2" Class="fw-bold">@context.Item.UpdatedBy</MudText>
@@ -148,7 +156,7 @@
                         </CellTemplate>
                     </PropertyColumn>
                 </Columns>
-                <ChildRowContent>
+                @* <ChildRowContent>
                     <MudCalendar Class="w-100" DayStartTime="@TimeOnly.Parse(" 08:00")" ShowMonth="false" ShowTodayButton="false" ShowDatePicker="false" ShowPrevNextButtons="false" ShowDay="false" ShowWeek="true"
                     DayTimeInterval="CalendarTimeInterval.Minutes30" ShowCurrentTime="true" Use24HourClock="false" Items="@GetCalendarItems(context.Item.TimeSlots)" Context="tableContext"
                     FirstDayOfWeek="DayOfWeek.Monday">
@@ -159,7 +167,7 @@
                             </div>
                         </CellTemplate>
                     </MudCalendar>
-                </ChildRowContent>
+                </ChildRowContent> *@
                 <NoRecordsContent>
                     <MudText>No Records to show</MudText>
                 </NoRecordsContent>
@@ -224,74 +232,115 @@
         await GetUserDepartment();
         await OnGetCourses();
         // await OnGetSections();
-
+        await OnGetScheduleList();
         await base.OnInitializedAsync();
     }
 
-    protected override void OnInitialized()
+    // protected override void OnInitialized()
+    // {
+    //     scheduleRequests = new List<ScheduleRequest>
+    // {
+    //     new ScheduleRequest
+    //     {
+    //         ScheduleId = 1,
+    //         Course = new Course { CourseId = 101, CourseName = "Bachelor of Computer Science",CourseCode = "BSCS" },
+    //         YearLevel = YearLevel.First_Year,
+    //         Section = new SectionsModel {  SectionName = "A", SchoolYear="SY 2025-2026" },
+    //         Semester = Semester.First_Semester ,
+    //         Departments = new Departments { DepartmentName = "Information Technology" },
+    //         IsActive = true,
+    //         TaskStatus = TaskStatus.On_Queue,
+    //         TimeSlots = new List<ScheduleTimeSlot>
+    //         {
+    //             new ScheduleTimeSlot
+    //             {
+    //                 TimeSlotId = 1,
+    //                 Subject = new Subjects { SubjectId = 201 },
+    //                 Room = new Rooms {RoomId = 301 },
+    //                 Faculty = new FacultyModel {FacultyId = 401 },
+    //                 Day = DayOfWeek.Monday,
+    //                 StartTime = new TimeSpan(8, 0, 0),
+    //                 EndTime = new TimeSpan(10, 0, 0)
+    //             },
+    //             new ScheduleTimeSlot
+    //             {
+    //                 TimeSlotId = 2,
+    //                 Subject = new Subjects {SubjectId = 202 },
+    //                 Room = new Rooms {RoomId = 302 },
+    //                 Faculty = new FacultyModel {FacultyId = 402 },
+    //                 Day = DayOfWeek.Wednesday,
+    //                 StartTime = new TimeSpan(10, 0, 0),
+    //                 EndTime = new TimeSpan(12, 0, 0)
+    //             }
+    //         }
+    //     },
+    //     new ScheduleRequest
+    //     {
+    //         ScheduleId = 2,
+    //         Course = new Course { CourseId = 102, CourseName = "Bachelor of Business Administration", CourseCode = "BSBA" },
+    //         YearLevel = YearLevel.Second_Year,
+    //         Section = new SectionsModel {  SectionName = "B", SchoolYear="SY 2025-2026" },
+    //         Semester =Semester.Second_Semester,
+    //         Departments = new Departments { DepartmentName = "Business Administration" },
+    //         IsActive = true,
+    //         TaskStatus = TaskStatus.Processing,
+    //         TimeSlots = new List<ScheduleTimeSlot>
+    //         {
+    //             new ScheduleTimeSlot
+    //             {
+    //                 TimeSlotId = 3,
+    //                 Subject = new Subjects{ SubjectId = 203 },
+    //                 Room = new Rooms{ RoomId = 303 },
+    //                 Faculty = new FacultyModel {FacultyId = 403 },
+    //                 Day = DayOfWeek.Friday,
+    //                 StartTime = new TimeSpan(1, 0, 0),
+    //                 EndTime = new TimeSpan(2, 0, 0)
+    //             }
+    //         }
+    //     }
+    // };
+    // }
+
+
+    private async Task OnShowSchedules(SectionsModel? sections, Course? course, YearLevel? yearLevel, Semester? semester)
     {
-        scheduleRequests = new List<ScheduleRequest>
-    {
-        new ScheduleRequest
+        try
         {
-            ScheduleId = 1,
-            Course = new Course { CourseId = 101, CourseName = "Bachelor of Computer Science" },
-            YearLevel = YearLevel.First_Year,
-            Section = new SectionsModel {  SectionName = "A", SchoolYear="SY 2025-2026" },
-            Semester = Semester.First_Semester ,
-            Departments = new Departments { DepartmentName = "Information Technology" },
-            IsActive = true,
-            TaskStatus = TaskStatus.On_Queue,
-            TimeSlots = new List<ScheduleTimeSlot>
+            var options = new DialogOptions
+                {
+                    CloseOnEscapeKey = true,
+                    FullWidth = true,
+                    MaxWidth = MaxWidth.Large,
+                    BackdropClick = false,
+                    CloseButton = true,
+                    BackgroundClass = "blurred"
+
+                };
+
+            var parameters = new DialogParameters<ScheduleDialog>
             {
-                new ScheduleTimeSlot
-                {
-                    TimeSlotId = 1,
-                    SubjectId = 201,
-                    RoomId = 301,
-                    FacultyId = 401,
-                    Day = DayOfWeek.Monday,
-                    StartTime = new TimeSpan(8, 0, 0),
-                    EndTime = new TimeSpan(10, 0, 0)
-                },
-                new ScheduleTimeSlot
-                {
-                    TimeSlotId = 2,
-                    SubjectId = 202,
-                    RoomId = 302,
-                    FacultyId = 402,
-                    Day = DayOfWeek.Wednesday,
-                    StartTime = new TimeSpan(10, 0, 0),
-                    EndTime = new TimeSpan(12, 0, 0)
-                }
-            }
-        },
-        new ScheduleRequest
-        {
-            ScheduleId = 2,
-            Course = new Course { CourseId = 102, CourseName = "Bachelor of Business Administration" },
-            YearLevel = YearLevel.Second_Year,
-            Section = new SectionsModel {  SectionName = "B", SchoolYear="SY 2025-2026" },
-            Semester =Semester.Second_Semester,
-            Departments = new Departments { DepartmentName = "Business Administration" },
-            IsActive = true,
-            TaskStatus = TaskStatus.Processing,
-            TimeSlots = new List<ScheduleTimeSlot>
+                { x => x.section, sections?.SectionName },
+                { x => x.courseCode, course?.CourseCode },
+                { x => x.schoolYear, sections?.SchoolYear},
+                { x => x.yearLevel, yearLevel.ToString().Replace("_"," ")},
+                { x => x.semester, semester.ToString().Replace("_"," ")},
+               
+            };
+
+            var dialog = await DialogService.ShowAsync<ScheduleDialog>("", parameters, options);
+            var result = await dialog.Result;
+            if (!result.Canceled)
             {
-                new ScheduleTimeSlot
-                {
-                    TimeSlotId = 3,
-                    SubjectId = 203,
-                    RoomId = 303,
-                    FacultyId = 403,
-                    Day = DayOfWeek.Friday,
-                    StartTime = new TimeSpan(1, 0, 0),
-                    EndTime = new TimeSpan(2, 0, 0)
-                }
+                
+                StateHasChanged();
             }
         }
-    };
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
+        }
     }
+
 
     private void OnChangeDepartment(int? value)
     {
@@ -504,7 +553,34 @@
     }
 
 
-  
+    private async Task OnGetScheduleList()
+    {
+
+
+        try
+        {
+
+            var response = await ApiHelper.GetAsync<List<ScheduleRequest>>("ScheduleManagement/GetScheduleList");
+            if (response.IsSuccess)
+            {
+                scheduleRequests = response.Data;
+
+                StateHasChanged();
+            }
+            else
+            {
+                Snackbar.Add($"Failed to load departments: {response.Message}", Severity.Error);
+            }
+
+
+
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
+        }
+
+    }
 
 
 

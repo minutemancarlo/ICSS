@@ -16,16 +16,16 @@ namespace ICSS.Shared
         public Departments? Departments { get; set; }
         public bool IsActive { get; set; } = true;
         public TaskStatus? TaskStatus { get; set; }
-        public List<ScheduleTimeSlot> TimeSlots { get; set; } = new List<ScheduleTimeSlot>();
+        public List<ScheduleTimeSlot>? TimeSlots { get; set; } = new List<ScheduleTimeSlot>();
     }
 
     public class ScheduleTimeSlot
     {
-        public int TimeSlotId { get; set; }
-        public int SubjectId { get; set; }
-        public int RoomId { get; set; }
-        public int? FacultyId { get; set; }
-        public DayOfWeek Day { get; set; }
+        public int? TimeSlotId { get; set; }
+        public Subjects? Subject { get; set; }
+        public Rooms? Room { get; set; }
+        public FacultyModel? Faculty { get; set; }
+        public DayOfWeek? Day { get; set; }
         public TimeSpan StartTime { get; set; }
         public TimeSpan EndTime { get; set; }
     }

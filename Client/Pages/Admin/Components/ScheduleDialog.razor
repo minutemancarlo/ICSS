@@ -1,0 +1,39 @@
+﻿@using ICSS.Shared
+@using SectionModel = ICSS.Shared.Sections
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@($"fa-solid fa-calendar-days")"></MudIcon>
+            Schedule for @(courseCode) Section: @(section) - @(schoolYear), (@(yearLevel)/@(semester))
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudCalendar Class="w-100" DayStartTime="@TimeOnly.Parse(" 08:00")" ShowMonth="false" ShowTodayButton="false" ShowDatePicker="false" ShowPrevNextButtons="false" ShowDay="false" ShowWeek="true"
+                     DayTimeInterval="CalendarTimeInterval.Minutes30" ShowCurrentTime="true" Use24HourClock="false"  Context="tableContext"
+                     FirstDayOfWeek="DayOfWeek.Monday">
+         
+        </MudCalendar>
+    </DialogContent>
+    <DialogActions>
+        <MudButton  Size="Size.Medium" OnClick="Cancel">Close</MudButton>
+        @*    <MudLoadingButton Variant="Variant.Filled"
+                          Color="Color.Success"
+                          Size="Size.Medium"
+                          Loading="@(_loading)"
+                          OnClick="@(async => OnSubmit())"
+                          ButtonType="ButtonType.Button">
+            <LoadingContent>Submitting...</LoadingContent>
+            <ChildContent>Submit</ChildContent> 
+        </MudLoadingButton>*@
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance? MudDialog { get; set; }
+    [Parameter] public string? section { get; set; }
+    [Parameter] public string? courseCode { get; set; }
+    [Parameter] public string? schoolYear { get; set; }
+    [Parameter] public string? yearLevel { get; set; }
+    [Parameter] public string? semester { get; set; }
+    void Cancel() => MudDialog.Cancel();
+}
