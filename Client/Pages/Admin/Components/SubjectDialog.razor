@@ -25,16 +25,16 @@
                     }
                 </MudSelect>
                 <MudSelect T="YearLevel?" @bind-Value="subjects.YearLevel" Label="Select Year Level" Clearable="true" Required RequiredError="Subject Year Level is Required"
-                AdornmentIcon="fa-solid fa-hashtag" Variant="Variant.Outlined"
-                Margin="Margin.Dense" AdornmentColor="Color.Primary">
+                           AdornmentIcon="fa-solid fa-hashtag" Variant="Variant.Outlined"
+                           Margin="Margin.Dense" AdornmentColor="Color.Primary">
                     @foreach (var item in Enum.GetValues<YearLevel>())
                     {
                         <MudSelectItem T="YearLevel?" Value="@item">@item.ToString().Replace("_", " ")</MudSelectItem>
                     }
                 </MudSelect>
                 <MudSelect T="Semester?" @bind-Value="subjects.Semester" Label="Select Semester" Clearable="true" Required RequiredError="Subject Semester is Required"
-                AdornmentIcon="fa-solid fa-hashtag" Variant="Variant.Outlined"
-                Margin="Margin.Dense" AdornmentColor="Color.Primary">
+                           AdornmentIcon="fa-solid fa-hashtag" Variant="Variant.Outlined"
+                           Margin="Margin.Dense" AdornmentColor="Color.Primary">
                     @foreach (var item in Enum.GetValues<Semester>())
                     {
                         <MudSelectItem T="Semester?" Value="@item">@item.ToString().Replace("_", " ")</MudSelectItem>
@@ -44,28 +44,28 @@
                 <MudNumericField HideSpinButtons @bind-Value="subjects.LectureHour" Label="Lecture Hours" Min="0" Variant="Variant.Outlined" Margin="Margin.Dense"></MudNumericField>
                 <MudNumericField HideSpinButtons @bind-Value="subjects.LabHour" Label="Laboratory Hours" Min="0" Variant="Variant.Outlined" Margin="Margin.Dense"></MudNumericField>
                 <MudNumericField HideSpinButtons @bind-Value="subjects.MaxStudent" Label="Student Capacity" Min="0" Variant="Variant.Outlined" Margin="Margin.Dense"></MudNumericField>
-
-
-                <MudSwitch @bind-Value="subjects.IsActive" Label="Is Active" Color="Color.Success" />
-
+                <MudStack Row Justify="Justify.SpaceBetween">
+                    <MudSwitch @bind-Value="subjects.IsActive" Label="Is Active" Color="Color.Success" />
+                    <MudCheckBox T="bool" Color="Color.Primary" @bind-Value="subjects.IsSaturdayClass" Label="Is Saturday Class"></MudCheckBox>
+                </MudStack>
             </MudStack>
         </MudForm>
     </DialogContent>
     <DialogActions>
         <MudButton Disabled="_loading" Size="Size.Medium" OnClick="Cancel">Cancel</MudButton>
         <MudLoadingButton Variant="Variant.Filled"
-        Color="Color.Success"
-        Size="Size.Medium"
-        Loading="@(_loading)"
-        OnClick="@(async => OnSubmit())"
-        ButtonType="ButtonType.Button">
+                          Color="Color.Success"
+                          Size="Size.Medium"
+                          Loading="@(_loading)"
+                          OnClick="@(async => OnSubmit())"
+                          ButtonType="ButtonType.Button">
             <LoadingContent>Submitting...</LoadingContent>
             <ChildContent>Submit</ChildContent>
         </MudLoadingButton>
     </DialogActions>
 </MudDialog>
 
-@code{
+@code {
     [CascadingParameter] MudDialogInstance? MudDialog { get; set; }
     [Inject] HttpClient? httpClient { get; set; }
     [Inject] ISnackbar Snackbar { get; set; }
@@ -150,31 +150,31 @@
 
     private async Task OnLoadDepartments()
     {
-        
+
 
         try
         {
-          
-                var response = await ApiHelper.GetAsync<List<Departments>>("DepartmentManagement/GetAllDepartments");
-                if (response.IsSuccess)
-                {
-                    departments = response.Data;
-           
-                    StateHasChanged();
-                }
-                else
-                {
-                    Snackbar.Add($"Failed to load departments: {response.Message}", Severity.Error);
-                }
-            
-          
+
+            var response = await ApiHelper.GetAsync<List<Departments>>("DepartmentManagement/GetAllDepartments");
+            if (response.IsSuccess)
+            {
+                departments = response.Data;
+
+                StateHasChanged();
+            }
+            else
+            {
+                Snackbar.Add($"Failed to load departments: {response.Message}", Severity.Error);
+            }
+
+
 
         }
         catch (Exception ex)
         {
             Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
         }
-      
+
     }
 
 }

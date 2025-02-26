@@ -29,6 +29,7 @@ namespace ICSS.Shared
         public Departments? Departments { get; set; }
         public YearLevel? YearLevel { get; set; }
         public Semester? Semester { get; set; }
+        public bool IsSaturdayClass { get; set; } = false;
 
     }
 

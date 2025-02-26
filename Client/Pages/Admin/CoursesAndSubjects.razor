@@ -117,8 +117,8 @@
                                 </CellTemplate>
                             </PropertyColumn>
                             <PropertyColumn Property="x => x.Semester" Title="Semester" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
-                                <CellTemplate>                                    
-                                        <MudText Typo="Typo.body2">@context.Item.Semester.ToString().Replace("_", " ")</MudText>                                    
+                                <CellTemplate>
+                                    <MudText Typo="Typo.body2">@context.Item.Semester.ToString().Replace("_", " ")</MudText>
                                 </CellTemplate>
                             </PropertyColumn>
                             <PropertyColumn Property="x => x.Departments.DepartmentName" Title="Department" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
@@ -126,6 +126,11 @@
                             <PropertyColumn Property="x => x.LabHour" Title="Laboratory Hour" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
                             <PropertyColumn Property="x => x.MaxStudent" Title="Maximum Student" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
                             <PropertyColumn Property="x => x.Units" Title="Units" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
+                            <PropertyColumn Property="x => x.IsSaturdayClass" Title="Is Saturday Class" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
+                                <CellTemplate>
+                                    <MudText Typo="Typo.body2">@(context.Item.IsSaturdayClass?"Yes":"No")</MudText>
+                                </CellTemplate>
+                            </PropertyColumn>
                             <PropertyColumn Property="x => x.IsActive" Title="Status" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
                                 <CellTemplate>
                                     @if (context.Item.IsActive)

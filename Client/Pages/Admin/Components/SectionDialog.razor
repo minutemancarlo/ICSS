@@ -42,7 +42,7 @@
                         <MudSelectItem T="YearLevel?" Value="@item">@item.ToString().Replace("_", " ")</MudSelectItem>
                     }
                 </MudSelect>
-                <MudCheckBox T="bool" Color="Color.Primary" Label="Summer Class"></MudCheckBox>
+                <MudCheckBox @bind-Value="section.IsSummer" T="bool" Color="Color.Primary" Label="Summer Class"></MudCheckBox>
             </MudStack>
         </MudForm>
     </DialogContent>
