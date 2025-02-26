@@ -2,7 +2,7 @@
 using ICSS.Shared;
 using System.Data;
 using System.Data.Common;
-
+using SchedStatus = ICSS.Shared.TaskStatus;
 namespace ICSS.Server.Repository
 {
 
@@ -33,6 +33,20 @@ namespace ICSS.Server.Repository
             return schedules;
         }
 
+        public async Task<int> InsertScheduleRequestAsync(ScheduleRequest request)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("@CourseId", request.Course.CourseId);
+            parameters.Add("@YearLevel", request.YearLevel);
+            parameters.Add("@SectionId", request.Section.SectionId);
+            parameters.Add("@Semester", request.Semester);
+            parameters.Add("@DepartmentId", request.Departments.DepartmentId);
+            parameters.Add("@IsActive", request.IsActive);
+            parameters.Add("@Status", SchedStatus.On_Queue);
+            parameters.Add("@CreatedBy", request.CreatedBy);
+
+            return await _dbConnection.ExecuteAsync("InsertScheduleRequest", parameters, commandType: CommandType.StoredProcedure);
+        }
 
 
 

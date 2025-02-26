@@ -41,13 +41,13 @@
                                 }
                             </MudSelect>
 
-                            <MudSelect @bind-Value="selectedCourse" T="int?" FullWidth Clearable Label="Select Course" AdornmentIcon="fa-solid fa-graduation-cap" Variant="Variant.Outlined" Margin="Margin.Dense" AdornmentColor="Color.Primary">
+                            <MudSelect @bind-Value="selectedCourse" @ref="mudSelect" T="Course" FullWidth Clearable Label="Select Course" AdornmentIcon="fa-solid fa-graduation-cap" Variant="Variant.Outlined" Margin="Margin.Dense" AdornmentColor="Color.Primary">
                                 @foreach (var item in coursesTemp)
                                 {
-                                    <MudSelectItem T="int?" Value="@(item.CourseId)">@item.CourseName</MudSelectItem>
+                                    <MudSelectItem T="Course" Value="@(item)">@item.CourseName</MudSelectItem>
                                 }
                             </MudSelect>
-                        </MudStack>                                                                        
+                        </MudStack>
                     </MudStack>
                     <MudSpacer />
                     @*   <MudSelect @bind-Value="selectedSchoolYear" Clearable Label="Select School Year" AdornmentIcon="fa-solid fa-calendar-day" Variant="Variant.Outlined" Margin="Margin.Dense" AdornmentColor="Color.Primary">
@@ -67,16 +67,16 @@
                     </MudSelect>    *@                                   
                     <MudBreakpointProvider>
                         <MudHidden Breakpoint="Breakpoint.MdAndUp" Invert="true">
-                            <MudButton Size="Size.Small" StartIcon="fa-solid fa-calendar-days" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Success" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
+                            <MudButton Size="Size.Small" StartIcon="fa-solid fa-calendar-days" OnClick="OnGenerateSchedule" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Success" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
                                 Generate
                             </MudButton>
-                            <MudButton Size="Size.Small" StartIcon="fa-solid fa-refresh" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Primary" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
+                            <MudButton Size="Size.Small" StartIcon="fa-solid fa-refresh" OnClick="OnGetScheduleList" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Primary" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
                                 Refresh
                             </MudButton>
                         </MudHidden>
                         <MudHidden Breakpoint="Breakpoint.MdAndDown" Invert="true">
-                            <MudIconButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Class="my-2 mx-1" Size="Size.Small" Icon="fa-solid fa-user-plus" Color="Color.Success" Disabled="!MainLayout.IsOnline" />
-                            <MudIconButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Class="my-2 mx-1" Size="Size.Small" Icon="fa-solid fa-refresh" Color="Color.Primary" Disabled="!MainLayout.IsOnline" />
+                            <MudIconButton ButtonType="ButtonType.Button" Variant="Variant.Filled" OnClick="OnGenerateSchedule" Class="my-2 mx-1" Size="Size.Small" Icon="fa-solid fa-user-plus" Color="Color.Success" Disabled="!MainLayout.IsOnline" />
+                            <MudIconButton ButtonType="ButtonType.Button" Variant="Variant.Filled" OnClick="OnGetScheduleList" Class="my-2 mx-1" Size="Size.Small" Icon="fa-solid fa-refresh" Color="Color.Primary" Disabled="!MainLayout.IsOnline" />
                         </MudHidden>
                     </MudBreakpointProvider>
 
@@ -87,12 +87,13 @@
                             <MudStack Row>
                                 <MudTooltip Text="View Schedule">
                                     <MudIconButton Icon="fa-solid fa-eye" Size="Size.Medium" Color="Color.Info" Variant="Variant.Filled" OnClick="@(() => OnShowSchedules(context.Item.Section,context.Item.Course, context.Item.YearLevel,context.Item.Semester))" />
-                                </MudTooltip>                                
+                                </MudTooltip>
                             </MudStack>
                         </CellTemplate>
                     </TemplateColumn>
                     <PropertyColumn Property="x => x.Course.CourseName" Title="Course" Sortable="true" HeaderClass="data-grid text-nowrap text-center text-white" CellClass="text-nowrap text-center" />
                     <PropertyColumn Property="x => x.Section.SchoolYear" Title="School Year" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
+                    <PropertyColumn Property="x => x.Section.SectionName" Title="Section" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
                     <PropertyColumn Property="x => x.YearLevel" Title="Year Level" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
                         <CellTemplate>
                             <MudText Typo="Typo.body2">@context.Item.YearLevel.ToString().Replace("_", " ")</MudText>
@@ -138,7 +139,7 @@
                                 <MudChip Variant="Variant.Filled" Size="Size.Small" Color="Color.Warning">Cancelled</MudChip>
                             }
                         </CellTemplate>
-                    </PropertyColumn>                    
+                    </PropertyColumn>
                     <PropertyColumn Property="x => x.CreatedBy" Title="Created By" Sortable="true" Hideable="true" HeaderClass="data-grid text-nowrap text-white">
                         <CellTemplate>
                             <MudStack Spacing="0">
@@ -193,6 +194,7 @@
     [Inject] private NavigationManager navigationManager { get; set; }
     [Inject] IDialogService? DialogService { get; set; }
 
+    MudSelect<Course>? mudSelect;
 
     private List<ScheduleRequest> scheduleRequests = new();
     private Departments? userDepartment = new();
@@ -220,7 +222,7 @@
 
     private YearLevel? selectedYearLevel;
     private string? selectedSchoolYear;
-    private int? selectedCourse;
+    private Course? selectedCourse;
 
     private bool isLoading = false;
     private bool isUserHasDepartment = false;
@@ -324,14 +326,14 @@
                 { x => x.schoolYear, sections?.SchoolYear},
                 { x => x.yearLevel, yearLevel.ToString().Replace("_"," ")},
                 { x => x.semester, semester.ToString().Replace("_"," ")},
-               
+
             };
 
             var dialog = await DialogService.ShowAsync<ScheduleDialog>("", parameters, options);
             var result = await dialog.Result;
             if (!result.Canceled)
             {
-                
+
                 StateHasChanged();
             }
         }
@@ -341,14 +343,86 @@
         }
     }
 
+    private async Task OnGenerateSchedule()
+    {
+        try
+        {
+            if (selectedDepartment is null)
+            {
+                Snackbar.Add($"Please select a Department", Severity.Error);
+                return;
+
+            }
+
+            if (selectedCourse is null)
+            {
+                Snackbar.Add($"Please select a Course", Severity.Error);
+                return;
+            }
+
+            var options = new DialogOptions
+                {
+                    CloseOnEscapeKey = false,
+                    FullWidth = true,
+                    MaxWidth = MaxWidth.Small,
+                    BackdropClick = false,
+                    CloseButton = false,
+                    BackgroundClass = "blurred"
+
+                };
+            string actionMessage = "Generate Schedule";
+            string  message = $"Note: If there are existing schedules for {selectedCourse.CourseName}, they will be marked as inactive. Are you sure you want to generate a new set of schedules?";
+            
+            var parameters = new DialogParameters<ConfirmationDialog>
+            {
+                { x => x.Action, actionMessage },
+                {x => x.Message, message}
+            };
+
+            var dialog = await DialogService.ShowAsync<ConfirmationDialog>("", parameters, options);
+            var result = await dialog.Result;
+            if (!result.Canceled)
+            {
+                var confirmed = (bool)result.Data;
+                if (confirmed == true)
+                {
+                    var payload = new ScheduleRequest
+                        {
+                            Course = selectedCourse,
+                            CreatedBy = MainLayout.CurrentUserId
+                        };
+
+                    var response = await ApiHelper.PostAsync<ScheduleRequest, ApiResponse<int>>($"ScheduleManagement/InsertScheduleRequest", payload);
+
+                    if (response.IsSuccess)
+                    {
+                        Snackbar.Add("Schedule Request successfully added to Queue", Severity.Success);
+                    }
+                    else
+                    {
+                        Snackbar.Add($"Error: {response.Message}", Severity.Error);
+                    }
+                }
+            }          
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
+        }finally
+        {
+            await OnGetScheduleList();
+        }
+    }
+
 
     private void OnChangeDepartment(int? value)
     {
-       
-        if(courses.Any())
+        mudSelect?.Clear();
+        if (courses.Any())
         {
-            coursesTemp=courses.Where(c => c.Departments?.DepartmentId == value).GroupBy(c => c.CourseName).Select(g => g.First()).ToList();
+            coursesTemp = courses.Where(c => c.Departments?.DepartmentId == value).GroupBy(c => c.CourseName).Select(g => g.First()).ToList();
         }
+
     }
 
     private List<CustomItem> GetCalendarItems(List<ScheduleTimeSlot> schedule)
@@ -422,7 +496,7 @@
                 {
                     userDepartment = department;
                     isUserHasDepartment = true;
-                    SelectedDepartment = userDepartment.DepartmentId;                    
+                    SelectedDepartment = userDepartment.DepartmentId;
                 }
                 else
                 {
@@ -529,7 +603,7 @@
                     // yearLevel = sections.Where(s => s.YearLevel != null).Select(s => s.YearLevel).Distinct().ToList();
                     // sectionFilter = sections.Where(s => !string.IsNullOrEmpty(s.SectionName) && !s.IsDeleted).Select(s => s.SectionName!).Distinct().OrderBy(s => s).ToList();
                 }
-                
+
                 StateHasChanged();
             }
             else
