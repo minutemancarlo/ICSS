@@ -31,6 +31,9 @@ namespace ICSS.Shared
         public Semester? Semester { get; set; }
         public bool IsSaturdayClass { get; set; } = false;
 
+        //For Process
+        public int? DepartmentId { get; set; }
+
     }
 
 
