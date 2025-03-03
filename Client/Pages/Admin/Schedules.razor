@@ -86,7 +86,7 @@
                         <CellTemplate>
                             <MudStack Row>
                                 <MudTooltip Text="View Schedule">
-                                    <MudIconButton Icon="fa-solid fa-eye" Size="Size.Medium" Color="Color.Info" Variant="Variant.Filled" OnClick="@(() => OnShowSchedules(context.Item.Section,context.Item.Course, context.Item.YearLevel,context.Item.Semester))" />
+                                    <MudIconButton Icon="fa-solid fa-eye" Size="Size.Medium" Color="Color.Info" Variant="Variant.Filled" OnClick="@(() => OnShowSchedules(context.Item.Section,context.Item.Course, context.Item.YearLevel,context.Item.Semester,context.Item.ScheduleId))" />
                                 </MudTooltip>
                             </MudStack>
                         </CellTemplate>
@@ -304,7 +304,7 @@
     // }
 
 
-    private async Task OnShowSchedules(SectionsModel? sections, Course? course, YearLevel? yearLevel, Semester? semester)
+    private async Task OnShowSchedules(SectionsModel? sections, Course? course, YearLevel? yearLevel, Semester? semester,int? scheduleId)
     {
         try
         {
@@ -319,6 +319,18 @@
 
                 };
 
+            var response = await ApiHelper.GetAsync<List<ScheduleTimeSlot>>($"ScheduleManagement/GetScheduleById/{scheduleId}");
+            List<ScheduleTimeSlot>? slots = new();
+            if (response.IsSuccess)
+            {
+                slots = response.Data;             
+            }
+            else
+            {
+                Snackbar.Add("Unable to get Schedule Information", Severity.Error);
+            }
+
+
             var parameters = new DialogParameters<ScheduleDialog>
             {
                 { x => x.section, sections?.SectionName },
@@ -326,6 +338,7 @@
                 { x => x.schoolYear, sections?.SchoolYear},
                 { x => x.yearLevel, yearLevel.ToString().Replace("_"," ")},
                 { x => x.semester, semester.ToString().Replace("_"," ")},
+                { x => x.scheduleTimeSlots, slots}
 
             };
 

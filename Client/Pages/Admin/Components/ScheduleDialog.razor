@@ -9,9 +9,19 @@
     </TitleContent>
     <DialogContent>
         <MudCalendar Class="w-100" DayStartTime="@TimeOnly.Parse(" 08:00")" ShowMonth="false" ShowTodayButton="false" ShowDatePicker="false" ShowPrevNextButtons="false" ShowDay="false" ShowWeek="true"
-                     DayTimeInterval="CalendarTimeInterval.Minutes30" ShowCurrentTime="true" Use24HourClock="false"  Context="tableContext"
-                     FirstDayOfWeek="DayOfWeek.Monday">
-         
+                     DayTimeInterval="CalendarTimeInterval.Minutes30" ShowCurrentTime="true" Use24HourClock="false" Items="items" DayCellHeight="100"
+        FirstDayOfWeek="DayOfWeek.Monday">
+            <CellTemplate>
+                <MudStack AlignItems="AlignItems.Stretch" Class="mud-cal-cell-template">
+                    <div style="width: 100%; height: 100%;color: white; background-color: @GetColor(((CustomItem)context).Color); border-radius: 12px; padding: 8px;">
+                        <MudText Typo="Typo.body2" Class="fw-bold py-3 text-center">Room: @((((CustomItem)context).Room is not null ? ((CustomItem)context).Room?.RoomCode : "TBD"))</MudText>
+                        <MudDivider/>
+                        <MudText Typo="Typo.body2" Class="py-3">Subject: @context.Text</MudText>
+                        <MudDivider />
+                        <MudText Typo="Typo.body2" Class="fw-bold py-3">Faculty: @((((CustomItem)context).Faculty is not null ? ((CustomItem)context).Faculty?.FacultyName : "TBD"))</MudText>
+                    </div>
+                </MudStack>                
+            </CellTemplate>
         </MudCalendar>
     </DialogContent>
     <DialogActions>
@@ -35,5 +45,66 @@
     [Parameter] public string? schoolYear { get; set; }
     [Parameter] public string? yearLevel { get; set; }
     [Parameter] public string? semester { get; set; }
+    [Parameter] public List<ScheduleTimeSlot>? scheduleTimeSlots { get; set; }
+
+    private List<CustomItem> items = new();
+    private string GetColor(Color color) => $"var(--mud-palette-{color.ToDescriptionString()})";
+    private class CustomItem : CalendarItem
+    {
+        public int? TimeSlotId { get; set; }
+        public Subjects? Subject { get; set; }
+        public FacultyModel? Faculty { get; set; }
+        public Rooms? Room { get; set; }
+        public DayOfWeek? Day { get; set; }
+        public TimeSpan? StartTime { get; set; }
+        public TimeSpan? EndTime { get; set; }
+        public Color Color { get; set; } = Color.Primary;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (scheduleTimeSlots is not null && scheduleTimeSlots.Any())
+        {
+            var today = DateTime.Today;
+
+            var customItems = scheduleTimeSlots.Select(slot =>
+            {
+                var baseDate = GetAdjustedDate(slot.Day, today);
+
+                return new CustomItem
+                    {
+                        TimeSlotId = slot.ScheduleId,
+                        Subject = slot.Subject,
+                        Faculty = slot.Faculty,
+                        Room = slot.Room,
+                        Day = slot.Day,                        
+                        StartTime = slot.StartTime,
+                        EndTime = slot.EndTime,
+                        Start = baseDate.Date.Add(slot.StartTime),
+                        End = baseDate.Date.Add(slot.EndTime),
+                        Text = slot.Subject?.SubjectName ?? "N/A",
+                        Color = Color.Primary
+                    };
+            }).ToList();
+            items.AddRange(customItems);
+        }
+
+        await base.OnInitializedAsync();
+    }
+
+    private DateTime GetAdjustedDate(DayOfWeek? scheduleDay, DateTime today)
+    {
+        if (!scheduleDay.HasValue) return today;
+
+        int daysOffset = scheduleDay <= today.DayOfWeek
+            ? -(today.DayOfWeek - scheduleDay.Value)
+            : (scheduleDay.Value - today.DayOfWeek);
+
+        if (today.DayOfWeek == DayOfWeek.Saturday || today.DayOfWeek == DayOfWeek.Sunday)
+            daysOffset -= 7;
+
+        return today.AddDays(daysOffset);
+    }
+
     void Cancel() => MudDialog.Cancel();
 }
