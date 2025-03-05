@@ -37,6 +37,23 @@ namespace ICSS.Server.Controllers
             }
         }
 
+        [HttpGet("GetScheduleById/{Id}")]
+        public async Task<ActionResult<IEnumerable<ScheduleTimeSlot>>> GetScheduleById(int? Id)
+        {
+            try
+            {
+                var schedules= await _scheduleRepository.GetScheduleListAsync();
+                var departmentId = schedules.Where(s => s.ScheduleId == Id).Select(x => x.Departments?.DepartmentId).FirstOrDefault();
+                var schedulesSingle = await _scheduleRepository.GetScheduleByIdAsync(Id,departmentId);
+
+                return Ok(schedulesSingle);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
+        }
+
 
         [HttpPost("InsertScheduleRequest")]
         public async Task<IActionResult> InsertScheduleRequest([FromBody] ScheduleRequest request)

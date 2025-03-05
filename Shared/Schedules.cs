@@ -22,6 +22,7 @@ namespace ICSS.Shared
     public class ScheduleTimeSlot
     {
         public int? TimeSlotId { get; set; }
+        public int? ScheduleId { get; set; }
         public Subjects? Subject { get; set; }
         public Rooms? Room { get; set; }
         public FacultyModel? Faculty { get; set; }

@@ -86,7 +86,7 @@
                         <CellTemplate>
                             <MudStack Row>
                                 <MudTooltip Text="View Schedule">
-                                    <MudIconButton Icon="fa-solid fa-eye" Size="Size.Medium" Color="Color.Info" Variant="Variant.Filled" OnClick="@(() => OnShowSchedules(context.Item.Section,context.Item.Course, context.Item.YearLevel,context.Item.Semester,context.Item.ScheduleId))" />
+                                    <MudIconButton Icon="fa-solid fa-eye" Disabled="@(context.Item.TaskStatus!=TaskStatus.Success)" Size="Size.Medium" Color="Color.Info" Variant="Variant.Filled" OnClick="@(() => OnShowSchedules(context.Item.Section,context.Item.Course, context.Item.YearLevel,context.Item.Semester,context.Item.ScheduleId))" />
                                 </MudTooltip>
                             </MudStack>
                         </CellTemplate>

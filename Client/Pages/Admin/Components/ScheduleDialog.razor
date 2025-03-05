@@ -9,22 +9,24 @@
     </TitleContent>
     <DialogContent>
         <MudCalendar Class="w-100" DayStartTime="@TimeOnly.Parse(" 08:00")" ShowMonth="false" ShowTodayButton="false" ShowDatePicker="false" ShowPrevNextButtons="false" ShowDay="false" ShowWeek="true"
-                     DayTimeInterval="CalendarTimeInterval.Minutes30" ShowCurrentTime="true" Use24HourClock="false" Items="items" DayCellHeight="100"
+                     DayTimeInterval="CalendarTimeInterval.Minutes30" ShowCurrentTime="true" Use24HourClock="false" Items="items" DayCellHeight="100" EnableDragItems
         FirstDayOfWeek="DayOfWeek.Monday">
             <CellTemplate>
                 <MudStack AlignItems="AlignItems.Stretch" Class="mud-cal-cell-template">
                     <div style="width: 100%; height: 100%;color: white; background-color: @GetColor(((CustomItem)context).Color); border-radius: 12px; padding: 8px;">
-                        <MudText Typo="Typo.body2" Class="fw-bold py-3 text-center">Room: @((((CustomItem)context).Room is not null ? ((CustomItem)context).Room?.RoomCode : "TBD"))</MudText>
+                        <MudText Typo="Typo.body2" Class="fw-bold py-3 text-center">@((((CustomItem)context).Room is not null ? ((CustomItem)context).Room?.RoomName : "TBD"))</MudText>
                         <MudDivider/>
-                        <MudText Typo="Typo.body2" Class="py-3">Subject: @context.Text</MudText>
+                        <MudText Typo="Typo.body2" Class="py-3">@context.Text - @(((CustomItem)context).Subject.Units)</MudText>
                         <MudDivider />
-                        <MudText Typo="Typo.body2" Class="fw-bold py-3">Faculty: @((((CustomItem)context).Faculty is not null ? ((CustomItem)context).Faculty?.FacultyName : "TBD"))</MudText>
+                        <MudText Typo="Typo.body2" Class="fw-bold py-3">@((((CustomItem)context).Faculty is not null ? ((CustomItem)context).Faculty?.FacultyName : "TBD"))</MudText>
                     </div>
                 </MudStack>                
             </CellTemplate>
         </MudCalendar>
     </DialogContent>
     <DialogActions>
+        <MudButton Size="Size.Medium" Variant="Variant.Filled" StartIcon="fa-solid fa-file-pdf" Color="Color.Success">Export to PDF</MudButton>
+        <MudSpacer/>
         <MudButton  Size="Size.Medium" OnClick="Cancel">Close</MudButton>
         @*    <MudLoadingButton Variant="Variant.Filled"
                           Color="Color.Success"

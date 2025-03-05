@@ -15,6 +15,31 @@ namespace ICSS.Server.Repository
             _dbConnection = dbConnection;
         }
 
+        public async Task<IEnumerable<ScheduleTimeSlot>> GetScheduleByIdAsync(int? scheduleId, int? departmentId)
+        {
+            var parameter = new DynamicParameters();
+            parameter.Add("@ScheduleId", scheduleId);
+            parameter.Add("@DepartmentId", departmentId);
+
+            var schedules = await _dbConnection.QueryAsync<ScheduleTimeSlot, Subjects, Rooms, FacultyModel, ScheduleTimeSlot>(
+                "GetScheduleById",
+                (schedule, subject, room, faculty) =>
+                {
+                    schedule.Subject = subject;
+                    schedule.Room = room;
+                    schedule.Faculty = faculty;
+                    return schedule;
+                },
+                param: parameter,
+                splitOn: "SubjectId, RoomId, FacultyId",
+                commandType: CommandType.StoredProcedure
+            );
+
+            return schedules;
+        }
+
+
+
         public async Task<IEnumerable<ScheduleRequest>> GetScheduleListAsync()
         {
             var schedules = await _dbConnection.QueryAsync<Course, Sections, Departments, ScheduleRequest, ScheduleRequest>(
@@ -51,7 +76,7 @@ namespace ICSS.Server.Repository
         public async Task<int> InsertScheduleTimeSlot(ScheduleTimeSlot timeSlot)
         {
             var parameters = new DynamicParameters();
-            parameters.Add("@TimeSlotId", timeSlot.TimeSlotId);
+            parameters.Add("@ScheduleId", timeSlot.ScheduleId);
             parameters.Add("@SubjectId", timeSlot.Subject?.SubjectId);
             parameters.Add("@RoomId", timeSlot.Room?.RoomId);
             parameters.Add("@FacultyId", timeSlot.Faculty?.FacultyId);
@@ -60,6 +85,17 @@ namespace ICSS.Server.Repository
             parameters.Add("@EndTime", timeSlot.EndTime);
 
             return await _dbConnection.ExecuteAsync("InsertScheduleTimeSlot", parameters, commandType: CommandType.StoredProcedure);
+        }
+
+
+        public async Task<int> UpdateScheduleStatus (int? scheduleId,SchedStatus status)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("@ScheduleId", scheduleId);
+            parameters.Add("@Status", status);
+            var query = "Update ScheduleRequest SET Status = @Status Where ScheduleId = @ScheduleId";
+
+            return await _dbConnection.ExecuteAsync(query, parameters, commandType: CommandType.Text);
         }
 
 

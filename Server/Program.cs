@@ -59,7 +59,8 @@ builder.Services.AddTransient<SectionRepository>();
 builder.Services.AddTransient<ScheduleRepository>();
 
 builder.Services.AddHostedService<StudentInfoUploader>();
-builder.Services.AddHostedService<ScheduleGenerator>();
+builder.Services.AddHostedService<ScheduleProcessor>();
+//builder.Services.AddHostedService<SchedGenerator>();
 
 builder.Services.AddHttpContextAccessor();
 
