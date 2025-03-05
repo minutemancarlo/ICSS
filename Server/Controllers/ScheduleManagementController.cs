@@ -54,6 +54,25 @@ namespace ICSS.Server.Controllers
             }
         }
 
+        [HttpGet("GetScheduleByUserId/{Id}")]
+        public async Task<ActionResult<IEnumerable<ScheduleTimeSlot>>> GetScheduleByUserId(string? Id)
+        {
+            try
+            {                
+                var schedules = await _scheduleRepository.GetScheduleByUserIdAsync(Id);
+                if(schedules is null)
+                {
+                    return NoContent();
+                }
+                
+                return Ok(schedules);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
+        }
+
 
         [HttpPost("InsertScheduleRequest")]
         public async Task<IActionResult> InsertScheduleRequest([FromBody] ScheduleRequest request)

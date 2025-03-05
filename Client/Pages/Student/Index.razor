@@ -10,10 +10,6 @@
             <MudPaper Class="w-100" Style="background-color: #1abc9c; color: white">
                 <MudText Typo="Typo.h6" Class="fw-bold p-2">
                     My Schedule
-                    @if (mySection is not null)
-                    {
-                        @($" - {mySection.Course?.CourseCode} {mySection.SchoolYear}: {mySection.SectionName} - {mySection.YearLevel.ToString().Replace("_", " ")}")
-                    }
                 </MudText>
 
             </MudPaper>
@@ -21,13 +17,29 @@
             <MudDivider />
         </MudItem>
         <MudItem xs="12">
+            <MudText Typo="Typo.h6">
+                @if (selectedSection is not null)
+                {
+                    @($"Showing Schedule for - {mySection.Course?.CourseCode} {mySection.SchoolYear}: Section {mySection.SectionName} - {mySection.YearLevel.ToString().Replace("_", " ")}")
+                }
+            </MudText>
             <MudCalendar Class="w-100" DayStartTime="@TimeOnly.Parse(" 08:00")" ShowMonth="false" ShowTodayButton="false" ShowDatePicker="false" ShowPrevNextButtons="false" ShowDay="false" ShowWeek="true"
-                         DayTimeInterval="CalendarTimeInterval.Minutes30" ShowCurrentTime="true" Use24HourClock="false" Items="items" DayCellHeight="100" EnableDragItems
-                         FirstDayOfWeek="DayOfWeek.Monday">
+            DayTimeInterval="CalendarTimeInterval.Minutes30" ShowCurrentTime="true" Use24HourClock="false" Items="items" DayCellHeight="100"
+            FirstDayOfWeek="DayOfWeek.Monday">
                 <ToolbarContent>
-                    <MudButton Variant="Variant.Filled" Color="Color.Success" Class="mx-1">Export as PDF</MudButton>
+                    <MudStack Row Class="w-100">
+                        <MudSelect Disabled="@(!MainLayout.IsOnline)" ValueChanged="OnSelectSchedule" T="int?" Clearable Label="Select Schedule" FullWidth AdornmentIcon="fa-solid fa-calendar-days" Variant="Variant.Outlined" Margin="Margin.Dense" AdornmentColor="Color.Primary">
+                            @foreach (var item in scheduleRequests.OrderBy(x => x.ScheduleId).ToList())
+                            {
+                                <MudSelectItem T="int?" Value="@(item.ScheduleId)">@($"{item.Course?.CourseCode} {item.Section?.SchoolYear}: Section {item.Section?.SectionName} - {item.Section?.YearLevel.ToString().Replace("_", " ")}/{item.Semester.ToString().Replace("_", " ")}")</MudSelectItem>
+                            }
+                        </MudSelect>
+                        <MudButton Variant="Variant.Filled" Color="Color.Success" Size="Size.Medium" Class="my-2 mx-1">View</MudButton>
+                        <MudSpacer />
+                        <MudButton Variant="Variant.Filled" Color="Color.Info" Size="Size.Medium" Class="my-2 mx-1">Export as PDF</MudButton>
+                    </MudStack>
                 </ToolbarContent>
-               @*  <CellTemplate>
+                <CellTemplate>
                     <MudStack AlignItems="AlignItems.Stretch" Class="mud-cal-cell-template">
                         <div style="width: 100%; height: 100%;color: white; background-color: @GetColor(((CustomItem)context).Color); border-radius: 12px; padding: 8px;">
                             <MudText Typo="Typo.body2" Class="fw-bold py-3 text-center">@((((CustomItem)context).Room is not null ? ((CustomItem)context).Room?.RoomName : "TBD"))</MudText>
@@ -37,7 +49,7 @@
                             <MudText Typo="Typo.body2" Class="fw-bold py-3">@((((CustomItem)context).Faculty is not null ? ((CustomItem)context).Faculty?.FacultyName : "TBD"))</MudText>
                         </div>
                     </MudStack>
-                </CellTemplate> *@
+                </CellTemplate>
             </MudCalendar>
         </MudItem>
     </MudGrid>
@@ -53,8 +65,12 @@
     [Inject] IDialogService? DialogService { get; set; }
 
     private Sections? mySection;
-
-    private List<CustomItem> items = new();
+    private List<ScheduleTimeSlot>? scheduleTimeSlots = new();
+    private List<ScheduleRequest>? scheduleRequests = new();
+    private int? selectedScheduleId;
+    private Sections? selectedSection;
+    private string GetColor(Color color) => $"var(--mud-palette-{color.ToDescriptionString()})";
+    private List<CustomItem>? items = new();
     private class CustomItem : CalendarItem
     {
         public int? TimeSlotId { get; set; }
@@ -77,7 +93,7 @@
             {
 
                 if (response.StatusCode == HttpStatusCode.NoContent)
-                {                    
+                {
                     mySection = null;
                     return;
                 }
@@ -89,7 +105,7 @@
                     mySection = section;
                 }
                 else
-                {                    
+                {
                     mySection = null;
                 }
 
@@ -103,8 +119,177 @@
         {
             Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
         }
+        finally
+        {
+            await GetSchedules();
+            await OnGetScheduleList();
+            if (scheduleRequests.Any())
+            {
+                scheduleRequests = scheduleRequests.Where(x => x.Section?.SectionId == mySection?.SectionId).ToList();
+            }
+            // if(mySection is not null)
+            // {
+            //     await GetSchedules();
+            //     if (scheduleTimeSlots is not null && scheduleTimeSlots.Any())
+            //     {
+            //         var today = DateTime.Today;
+
+            //         var customItems = scheduleTimeSlots.Select(slot =>
+            //         {
+            //             var baseDate = GetAdjustedDate(slot.Day, today);
+
+            //             return new CustomItem
+            //                 {
+            //                     TimeSlotId = slot.ScheduleId,
+            //                     Subject = slot.Subject,
+            //                     Faculty = slot.Faculty,
+            //                     Room = slot.Room,
+            //                     Day = slot.Day,
+            //                     StartTime = slot.StartTime,
+            //                     EndTime = slot.EndTime,
+            //                     Start = baseDate.Date.Add(slot.StartTime),
+            //                     End = baseDate.Date.Add(slot.EndTime),
+            //                     Text = slot.Subject?.SubjectName ?? "N/A",
+            //                     Color = Color.Primary
+            //                 };
+            //         }).ToList();
+            //         items.AddRange(customItems);
+            //     }
+            //     items = items.Where(s => items.Count(x => x.TimeSlotId == s.TimeSlotId) > 1).ToList();
+            // }
+        }
 
         await base.OnInitializedAsync();
+    }
+
+    private void OnSelectSchedule(int? value)
+    {
+        selectedScheduleId = value;
+
+
+        if (selectedScheduleId is not null && mySection is not null)
+        {
+            if (scheduleTimeSlots.Any())
+            {
+                items?.Clear();
+                var selectedSchedule = scheduleTimeSlots.Where(x => x.ScheduleId == value);
+                if (selectedSchedule.Any())
+                {
+                    var today = DateTime.Today;
+
+                    var customItems = selectedSchedule.Select(slot =>
+                            {
+                                var baseDate = GetAdjustedDate(slot.Day, today);
+
+                                return new CustomItem
+                                    {
+                                        TimeSlotId = slot.ScheduleId,
+                                        Subject = slot.Subject,
+                                        Faculty = slot.Faculty,
+                                        Room = slot.Room,
+                                        Day = slot.Day,
+                                        StartTime = slot.StartTime,
+                                        EndTime = slot.EndTime,
+                                        Start = baseDate.Date.Add(slot.StartTime),
+                                        End = baseDate.Date.Add(slot.EndTime),
+                                        Text = slot.Subject?.SubjectName ?? "N/A",
+                                        Color = Color.Primary
+                                    };
+                            }).ToList();
+                    items.AddRange(customItems);
+                }
+
+            }
+            else
+            {
+                Snackbar.Add("No Schedules found", Severity.Error);
+            }
+        }
+
+
+    }
+
+
+    private DateTime GetAdjustedDate(DayOfWeek? scheduleDay, DateTime today)
+    {
+        if (!scheduleDay.HasValue) return today;
+
+        int daysOffset = scheduleDay <= today.DayOfWeek
+            ? -(today.DayOfWeek - scheduleDay.Value)
+            : (scheduleDay.Value - today.DayOfWeek);
+
+        if (today.DayOfWeek == DayOfWeek.Saturday || today.DayOfWeek == DayOfWeek.Sunday)
+            daysOffset -= 7;
+
+        return today.AddDays(daysOffset);
+    }
+
+
+    private async Task GetSchedules()
+    {
+        try
+        {
+            var response = await HttpClient.GetAsync($"ScheduleManagement/GetScheduleByUserId/{MainLayout.CurrentUserId}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                if (response.StatusCode == HttpStatusCode.NoContent)
+                {
+                    scheduleTimeSlots = null;
+                    return;
+                }
+
+                var schedule = await response.Content.ReadFromJsonAsync<List<ScheduleTimeSlot>>();
+
+                if (schedule is not null)
+                {
+                    scheduleTimeSlots = schedule;
+                    Console.WriteLine(scheduleTimeSlots.Count());
+                }
+                else
+                {
+                    scheduleTimeSlots = null;
+                }
+            }
+            else
+            {
+                Snackbar.Add($"Error: {response.ReasonPhrase}", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error getting schedule data: {ex.Message}", Severity.Error);
+        }
+    }
+
+
+    private async Task OnGetScheduleList()
+    {
+
+
+        try
+        {
+
+            var response = await ApiHelper.GetAsync<List<ScheduleRequest>>("ScheduleManagement/GetScheduleList");
+            if (response.IsSuccess)
+            {
+                scheduleRequests = response.Data;
+
+                StateHasChanged();
+            }
+            else
+            {
+                Snackbar.Add($"Failed to load schedules: {response.Message}", Severity.Error);
+            }
+
+
+
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
+        }
+
     }
 
 }
