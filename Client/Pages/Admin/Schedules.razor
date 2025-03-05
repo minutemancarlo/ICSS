@@ -438,53 +438,7 @@
 
     }
 
-    private List<CustomItem> GetCalendarItems(List<ScheduleTimeSlot> schedule)
-    {
-        var items = new List<CustomItem>();
-        TimeZoneInfo manilaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Manila");
-
-        foreach (var item in schedule)
-        {
-            var today = DateTime.Today;
-            int daysUntilTarget = ((int)item.Day - (int)today.DayOfWeek + 7) % 7;
-            DateTime targetDate = today.AddDays(daysUntilTarget);
-
-            if (item.Day == DayOfWeek.Monday)
-            {
-                targetDate = targetDate.AddDays(-1);
-            }
-
-            DateTime startDate = targetDate.Add(item.StartTime);
-            DateTime endDate = targetDate.Add(item.EndTime);
-
-            DateTime manilaStartDateTime = DateTime.SpecifyKind(startDate, DateTimeKind.Unspecified);
-            DateTime manilaEndDateTime = DateTime.SpecifyKind(endDate, DateTimeKind.Unspecified);
-
-            DateTime utcStartDateTime = TimeZoneInfo.ConvertTimeToUtc(manilaStartDateTime, manilaTimeZone);
-            DateTime utcEndDateTime = TimeZoneInfo.ConvertTimeToUtc(manilaEndDateTime, manilaTimeZone);
-
-            var timeSlot = new CustomItem
-                {
-                    Title = "Room 102",
-                    Text = "CS102 - Programming 1",
-                    Start = utcStartDateTime,
-                    End = utcEndDateTime
-                };
-
-            items.Add(timeSlot);
-        }
-
-        return items;
-    }
-
-
-
-    private class CustomItem : CalendarItem
-    {
-        public string Title { get; set; } = string.Empty;
-        public string Location { get; set; } = string.Empty;
-        public Color Color { get; set; } = Color.Primary;
-    }
+    
 
 
 

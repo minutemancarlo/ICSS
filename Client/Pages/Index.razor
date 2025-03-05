@@ -32,8 +32,11 @@
                 if (user.IsInRole("Admin"))
                 {
                     Navigation.NavigateTo("/admin-dashboard");
-                }else
+                }
+                else if(user.IsInRole("Student"))
                 {
+                    Navigation.NavigateTo("/student-index");
+                }else{
                     Navigation.NavigateTo("/501");
                 }
                 // else if (user.IsInRole("Front Desk"))

@@ -108,6 +108,27 @@ namespace ICSS.Server.Repository
             return students;
         }
 
+        public async Task<IEnumerable<Sections>> GetSectionByUserIdAsync(string id)
+        {
+            var parameter = new DynamicParameters();
+            parameter.Add("@UserId", id);
+
+            var result = await _dbConnection.QueryAsync<Sections, Course, Sections>(
+                "GetSectionByUserId",
+                (section, course) =>
+                {
+                    section.Course = course;
+                    return section;
+                },
+                parameter,
+                commandType: CommandType.StoredProcedure,
+                splitOn: "CourseId"
+            );
+
+            return result;
+        }
+
+
 
         public async Task<IEnumerable<SectionMember>> GetSectionMembers(int? sectionId)
         {

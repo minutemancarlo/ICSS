@@ -9,21 +9,38 @@
 <CascadingValue Value="this">
     <MudLayout>
         <MudAppBar>
-            <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-            <MudText Typo="Typo.h6">@subTitle</MudText>
+            <AuthorizeView Roles="Admin,Faculty">
+                <Authorized>
+                    <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+                    <MudText Typo="Typo.h6">@subTitle</MudText>
+                </Authorized>
+            </AuthorizeView>
+            <AuthorizeView Roles="Student">
+                <Authorized>
+                    <MudDrawerHeader Class="mud-theme-primary" Dense>
+                        <MudStack Row Spacing="0" Class="w-100" Justify="Justify.SpaceEvenly">
+                            <MudImage Src="icon-512.png" Width="50" Height="50" />
+                            <MudText Typo="Typo.h5" Class="pt-2">ICSS</MudText>
+                        </MudStack>
+                    </MudDrawerHeader>
+                </Authorized>
+            </AuthorizeView>
             <MudSpacer />
-            <AccessControl/>
+            <AccessControl />
         </MudAppBar>
-        <MudDrawer @bind-Open="@_drawerOpen" Elevation="1">
-            <MudDrawerHeader Class="mud-theme-primary" Dense>
-                <MudStack Row Spacing="0" Class="w-100" Justify="Justify.SpaceEvenly">
-                    <MudImage Src="icon-512.png" Width="50" Height="50" />
-                    <MudText Typo="Typo.h5" Class="pt-2">ICSS</MudText>               
-                </MudStack>
-
-            </MudDrawerHeader>
-            <NavMenu />
-        </MudDrawer>
+        <AuthorizeView Roles="Admin,Faculty">
+            <Authorized>
+                <MudDrawer @bind-Open="@_drawerOpen" Elevation="1">
+                    <MudDrawerHeader Class="mud-theme-primary" Dense>
+                        <MudStack Row Spacing="0" Class="w-100" Justify="Justify.SpaceEvenly">
+                            <MudImage Src="icon-512.png" Width="50" Height="50" />
+                            <MudText Typo="Typo.h5" Class="pt-2">ICSS</MudText>
+                        </MudStack>
+                    </MudDrawerHeader>
+                    <NavMenu />
+                </MudDrawer>
+            </Authorized>
+        </AuthorizeView>
         <MudMainContent>
             @Body
         </MudMainContent>
@@ -34,7 +51,7 @@
     [Inject] IJSRuntime JSRuntime { get; set; }
     bool _drawerOpen = true;
     private string currentUserId;
-    private string subTitle;
+    private string subTitle;    
     private bool isOnline;
 
     private async Task ShowInstallPrompt()
@@ -75,6 +92,7 @@
             InvokeAsync(() => StateHasChanged());
         }
     }
+
 
     public string CurrentUserId
     {

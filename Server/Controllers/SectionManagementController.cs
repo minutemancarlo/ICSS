@@ -110,6 +110,27 @@ namespace ICSS.Server.Controllers
             }
         }
 
+        [HttpGet("GetSectionByUserId/{id}")]
+        public async Task<ActionResult<Sections>> GetSectionByUserId(string id)
+        {
+            try
+            {
+
+                var sections = await _sectionRepository.GetSectionByUserIdAsync(id);
+                 var section = sections.FirstOrDefault();
+                if (sections is null)
+                {
+                    return NoContent();
+                }
+
+                return Ok(section);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
+        }
+
         [HttpPost("UpdateSectionMembers")]
         public async Task<IActionResult> UpdateSectionMembers([FromBody] List<SectionMember> member)
         {

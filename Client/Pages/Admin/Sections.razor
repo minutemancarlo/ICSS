@@ -116,7 +116,7 @@
                             }
                         </MudSelect>
 
-                        <MudSelect Disabled="!MainLayout.IsOnline" T="string" @bind-Value="selectedSection" Clearable Label="Select School Year" AdornmentIcon="fa-solid fa-calendar-day" Variant="Variant.Outlined" Margin="Margin.Dense" AdornmentColor="Color.Primary">
+                        <MudSelect Disabled="!MainLayout.IsOnline" T="string" @bind-Value="selectedSection" Clearable Label="Select Section" AdornmentIcon="fa-solid fa-calendar-day" Variant="Variant.Outlined" Margin="Margin.Dense" AdornmentColor="Color.Primary">
                             @foreach (var item in sectionFilter)
                             {
                                 <MudSelectItem Value="@(item)">@item</MudSelectItem>

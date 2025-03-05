@@ -1,0 +1,110 @@
+﻿@page "/student-index"
+@attribute [Authorize(Roles = "Student")]
+@layout MainLayout
+@using ICSS.Shared
+@using System.Net
+
+<MudContainer Class="py-4 py-sm-8 py-md-12 py-lg-16 py-xl-20">
+    <MudGrid>
+        <MudItem xs="12">
+            <MudPaper Class="w-100" Style="background-color: #1abc9c; color: white">
+                <MudText Typo="Typo.h6" Class="fw-bold p-2">
+                    My Schedule
+                    @if (mySection is not null)
+                    {
+                        @($" - {mySection.Course?.CourseCode} {mySection.SchoolYear}: {mySection.SectionName} - {mySection.YearLevel.ToString().Replace("_", " ")}")
+                    }
+                </MudText>
+
+            </MudPaper>
+
+            <MudDivider />
+        </MudItem>
+        <MudItem xs="12">
+            <MudCalendar Class="w-100" DayStartTime="@TimeOnly.Parse(" 08:00")" ShowMonth="false" ShowTodayButton="false" ShowDatePicker="false" ShowPrevNextButtons="false" ShowDay="false" ShowWeek="true"
+                         DayTimeInterval="CalendarTimeInterval.Minutes30" ShowCurrentTime="true" Use24HourClock="false" Items="items" DayCellHeight="100" EnableDragItems
+                         FirstDayOfWeek="DayOfWeek.Monday">
+                <ToolbarContent>
+                    <MudButton Variant="Variant.Filled" Color="Color.Success" Class="mx-1">Export as PDF</MudButton>
+                </ToolbarContent>
+               @*  <CellTemplate>
+                    <MudStack AlignItems="AlignItems.Stretch" Class="mud-cal-cell-template">
+                        <div style="width: 100%; height: 100%;color: white; background-color: @GetColor(((CustomItem)context).Color); border-radius: 12px; padding: 8px;">
+                            <MudText Typo="Typo.body2" Class="fw-bold py-3 text-center">@((((CustomItem)context).Room is not null ? ((CustomItem)context).Room?.RoomName : "TBD"))</MudText>
+                            <MudDivider />
+                            <MudText Typo="Typo.body2" Class="py-3">@context.Text</MudText>
+                            <MudDivider />
+                            <MudText Typo="Typo.body2" Class="fw-bold py-3">@((((CustomItem)context).Faculty is not null ? ((CustomItem)context).Faculty?.FacultyName : "TBD"))</MudText>
+                        </div>
+                    </MudStack>
+                </CellTemplate> *@
+            </MudCalendar>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
+
+@code {
+    [CascadingParameter]
+    public MainLayout MainLayout { get; private set; }
+    [Inject] private ISnackbar Snackbar { get; set; }
+    [Inject] private ILocalStorageService LocalStorage { get; set; }
+    [Inject] private HttpClient HttpClient { get; set; }
+    [Inject] private ApiRequestHelper ApiHelper { get; set; }
+    [Inject] IDialogService? DialogService { get; set; }
+
+    private Sections? mySection;
+
+    private List<CustomItem> items = new();
+    private class CustomItem : CalendarItem
+    {
+        public int? TimeSlotId { get; set; }
+        public Subjects? Subject { get; set; }
+        public FacultyModel? Faculty { get; set; }
+        public Rooms? Room { get; set; }
+        public DayOfWeek? Day { get; set; }
+        public TimeSpan? StartTime { get; set; }
+        public TimeSpan? EndTime { get; set; }
+        public Color Color { get; set; } = Color.Primary;
+    }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var response = await HttpClient.GetAsync($"SectionManagement/GetSectionByUserId/{MainLayout.CurrentUserId}");
+            if (response.IsSuccessStatusCode)
+            {
+
+                if (response.StatusCode == HttpStatusCode.NoContent)
+                {                    
+                    mySection = null;
+                    return;
+                }
+
+                var section = await response.Content.ReadFromJsonAsync<Sections>();
+
+                if (section is not null)
+                {
+                    mySection = section;
+                }
+                else
+                {                    
+                    mySection = null;
+                }
+
+            }
+            else
+            {
+                Snackbar.Add($"Error: {response.ReasonPhrase}", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
+        }
+
+        await base.OnInitializedAsync();
+    }
+
+}
