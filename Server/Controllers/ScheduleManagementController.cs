@@ -74,6 +74,23 @@ namespace ICSS.Server.Controllers
         }
 
 
+        [HttpGet("GetScheduleByFacultyId/{Id}")]
+        public async Task<ActionResult<IEnumerable<FacultyWorkload>>> GetScheduleByFacultyId(int? Id)
+        {
+            try
+            {
+                var schedules = await _scheduleRepository.GetScheduleByFacultyIdAsync(Id);
+              
+
+                return Ok(schedules);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
+        }
+
+
         [HttpPost("InsertScheduleRequest")]
         public async Task<IActionResult> InsertScheduleRequest([FromBody] ScheduleRequest request)
         {

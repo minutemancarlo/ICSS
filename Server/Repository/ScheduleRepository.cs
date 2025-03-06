@@ -38,6 +38,37 @@ namespace ICSS.Server.Repository
             return schedules;
         }
 
+        public async Task<IEnumerable<FacultyWorkload>> GetScheduleByFacultyIdAsync(int? facultyId)
+        {
+            var parameter = new DynamicParameters();
+            parameter.Add("@FacultyId", facultyId);
+
+            var workloads = await _dbConnection.QueryAsync<FacultyModel, Course, Sections, ScheduleTimeSlot, Subjects, Rooms, FacultyWorkload>(
+                "GetSchedulesByFacultyId",
+                (faculty, course, section, scheduleTimeSlot, subject, room) =>
+                {
+                    scheduleTimeSlot.Subject = subject;
+                    scheduleTimeSlot.Room = room;
+
+                    return new FacultyWorkload
+                    {
+                        Faculty = faculty,
+                        Course = course,
+                        Sections = section,
+                        ScheduleTimeSlot = scheduleTimeSlot
+                    };
+                },
+                param: parameter,
+                splitOn: "CourseId, SectionId, TimeSlotId, SubjectId, RoomId",
+                commandType: CommandType.StoredProcedure
+            );
+
+            return workloads;
+        }
+
+
+
+
         public async Task<IEnumerable<ScheduleTimeSlot>> GetScheduleByUserIdAsync(string? userId)
         {
             var parameter = new DynamicParameters();

@@ -17,5 +17,16 @@ namespace ICSS.Shared
         public string? DoctorateDegree { get; set; }
         public bool IsDeleted { get; set; } = false;
     }
+
+    public class FacultyWorkload
+    {
+        public FacultyModel? Faculty { get; set; }
+        public Course? Course { get; set; }
+        public Sections? Sections { get; set; }
+        public ScheduleTimeSlot? ScheduleTimeSlot { get; set; }
+        public Subjects? Subjects { get; set; }
+        public Rooms? Rooms { get; set; }
+    }
+
 }
 

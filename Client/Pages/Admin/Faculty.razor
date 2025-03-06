@@ -3,7 +3,7 @@
 @layout MainLayout
 @using ICSS.Shared
 @using ICSS.Client.Pages.Admin.Components
-
+@using SectionsModel = ICSS.Shared.Sections
 
 <MudContainer Class="py-4 py-sm-8 py-md-12 py-lg-16 py-xl-20">
     <MudGrid>
@@ -53,6 +53,9 @@
                                 <MudTooltip Text="Delete Faculty Information">
                                     <MudIconButton Icon="fa-solid fa-trash-can" Size="Size.Medium" Color="Color.Error" Variant="Variant.Filled" Disabled="@(!MainLayout.IsOnline)" OnClick="@(() => OnShowUpdateFacultyDialog(context.Item.FacultyModel))" />
                                 </MudTooltip>
+                                <MudTooltip Text="Faculty Workload">
+                                    <MudIconButton Icon="fa-solid fa-chalkboard-user" Size="Size.Medium" Color="Color.Info" Variant="Variant.Filled" Disabled="@(!MainLayout.IsOnline)" OnClick="@(() => OnShowSchedules(context.Item.FacultyModel?.FacultyId))" />
+                                </MudTooltip>
                             </MudStack>
                         </CellTemplate>
                     </TemplateColumn>
@@ -63,8 +66,8 @@
                             <MudStack Spacing="0">
                                 <MudText Typo="Typo.body2">
                                     @(context.Item.Departments?.DepartmentId == null
-                                        ? "Unassigned"
-                                        : departments.FirstOrDefault(x => x.DepartmentId == context.Item.Departments.DepartmentId)?.DepartmentName ?? "Unassigned")
+                                                ? "Unassigned"
+                                                : departments.FirstOrDefault(x => x.DepartmentId == context.Item.Departments.DepartmentId)?.DepartmentName ?? "Unassigned")
                                 </MudText>
                             </MudStack>
                         </CellTemplate>
@@ -128,6 +131,9 @@
 
     private List<Departments> departments = new();
     private List<Departments> departmentsTemp = new();
+
+    private List<FacultyWorkload> workload= new();
+    
 
     private bool isLoading = false;
 
@@ -233,7 +239,7 @@
                 {
                     faculty = response.Data;
                     facultyTemp = faculty;
-                    await LocalStorage.SetItemAsync("faculty", faculty);
+                    await LocalStorage.SetItemAsync("faculty", faculty);                    
                     StateHasChanged();
                 }
                 else
@@ -313,6 +319,56 @@
                    return true;
                return false;
            }).ToList();
+    }
+
+   
+
+
+    private async Task OnShowSchedules(int? facultyId)
+    {
+        try
+        {
+            var options = new DialogOptions
+                {
+                    CloseOnEscapeKey = true,
+                    FullWidth = true,
+                    MaxWidth = MaxWidth.Large,
+                    BackdropClick = false,
+                    CloseButton = true,
+                    BackgroundClass = "blurred"
+
+                };
+
+            var response = await ApiHelper.GetAsync<List<FacultyWorkload>>($"ScheduleManagement/GetScheduleByFacultyId/{facultyId}");
+            
+            if (response.IsSuccess)
+            {
+                workload = response.Data;
+            }
+            else
+            {
+                Snackbar.Add("Unable to get Schedule Information", Severity.Error);
+            }
+
+
+            var parameters = new DialogParameters<FacultyWorkloadDialog>
+            {               
+                { x => x.schedules, workload}
+
+            };
+
+            var dialog = await DialogService.ShowAsync<FacultyWorkloadDialog>("", parameters, options);
+            var result = await dialog.Result;
+            if (!result.Canceled)
+            {
+
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
+        }
     }
 
 }

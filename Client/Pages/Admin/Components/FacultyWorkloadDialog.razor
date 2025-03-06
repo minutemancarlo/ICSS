@@ -1,0 +1,115 @@
+﻿@using ICSS.Shared
+@using SectionModel = ICSS.Shared.Sections
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@($"fa-solid fa-calendar-days")"></MudIcon>
+            Schedule for @schedules?.FirstOrDefault()?.Faculty?.FacultyName
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+     
+
+        <MudCalendar Class="w-100" DayStartTime="@TimeOnly.Parse(" 08:00")" ShowMonth="false" ShowTodayButton="false" ShowDatePicker="false" ShowPrevNextButtons="false" ShowDay="false" ShowWeek="true"
+        DayTimeInterval="CalendarTimeInterval.Minutes30" ShowCurrentTime="true" Use24HourClock="false" Items="items" DayCellHeight="100"
+        FirstDayOfWeek="DayOfWeek.Monday">
+            <CellTemplate>
+                <MudStack AlignItems="AlignItems.Stretch" Class="mud-cal-cell-template">
+                    <div style="width: 100%; height: 100%;color: white; background-color: @GetColor(((CustomItem)context).Color); border-radius: 12px; padding: 8px;">
+                        <MudText Typo="Typo.body2" Class="fw-bold py-3 text-center">@((((CustomItem)context).Room is not null ? ((CustomItem)context).Room?.RoomName : "TBD"))</MudText>                        
+                        <MudDivider />
+                        <MudText Typo="Typo.body2" Class="py-3 text-center">@context.Text</MudText>
+                        <MudDivider />
+                        <MudText Typo="Typo.body2" Class="fw-bold py-3 text-center">@((((CustomItem)context).Course is not null ? ((CustomItem)context).Course?.CourseCode: "N/A")) - @((((CustomItem)context).Sections is not null ? ((CustomItem)context).Sections?.SectionName : "TBD"))</MudText>
+                    </div>
+                </MudStack>
+            </CellTemplate>
+        </MudCalendar>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Size="Size.Medium" Variant="Variant.Filled" StartIcon="fa-solid fa-file-pdf" Color="Color.Info">Export to PDF</MudButton>
+        <MudSpacer />
+        <MudButton Size="Size.Medium" OnClick="Cancel">Close</MudButton>
+        @*    <MudLoadingButton Variant="Variant.Filled"
+                          Color="Color.Success"
+                          Size="Size.Medium"
+                          Loading="@(_loading)"
+                          OnClick="@(async => OnSubmit())"
+                          ButtonType="ButtonType.Button">
+            <LoadingContent>Submitting...</LoadingContent>
+            <ChildContent>Submit</ChildContent> 
+        </MudLoadingButton>*@
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance? MudDialog { get; set; }
+
+    [Parameter] public List<FacultyWorkload>? schedules { get; set; }
+
+    private List<CustomItem> items = new();
+    private string GetColor(Color color) => $"var(--mud-palette-{color.ToDescriptionString()})";
+    private class CustomItem : CalendarItem
+    {
+        public int? TimeSlotId { get; set; }
+        public Subjects? Subject { get; set; }
+        public FacultyModel? Faculty { get; set; }
+        public Rooms? Room { get; set; }
+        public Course? Course { get; set; }
+        public SectionModel? Sections { get; set; }
+        public DayOfWeek? Day { get; set; }
+        public TimeSpan? StartTime { get; set; }
+        public TimeSpan? EndTime { get; set; }
+        public Color Color { get; set; } = Color.Primary;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (schedules is not null && schedules.Any())
+        {
+            var today = DateTime.Today;
+
+            var customItems = schedules.Select(slot =>
+            {
+                var baseDate = GetAdjustedDate(slot.ScheduleTimeSlot?.Day, today);
+
+                return new CustomItem
+                    {
+                        TimeSlotId = slot.ScheduleTimeSlot?.TimeSlotId,
+                        Subject = slot.ScheduleTimeSlot?.Subject,
+                        Faculty = slot.ScheduleTimeSlot?.Faculty,
+                        Sections = slot.Sections,
+                        Course = slot.Course,
+                        Room = slot.ScheduleTimeSlot?.Room,
+                        Day = slot.ScheduleTimeSlot?.Day,
+                        StartTime = slot.ScheduleTimeSlot?.StartTime,
+                        EndTime = slot.ScheduleTimeSlot?.EndTime,
+                        Start = baseDate.Date.Add(slot.ScheduleTimeSlot.StartTime),
+                        End = baseDate.Date.Add(slot.ScheduleTimeSlot.EndTime),
+                        Text = slot.ScheduleTimeSlot?.Subject?.SubjectName ?? "N/A",
+                        Color = Color.Primary
+                    };
+            }).ToList();
+            items.AddRange(customItems);
+        }
+
+
+        await base.OnInitializedAsync();
+    }
+
+    private DateTime GetAdjustedDate(DayOfWeek? scheduleDay, DateTime today)
+    {
+        if (!scheduleDay.HasValue) return today;
+
+        int daysOffset = scheduleDay <= today.DayOfWeek
+            ? -(today.DayOfWeek - scheduleDay.Value)
+            : (scheduleDay.Value - today.DayOfWeek);
+
+        if (today.DayOfWeek == DayOfWeek.Saturday || today.DayOfWeek == DayOfWeek.Sunday)
+            daysOffset -= 7;
+
+        return today.AddDays(daysOffset);
+    }
+
+    void Cancel() => MudDialog.Cancel();
+}
