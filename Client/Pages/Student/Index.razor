@@ -4,7 +4,7 @@
 @using ICSS.Shared
 @using System.Net
 
-<MudContainer Class="py-4 py-sm-8 py-md-12 py-lg-16 py-xl-20">
+<MudContainer Class="py-4 py-sm-8 py-md-12">
     <MudGrid>
         <MudItem xs="12">
             <MudPaper Class="w-100" Style="background-color: #1abc9c; color: white">
@@ -17,12 +17,61 @@
             <MudDivider />
         </MudItem>
         <MudItem xs="12">
-            <MudText Typo="Typo.h6">
-                @if (selectedSection is not null)
-                {
-                    @($"Showing Schedule for - {mySection.Course?.CourseCode} {mySection.SchoolYear}: Section {mySection.SectionName} - {mySection.YearLevel.ToString().Replace("_", " ")}")
-                }
-            </MudText>
+            <MudStack Row Justify="Justify.SpaceBetween">
+                <MudCard Style="background-color: #ecf0f1;">
+                    <MudCardContent>
+                        <MudStack Row AlignItems="AlignItems.Baseline">
+                            <MudIconButton Icon="fa-solid fa-chalkboard" Color="Color.Error" Size="Size.Medium" Ripple="false" Class="rounded-circle mb-2" Style="background-color: rgba(var(--mud-palette-primary-rgb), var(--icon-opacity)) !important; cursor: default;" />
+                            <MudText Typo="Typo.h6" Class="mb-2">Current Schedule</MudText>
+                        </MudStack>
+                        @if (currentSchedule is null)
+                        {
+                            <MudText Typo="Typo.h6">No Schedule Selected</MudText>
+                        }
+                        else
+                        {
+                            <MudText Typo="Typo.body2" Class="fw-bold">@currentSchedule.Subject?.SubjectName</MudText>
+                            <MudText Typo="Typo.body2">Instructor: @currentSchedule.Faculty?.FacultyName</MudText>
+                            <MudText Typo="Typo.body2">Room: @currentSchedule.Room?.RoomName</MudText>
+                        }
+                    </MudCardContent>
+                </MudCard>
+                <MudCard Style="background-color: #ecf0f1;">
+                    <MudCardContent>
+                        <MudStack Row AlignItems="AlignItems.Baseline">
+                            <MudIconButton Icon="fa-solid fa-calendar" Color="Color.Primary" Size="Size.Medium" Ripple="false" Class="rounded-circle mb-2" Style="background-color: rgba(var(--mud-palette-primary-rgb), var(--icon-opacity)) !important; cursor: default;" />
+                            <MudStack>
+                                <MudText Typo="Typo.h6">@CurrentDate</MudText>
+                            </MudStack>
+                        </MudStack>
+                        <MudStack Row AlignItems="AlignItems.Baseline">
+                            <MudIconButton Icon="fa-solid fa-clock" Color="Color.Primary" Size="Size.Medium" Ripple="false" Class="rounded-circle mb-2" Style="background-color: rgba(var(--mud-palette-primary-rgb), var(--icon-opacity)) !important; cursor: default;" />
+                            <MudStack>
+                                <MudText Typo="Typo.h6" Class="mb-2">@CurrentTime</MudText>
+                            </MudStack>
+                        </MudStack>
+
+                    </MudCardContent>
+                </MudCard>
+                <MudCard Style="background-color: #ecf0f1;">
+                    <MudCardContent>
+                        <MudStack Row AlignItems="AlignItems.Baseline">
+                            <MudIconButton Icon="fa-solid fa-forward" Color="Color.Success" Size="Size.Medium" Ripple="false" Class="rounded-circle mb-2" Style="background-color: rgba(var(--mud-palette-primary-rgb), var(--icon-opacity)) !important; cursor: default;" />
+                            <MudText Typo="Typo.h6" Class="mb-2">Next Schedule</MudText>
+                        </MudStack>
+                        @if (nextSchedule is null)
+                        {
+                            <MudText Typo="Typo.h6">No Schedule Selected</MudText>
+                        }
+                        else
+                        {
+                            <MudText Typo="Typo.body2" Class="fw-bold">@nextSchedule.Subject?.SubjectName</MudText>
+                            <MudText Typo="Typo.body2">Instructor: @nextSchedule.Faculty?.FacultyName</MudText>
+                            <MudText Typo="Typo.body2">Room: @nextSchedule.Room?.RoomName</MudText>
+                        }
+                    </MudCardContent>
+                </MudCard>
+            </MudStack>
             <MudCalendar Class="w-100" DayStartTime="@TimeOnly.Parse(" 08:00")" ShowMonth="false" ShowTodayButton="false" ShowDatePicker="false" ShowPrevNextButtons="false" ShowDay="false" ShowWeek="true"
             DayTimeInterval="CalendarTimeInterval.Minutes30" ShowCurrentTime="true" Use24HourClock="false" Items="items" DayCellHeight="100"
             FirstDayOfWeek="DayOfWeek.Monday">
@@ -33,10 +82,9 @@
                             {
                                 <MudSelectItem T="int?" Value="@(item.ScheduleId)">@($"{item.Course?.CourseCode} {item.Section?.SchoolYear}: Section {item.Section?.SectionName} - {item.Section?.YearLevel.ToString().Replace("_", " ")}/{item.Semester.ToString().Replace("_", " ")}")</MudSelectItem>
                             }
-                        </MudSelect>
-                        <MudButton Variant="Variant.Filled" Color="Color.Success" Size="Size.Medium" Class="my-2 mx-1">View</MudButton>
-                        <MudSpacer />
-                        <MudButton Variant="Variant.Filled" Color="Color.Info" Size="Size.Medium" Class="my-2 mx-1">Export as PDF</MudButton>
+                        </MudSelect>    
+                        <MudButton Size="Size.Medium" Variant="Variant.Filled" Disabled="!isEnabledExport" StartIcon="fa-solid fa-file-pdf" Class="my-2 mx-1" Color="Color.Info">Export to PDF</MudButton>
+
                     </MudStack>
                 </ToolbarContent>
                 <CellTemplate>
@@ -44,9 +92,9 @@
                         <div style="width: 100%; height: 100%;color: white; background-color: @GetColor(((CustomItem)context).Color); border-radius: 12px; padding: 8px;">
                             <MudText Typo="Typo.body2" Class="fw-bold py-3 text-center">@((((CustomItem)context).Room is not null ? ((CustomItem)context).Room?.RoomName : "TBD"))</MudText>
                             <MudDivider />
-                            <MudText Typo="Typo.body2" Class="py-3">@context.Text</MudText>
+                            <MudText Typo="Typo.body2" Class="py-3 text-center">@context.Text</MudText>
                             <MudDivider />
-                            <MudText Typo="Typo.body2" Class="fw-bold py-3">@((((CustomItem)context).Faculty is not null ? ((CustomItem)context).Faculty?.FacultyName : "TBD"))</MudText>
+                            <MudText Typo="Typo.body2" Class="fw-bold py-3 text-center">@((((CustomItem)context).Faculty is not null ? ((CustomItem)context).Faculty?.FacultyName : "TBD"))</MudText>
                         </div>
                     </MudStack>
                 </CellTemplate>
@@ -71,6 +119,11 @@
     private Sections? selectedSection;
     private string GetColor(Color color) => $"var(--mud-palette-{color.ToDescriptionString()})";
     private List<CustomItem>? items = new();
+    private bool isEnabledExport = false;
+
+    private CustomItem? currentSchedule;
+    private CustomItem? nextSchedule;
+
     private class CustomItem : CalendarItem
     {
         public int? TimeSlotId { get; set; }
@@ -83,9 +136,11 @@
         public Color Color { get; set; } = Color.Primary;
     }
 
-
+    private string CurrentDate => DateTime.Now.ToString("MMMM d, yyyy");
+    private string CurrentTime => DateTime.Now.ToString("h:mm:ss tt");
     protected override async Task OnInitializedAsync()
     {
+
         try
         {
             var response = await HttpClient.GetAsync($"SectionManagement/GetSectionByUserId/{MainLayout.CurrentUserId}");
@@ -158,7 +213,11 @@
             //     items = items.Where(s => items.Count(x => x.TimeSlotId == s.TimeSlotId) > 1).ToList();
             // }
         }
-
+        while (true)
+        {
+            StateHasChanged();
+            await Task.Delay(1000);
+        }
         await base.OnInitializedAsync();
     }
 
@@ -175,11 +234,12 @@
                 var selectedSchedule = scheduleTimeSlots.Where(x => x.ScheduleId == value);
                 if (selectedSchedule.Any())
                 {
-                    var today = DateTime.Today;
+                    var timeZone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Manila");
+                    var now = TimeZoneInfo.ConvertTime(DateTime.Now, timeZone);
 
                     var customItems = selectedSchedule.Select(slot =>
                             {
-                                var baseDate = GetAdjustedDate(slot.Day, today);
+                                var baseDate = GetAdjustedDate(slot.Day, now);
 
                                 return new CustomItem
                                     {
@@ -197,6 +257,13 @@
                                     };
                             }).ToList();
                     items.AddRange(customItems);
+
+                    isEnabledExport = true;
+
+
+                        currentSchedule = items.FirstOrDefault(item => item.Start.TimeOfDay <= now.TimeOfDay && item.End.HasValue && item.End.Value.TimeOfDay >= now.TimeOfDay && item.Day == now.DayOfWeek);
+                        nextSchedule = items.FirstOrDefault(item => item.Start.TimeOfDay > now.TimeOfDay && item.Day == now.DayOfWeek);
+                   
                 }
 
             }

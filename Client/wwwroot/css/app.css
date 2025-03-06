@@ -79,3 +79,8 @@ h1:focus {
     backdrop-filter: blur(10px);
 }
 
+.mud-cal-week-header {
+    background-color: #2980b9;
+    color: white;
+    font-weight: bold;
+}
