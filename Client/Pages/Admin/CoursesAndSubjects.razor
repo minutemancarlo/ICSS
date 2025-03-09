@@ -1,5 +1,5 @@
 ﻿@page "/manage-course"
-@attribute [Authorize]
+@attribute [Authorize(Roles = "Admin,Faculty")]
 @layout MainLayout
 @using ICSS.Shared
 @using ICSS.Client.Pages.Admin.Components

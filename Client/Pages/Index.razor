@@ -1,8 +1,9 @@
 ﻿@page "/"
-@* @layout NoLayout *@
+@layout MainLayout
 @inject NavigationManager Navigation
 @inject IJSRuntime JSRuntime
 @using System.Security.Claims
+
 <PageTitle>Index</PageTitle>
 
 
@@ -10,8 +11,10 @@
 @code {
     [CascadingParameter]
     private Task<AuthenticationState>? authenticationState { get; set; }
-
+  
     public List<Claim> UserClaims { get; set; } = new List<Claim>();
+
+ 
 
     protected override async Task OnInitializedAsync()
     {
@@ -33,49 +36,19 @@
                 {
                     Navigation.NavigateTo("/admin-dashboard");
                 }
-                else if(user.IsInRole("Student"))
+                else if (user.IsInRole("Student"))
                 {
                     Navigation.NavigateTo("/student-index");
-                }else{
-                    Navigation.NavigateTo("/501");
                 }
-                // else if (user.IsInRole("Front Desk"))
-                // {
-                //     if (returnUrl == "portal")
-                //     {
-                //         Navigation.NavigateTo("/portal");
-                //     }
-                //     else
-                //     {
-                //         Navigation.NavigateTo("/hotel-dashboard");
-                //     }
-                // }
-                // else if (user.IsInRole("Human Resource"))
-                // {
-                //     if (returnUrl == "portal")
-                //     {
-                //         Navigation.NavigateTo("/portal");
-                //     }
-                //     else
-                //     {
-                //         Navigation.NavigateTo("/hr-dashboard");
-                //     }
-                // }
-                // else if (user.IsInRole("Gas Employee"))
-                // {
-                //     if (returnUrl == "portal")
-                //     {
-                //         Navigation.NavigateTo("/portal");
-                //     }
-                //     else
-                //     {
-                //         Navigation.NavigateTo("/gas-dashboard");
-                //     }
-                // }
-                // else
-                // {
-                //     Navigation.NavigateTo("/Home");
-                // }
+                else if (user.IsInRole("Faculty"))
+                {
+
+                    Navigation.NavigateTo("/faculty-dashboard"); 
+                }
+                else
+                {
+                    Navigation.NavigateTo("/501");
+                }               
             }
             else
             {
@@ -84,5 +57,8 @@
             }
         }
     }
+
+
+    
 
 }

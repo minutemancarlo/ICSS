@@ -1,5 +1,9 @@
 ﻿@inherits LayoutComponentBase
 @using ICSS.Client.Shared
+@using ICSS.Shared
+@using System.Net
+@using System.Security.Claims
+
 <MudThemeProvider />
 <MudPopoverProvider />
 <MudDialogProvider />
@@ -47,11 +51,19 @@
     </MudLayout>
 </CascadingValue>
 @code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationState { get; set; }
     [Inject] AuthenticationStateProvider AuthenticationStateProvider { get; set; }
     [Inject] IJSRuntime JSRuntime { get; set; }
+
+    public List<Claim> UserClaims { get; set; } = new List<Claim>();
+    [Inject] private ISnackbar Snackbar { get; set; }
+    [Inject] private HttpClient HttpClient { get; set; }
     bool _drawerOpen = true;
     private string currentUserId;
-    private string subTitle;    
+    private string subTitle;
+    private Departments facultyDepartment = new();
+    private bool isFacultyWithDepartment = false;
     private bool isOnline;
 
     private async Task ShowInstallPrompt()
@@ -80,6 +92,23 @@
         await JSRuntime.InvokeVoidAsync("networkStatus.registerOnlineOfflineEvents", DotNetObjectReference.Create(this));
         IsOnline = await JSRuntime.InvokeAsync<bool>("networkStatus.isOnline");
 
+
+        if (authenticationState is not null)
+        {
+            var state = await authenticationState;
+            // var returnUrl = await JSRuntime.InvokeAsync<string>("sessionStorage.getItem", "returnUrl");
+            if (state.User.Identity.IsAuthenticated)
+            {
+                var users = authenticationState.Result.User;
+
+                if (users.IsInRole("Faculty"))
+                {
+                    await GetUserDepartment();
+                }
+
+            }
+        }
+
         await base.OnInitializedAsync();
     }
 
@@ -91,6 +120,27 @@
             subTitle = value;
             InvokeAsync(() => StateHasChanged());
         }
+    }
+
+    public bool IsFacultyWithDepartment
+    {
+        get => isFacultyWithDepartment;
+        set
+        {
+            isFacultyWithDepartment = value;
+            InvokeAsync(() => StateHasChanged());
+        }
+    }
+
+    public Departments FacultyDepartment
+    {
+        get => facultyDepartment;
+        set
+        {
+            facultyDepartment = value;
+            InvokeAsync(() => StateHasChanged());
+        }
+
     }
 
 
@@ -126,5 +176,49 @@
     void DrawerToggle()
     {
         _drawerOpen = !_drawerOpen;
+    }
+
+
+    private async Task GetUserDepartment()
+    {
+        try
+        {
+            var response = await HttpClient.GetAsync($"UserManagement/GetUserDepartment/{CurrentUserId}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                if (response.StatusCode == HttpStatusCode.NoContent)
+                {
+                    IsFacultyWithDepartment = false;
+
+                    return;
+                }
+
+                var department = await response.Content.ReadFromJsonAsync<Departments>();
+
+                if (department is not null)
+                {
+                    FacultyDepartment = department;
+                    IsFacultyWithDepartment = true;
+                }
+                else
+                {
+                    IsFacultyWithDepartment = false;
+                    FacultyDepartment = null;
+                }
+            }
+            else
+            {
+                Snackbar.Add($"Error: {response.ReasonPhrase}", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error getting user department data: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+
+        }
     }
 }

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Text;
 
+
 namespace ICSS.Server.Repository
 {
     public class SectionRepository
@@ -19,23 +20,28 @@ namespace ICSS.Server.Repository
         public async Task<List<Sections>> GetSectionsWithCoursesAsync()
         {
             using var connection = _dbConnection;
-            using var multi = await connection.QueryMultipleAsync("GetSections", commandType: CommandType.StoredProcedure);
 
-            var sections = await multi.ReadAsync<Sections>();
-            var courses = await multi.ReadAsync<Course>();
-
-            // Map Course to Sections
-            var courseDict = courses.ToDictionary(c => c.CourseId);
-            foreach (var section in sections)
-            {
-                if (section.CourseId.HasValue && courseDict.TryGetValue(section.CourseId.Value, out var course))
+            var sections = await connection.QueryAsync<Sections, Course, Departments, Sections>(
+                "GetSections",
+                (section, course, department) =>
                 {
-                    section.Course = course;
-                }
-            }
+                    if (course != null)
+                    {
+                        section.Course = course;
+                        if (department != null)
+                        {
+                            course.Departments = department;
+                        }
+                    }
+                    return section;
+                },
+                splitOn: "CourseId,DepartmentId",
+                commandType: CommandType.StoredProcedure
+            );
 
             return sections.ToList();
         }
+
 
 
         public async Task<bool> InsertSectionAsync(Sections section, string userId)

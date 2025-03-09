@@ -1,5 +1,5 @@
 ﻿@page "/manage-students"
-@attribute [Authorize]
+@attribute [Authorize(Roles ="Admin,Faculty")]
 @layout MainLayout
 
 @using ICSS.Shared
