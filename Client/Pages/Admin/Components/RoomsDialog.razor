@@ -12,7 +12,7 @@
             <MudStack>
                 <MudTextField @bind-Value="rooms.RoomCode" Label="Room Code" Variant="Variant.Outlined" Required RequiredError="Room Code is Required" Margin="Margin.Dense"></MudTextField>
                 <MudTextField @bind-Value="rooms.RoomName" Label="Room Name" Variant="Variant.Outlined" Required RequiredError="Room Name is Required" Margin="Margin.Dense"></MudTextField>
-                <MudSelect @bind-Value="rooms.Departments.DepartmentId" Required RequiredError="Room Department is Required" T="int?" Clearable Label="Select Department" AdornmentIcon="fa-solid fa-graduation-cap" Variant="Variant.Outlined" Margin="Margin.Dense" AdornmentColor="Color.Primary">
+                <MudSelect @bind-Value="rooms.Departments.DepartmentId" ReadOnly="isUserHasDepartment" Required RequiredError="Room Department is Required" T="int?" Clearable Label="Select Department" AdornmentIcon="fa-solid fa-graduation-cap" Variant="Variant.Outlined" Margin="Margin.Dense" AdornmentColor="Color.Primary">
                     @foreach (var item in departments)
                     {
                         <MudSelectItem T="int?" Value="@(item.DepartmentId)">@item.DepartmentName</MudSelectItem>
@@ -38,6 +38,7 @@
 </MudDialog>
 
 @code {
+
     [CascadingParameter] MudDialogInstance? MudDialog { get; set; }
     [Inject] HttpClient? httpClient { get; set; }
     [Inject] ISnackbar Snackbar { get; set; }
@@ -47,7 +48,8 @@
     [Parameter] public string? Icon { get; set; }
     [Parameter] public Rooms rooms { get; set; }
     [Parameter] public string? currentUserId { get; set; }
-
+    [Parameter] public int? userDepartment { get; set; }
+    [Parameter] public bool isUserHasDepartment { get; set; }
     MudForm? _form;
     private bool _loading = false;
     private List<Departments> departments = new();
@@ -56,6 +58,10 @@
     protected override async Task OnInitializedAsync()
     {
         await OnLoadDepartments();
+        if(isUserHasDepartment)
+        {
+            rooms.Departments.DepartmentId = userDepartment;            
+        }
         await base.OnInitializedAsync();
     }
 

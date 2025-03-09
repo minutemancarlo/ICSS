@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ICSS.Client", "Client\ICSS.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ICSS.Shared", "Shared\ICSS.Shared.csproj", "{58253672-3CDB-44F6-9E57-77F0E7DD8D00}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Project1", "Project1\Project1.csproj", "{EFBCDC0B-A361-4FB5-BE92-16801C0FEA58}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{58253672-3CDB-44F6-9E57-77F0E7DD8D00}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{58253672-3CDB-44F6-9E57-77F0E7DD8D00}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{58253672-3CDB-44F6-9E57-77F0E7DD8D00}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EFBCDC0B-A361-4FB5-BE92-16801C0FEA58}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EFBCDC0B-A361-4FB5-BE92-16801C0FEA58}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EFBCDC0B-A361-4FB5-BE92-16801C0FEA58}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EFBCDC0B-A361-4FB5-BE92-16801C0FEA58}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

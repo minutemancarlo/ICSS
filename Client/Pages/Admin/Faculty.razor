@@ -66,8 +66,8 @@
                             <MudStack Spacing="0">
                                 <MudText Typo="Typo.body2">
                                     @(context.Item.Departments?.DepartmentId == null
-                                                ? "Unassigned"
-                                                : departments.FirstOrDefault(x => x.DepartmentId == context.Item.Departments.DepartmentId)?.DepartmentName ?? "Unassigned")
+                                                    ? "Unassigned"
+                                                    : departments.FirstOrDefault(x => x.DepartmentId == context.Item.Departments.DepartmentId)?.DepartmentName ?? "Unassigned")
                                 </MudText>
                             </MudStack>
                         </CellTemplate>
@@ -133,7 +133,7 @@
     private List<Departments> departmentsTemp = new();
 
     private List<FacultyWorkload> workload= new();
-    
+
 
     private bool isLoading = false;
 
@@ -141,6 +141,7 @@
     {
         MainLayout.SubTitle = "Faculty Management";
         await OnLoadDepartments();
+        await OnLoadFaculty();
         await OnLoadFaculty();
         await base.OnInitializedAsync();
     }
@@ -175,6 +176,7 @@
             if (!result.Canceled)
             {
                 await OnLoadDepartments();
+                await OnLoadFaculty();
                 await OnLoadFaculty();
                 StateHasChanged();
             }
@@ -215,6 +217,7 @@
             if (!result.Canceled)
             {
                 await OnLoadDepartments();
+                await OnLoadFaculty();
                 await OnLoadFaculty();
                 StateHasChanged();
             }
@@ -262,6 +265,11 @@
         }
         finally
         {
+            if(MainLayout.IsFacultyWithDepartment)
+            {
+                faculty = faculty.Where(x => x.Departments?.DepartmentId == MainLayout.FacultyDepartment?.DepartmentId).ToList();
+                facultyTemp = faculty;                
+            }
             isLoading = false;
         }
     }

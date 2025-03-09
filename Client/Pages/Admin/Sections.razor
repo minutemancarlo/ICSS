@@ -376,13 +376,14 @@
         }
         finally
         {
-            courses = sections.Where(s => s.Course != null).DistinctBy(s => s.Course.CourseName).Select(s => s.Course).ToList();
-            schoolYear = sections.Where(s => !string.IsNullOrEmpty(s.SchoolYear)).Select(s => s.SchoolYear).Distinct().ToList();
-            yearLevel = sections.Where(s => s.YearLevel != null).Select(s => s.YearLevel).Distinct().ToList();
+           
             if(MainLayout.IsFacultyWithDepartment)
             {
                 sections = sections.Where(x => x.Course is not null && x.Course.Departments?.DepartmentId == MainLayout.FacultyDepartment?.DepartmentId).ToList();            
             }
+            courses = sections.Where(s => s.Course != null).DistinctBy(s => s.Course.CourseName).Select(s => s.Course).ToList();
+            schoolYear = sections.Where(s => !string.IsNullOrEmpty(s.SchoolYear)).Select(s => s.SchoolYear).Distinct().ToList();
+            yearLevel = sections.Where(s => s.YearLevel != null).Select(s => s.YearLevel).Distinct().ToList();
             sectionFilter = sections.Where(s => !string.IsNullOrEmpty(s.SectionName) && !s.IsDeleted).Select(s => s.SectionName!).Distinct().OrderBy(s => s).ToList();
             await OnGetStudents();
             isLoading = false;
