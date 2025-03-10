@@ -33,6 +33,12 @@
                             <MudText Typo="Typo.body2" Class="fw-bold">@currentSchedule.Subject?.SubjectName</MudText>
                             <MudText Typo="Typo.body2">Instructor: @currentSchedule.Faculty?.FacultyName</MudText>
                             <MudText Typo="Typo.body2">Room: @currentSchedule.Room?.RoomName</MudText>
+                            <MudText Typo="Typo.body2" Class="fw-bold">
+                                @(currentSchedule?.StartTime.HasValue == true ? DateTime.Today.Add(currentSchedule.StartTime.Value).ToString("hh:mm tt") : "--") -
+                                @(currentSchedule?.EndTime.HasValue == true ? DateTime.Today.Add(currentSchedule.EndTime.Value).ToString("hh:mm tt") : "--")
+                            </MudText>
+
+
                         }
                     </MudCardContent>
                 </MudCard>
@@ -68,6 +74,11 @@
                             <MudText Typo="Typo.body2" Class="fw-bold">@nextSchedule.Subject?.SubjectName</MudText>
                             <MudText Typo="Typo.body2">Instructor: @nextSchedule.Faculty?.FacultyName</MudText>
                             <MudText Typo="Typo.body2">Room: @nextSchedule.Room?.RoomName</MudText>
+                            <MudText Typo="Typo.body2" Class="fw-bold">
+                                @(nextSchedule?.StartTime.HasValue == true ? DateTime.Today.Add(nextSchedule.StartTime.Value).ToString("hh:mm tt") : "--") -
+                                @(nextSchedule?.EndTime.HasValue == true ? DateTime.Today.Add(nextSchedule.EndTime.Value).ToString("hh:mm tt") : "--")
+                            </MudText>
+
                         }
                     </MudCardContent>
                 </MudCard>
