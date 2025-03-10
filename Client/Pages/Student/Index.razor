@@ -73,8 +73,8 @@
                 </MudCard>
             </MudStack>
             <MudCalendar Class="w-100" DayStartTime="@TimeOnly.Parse(" 08:00")" ShowMonth="false" ShowTodayButton="false" ShowDatePicker="false" ShowPrevNextButtons="false" ShowDay="false" ShowWeek="true"
-            DayTimeInterval="CalendarTimeInterval.Minutes30" ShowCurrentTime="true" Use24HourClock="false" Items="items" DayCellHeight="100"
-            FirstDayOfWeek="DayOfWeek.Monday">
+                         DayTimeInterval="CalendarTimeInterval.Minutes30" ShowCurrentTime="true" Use24HourClock="false" Items="items" DayCellHeight="100"
+                         FirstDayOfWeek="DayOfWeek.Monday">
                 <ToolbarContent>
                     <MudStack Row Class="w-100">
                         <MudSelect Disabled="@(!MainLayout.IsOnline)" ValueChanged="OnSelectSchedule" T="int?" Clearable Label="Select Schedule" FullWidth AdornmentIcon="fa-solid fa-calendar-days" Variant="Variant.Outlined" Margin="Margin.Dense" AdornmentColor="Color.Primary">
@@ -82,7 +82,7 @@
                             {
                                 <MudSelectItem T="int?" Value="@(item.ScheduleId)">@($"{item.Course?.CourseCode} {item.Section?.SchoolYear}: Section {item.Section?.SectionName} - {item.Section?.YearLevel.ToString().Replace("_", " ")}/{item.Semester.ToString().Replace("_", " ")}")</MudSelectItem>
                             }
-                        </MudSelect>    
+                        </MudSelect>
                         <MudButton Size="Size.Medium" Variant="Variant.Filled" Disabled="!isEnabledExport" StartIcon="fa-solid fa-file-pdf" Class="my-2 mx-1" Color="Color.Info">Export to PDF</MudButton>
 
                     </MudStack>
@@ -143,32 +143,46 @@
 
         try
         {
-            var response = await HttpClient.GetAsync($"SectionManagement/GetSectionByUserId/{MainLayout.CurrentUserId}");
-            if (response.IsSuccessStatusCode)
+
+            if (MainLayout.IsOnline)
             {
-
-                if (response.StatusCode == HttpStatusCode.NoContent)
+                var response = await HttpClient.GetAsync($"SectionManagement/GetSectionByUserId/{MainLayout.CurrentUserId}");
+                if (response.IsSuccessStatusCode)
                 {
-                    mySection = null;
-                    return;
-                }
 
-                var section = await response.Content.ReadFromJsonAsync<Sections>();
+                    if (response.StatusCode == HttpStatusCode.NoContent)
+                    {
+                        mySection = null;
+                        return;
+                    }
 
-                if (section is not null)
-                {
-                    mySection = section;
+                    var section = await response.Content.ReadFromJsonAsync<Sections>();
+
+                    if (section is not null)
+                    {
+                        mySection = section;
+                    }
+                    else
+                    {
+                        mySection = null;
+                    }
+
+                    await LocalStorage.SetItemAsync("mySection", mySection);
+                    StateHasChanged();
+
                 }
                 else
                 {
-                    mySection = null;
+                    Snackbar.Add($"Error: {response.ReasonPhrase}", Severity.Error);
                 }
-
             }
             else
             {
-                Snackbar.Add($"Error: {response.ReasonPhrase}", Severity.Error);
+                var cachedData = await LocalStorage.GetItemAsync<Sections?>("mySection");
+                mySection = cachedData ?? new Sections();
             }
+
+
         }
         catch (Exception ex)
         {
@@ -182,43 +196,15 @@
             {
                 scheduleRequests = scheduleRequests.Where(x => x.Section?.SectionId == mySection?.SectionId).ToList();
             }
-            // if(mySection is not null)
-            // {
-            //     await GetSchedules();
-            //     if (scheduleTimeSlots is not null && scheduleTimeSlots.Any())
-            //     {
-            //         var today = DateTime.Today;
 
-            //         var customItems = scheduleTimeSlots.Select(slot =>
-            //         {
-            //             var baseDate = GetAdjustedDate(slot.Day, today);
-
-            //             return new CustomItem
-            //                 {
-            //                     TimeSlotId = slot.ScheduleId,
-            //                     Subject = slot.Subject,
-            //                     Faculty = slot.Faculty,
-            //                     Room = slot.Room,
-            //                     Day = slot.Day,
-            //                     StartTime = slot.StartTime,
-            //                     EndTime = slot.EndTime,
-            //                     Start = baseDate.Date.Add(slot.StartTime),
-            //                     End = baseDate.Date.Add(slot.EndTime),
-            //                     Text = slot.Subject?.SubjectName ?? "N/A",
-            //                     Color = Color.Primary
-            //                 };
-            //         }).ToList();
-            //         items.AddRange(customItems);
-            //     }
-            //     items = items.Where(s => items.Count(x => x.TimeSlotId == s.TimeSlotId) > 1).ToList();
-            // }
         }
+        await base.OnInitializedAsync();
         while (true)
         {
             StateHasChanged();
             await Task.Delay(1000);
         }
-        await base.OnInitializedAsync();
+        
     }
 
     private void OnSelectSchedule(int? value)
@@ -261,9 +247,9 @@
                     isEnabledExport = true;
 
 
-                        currentSchedule = items.FirstOrDefault(item => item.Start.TimeOfDay <= now.TimeOfDay && item.End.HasValue && item.End.Value.TimeOfDay >= now.TimeOfDay && item.Day == now.DayOfWeek);
-                        nextSchedule = items.FirstOrDefault(item => item.Start.TimeOfDay > now.TimeOfDay && item.Day == now.DayOfWeek);
-                   
+                    currentSchedule = items.FirstOrDefault(item => item.Start.TimeOfDay <= now.TimeOfDay && item.End.HasValue && item.End.Value.TimeOfDay >= now.TimeOfDay && item.Day == now.DayOfWeek);
+                    nextSchedule = items.FirstOrDefault(item => item.Start.TimeOfDay > now.TimeOfDay && item.Day == now.DayOfWeek);
+
                 }
 
             }
@@ -296,32 +282,44 @@
     {
         try
         {
-            var response = await HttpClient.GetAsync($"ScheduleManagement/GetScheduleByUserId/{MainLayout.CurrentUserId}");
-
-            if (response.IsSuccessStatusCode)
+            if (MainLayout.IsOnline)
             {
-                if (response.StatusCode == HttpStatusCode.NoContent)
-                {
-                    scheduleTimeSlots = null;
-                    return;
-                }
+                var response = await HttpClient.GetAsync($"ScheduleManagement/GetScheduleByUserId/{MainLayout.CurrentUserId}");
 
-                var schedule = await response.Content.ReadFromJsonAsync<List<ScheduleTimeSlot>>();
-
-                if (schedule is not null)
+                if (response.IsSuccessStatusCode)
                 {
-                    scheduleTimeSlots = schedule;
-                    Console.WriteLine(scheduleTimeSlots.Count());
+                    if (response.StatusCode == HttpStatusCode.NoContent)
+                    {
+                        scheduleTimeSlots = null;
+                        return;
+                    }
+
+                    var schedule = await response.Content.ReadFromJsonAsync<List<ScheduleTimeSlot>>();
+
+                    if (schedule is not null)
+                    {
+                        scheduleTimeSlots = schedule;
+                        Console.WriteLine(scheduleTimeSlots.Count());
+                    }
+                    else
+                    {
+                        scheduleTimeSlots = null;
+                    }
+
+                    await LocalStorage.SetItemAsync("studentScheduleTimeSlots", scheduleTimeSlots);
+                    StateHasChanged();
                 }
                 else
                 {
-                    scheduleTimeSlots = null;
+                    Snackbar.Add($"Error: {response.ReasonPhrase}", Severity.Error);
                 }
             }
             else
             {
-                Snackbar.Add($"Error: {response.ReasonPhrase}", Severity.Error);
+                var cachedData = await LocalStorage.GetItemAsync<List<ScheduleTimeSlot>>("studentScheduleTimeSlots");
+                scheduleTimeSlots = cachedData ?? new List<ScheduleTimeSlot>();
             }
+
         }
         catch (Exception ex)
         {
@@ -336,18 +334,29 @@
 
         try
         {
-
-            var response = await ApiHelper.GetAsync<List<ScheduleRequest>>("ScheduleManagement/GetScheduleList");
-            if (response.IsSuccess)
+            if (MainLayout.IsOnline)
             {
-                scheduleRequests = response.Data;
+                var response = await ApiHelper.GetAsync<List<ScheduleRequest>>("ScheduleManagement/GetScheduleList");
+                if (response.IsSuccess)
+                {
+                    scheduleRequests = response.Data;
 
+                    StateHasChanged();
+                }
+                else
+                {
+                    Snackbar.Add($"Failed to load schedules: {response.Message}", Severity.Error);
+                }
+                await LocalStorage.SetItemAsync("studentsSheduleRequests", scheduleRequests);
                 StateHasChanged();
+
             }
             else
             {
-                Snackbar.Add($"Failed to load schedules: {response.Message}", Severity.Error);
+                var cachedData = await LocalStorage.GetItemAsync<List<ScheduleRequest>>("studentsSheduleRequests");
+                scheduleRequests = cachedData ?? new List<ScheduleRequest>();
             }
+
 
 
 

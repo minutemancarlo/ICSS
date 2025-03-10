@@ -304,7 +304,7 @@
     // }
 
 
-    private async Task OnShowSchedules(SectionsModel? sections, Course? course, YearLevel? yearLevel, Semester? semester,int? scheduleId)
+    private async Task OnShowSchedules(SectionsModel? sections, Course? course, YearLevel? yearLevel, Semester? semester, int? scheduleId)
     {
         try
         {
@@ -323,7 +323,7 @@
             List<ScheduleTimeSlot>? slots = new();
             if (response.IsSuccess)
             {
-                slots = response.Data;             
+                slots = response.Data;
             }
             else
             {
@@ -384,8 +384,8 @@
 
                 };
             string actionMessage = "Generate Schedule";
-            string  message = $"Note: If there are existing schedules for {selectedCourse.CourseName}, they will be marked as inactive. Are you sure you want to generate a new set of schedules?";
-            
+            string message = $"Note: If there are existing schedules for {selectedCourse.CourseName}, they will be marked as inactive. Are you sure you want to generate a new set of schedules?";
+
             var parameters = new DialogParameters<ConfirmationDialog>
             {
                 { x => x.Action, actionMessage },
@@ -416,12 +416,13 @@
                         Snackbar.Add($"Error: {response.Message}", Severity.Error);
                     }
                 }
-            }          
+            }
         }
         catch (Exception ex)
         {
             Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
-        }finally
+        }
+        finally
         {
             await OnGetScheduleList();
         }
@@ -438,7 +439,7 @@
 
     }
 
-    
+
 
 
 
@@ -601,17 +602,32 @@
         try
         {
 
-            var response = await ApiHelper.GetAsync<List<ScheduleRequest>>("ScheduleManagement/GetScheduleList");
-            if (response.IsSuccess)
+            if (MainLayout.IsOnline)
             {
-                scheduleRequests = response.Data;
-
-                StateHasChanged();
+                var response = await ApiHelper.GetAsync<List<ScheduleRequest>>("ScheduleManagement/GetScheduleList");
+                if (response.IsSuccess)
+                {
+                    scheduleRequests = response.Data;
+                    if (MainLayout.IsFacultyWithDepartment)
+                    {
+                        scheduleRequests = scheduleRequests.Where(x => x.Departments?.DepartmentId == MainLayout.FacultyDepartment?.DepartmentId).ToList();
+                    }
+                    await LocalStorage.SetItemAsync("schedulRequests", scheduleRequests);
+                    StateHasChanged();
+                }
+                else
+                {
+                    Snackbar.Add($"Failed to load schedules: {response.Message}", Severity.Error);
+                }
             }
             else
             {
-                Snackbar.Add($"Failed to load schedules: {response.Message}", Severity.Error);
+                var cachedData = await LocalStorage.GetItemAsync<List<ScheduleRequest>>("schedulRequests");
+                scheduleRequests = cachedData ?? new List<ScheduleRequest>();
+                StateHasChanged();
             }
+
+
 
 
 

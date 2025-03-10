@@ -176,8 +176,7 @@
             if (!result.Canceled)
             {
                 await OnLoadDepartments();
-                await OnLoadFaculty();
-                await OnLoadFaculty();
+                await OnLoadFaculty();                
                 StateHasChanged();
             }
         }
@@ -217,8 +216,7 @@
             if (!result.Canceled)
             {
                 await OnLoadDepartments();
-                await OnLoadFaculty();
-                await OnLoadFaculty();
+                await OnLoadFaculty();                
                 StateHasChanged();
             }
         }
@@ -241,9 +239,11 @@
                 if (response.IsSuccess)
                 {
                     faculty = response.Data;
-                    facultyTemp = faculty;
-                    await LocalStorage.SetItemAsync("faculty", faculty);                    
-                    StateHasChanged();
+                    if (MainLayout.IsFacultyWithDepartment)
+                    {
+                        faculty = faculty.Where(x => x.Departments?.DepartmentId == MainLayout.FacultyDepartment?.DepartmentId).ToList();                        
+                    }                    
+                    await LocalStorage.SetItemAsync("faculty", faculty);                                        
                 }
                 else
                 {
@@ -254,22 +254,23 @@
             {
                 var cachedData = await LocalStorage.GetItemAsync<List<DepartmentMember>>("faculty");
                 faculty = cachedData ?? new List<DepartmentMember>();
-                facultyTemp = faculty;
-                StateHasChanged();
+                if (MainLayout.IsFacultyWithDepartment)
+                {
+                    faculty = faculty.Where(x => x.Departments?.DepartmentId == MainLayout.FacultyDepartment?.DepartmentId).ToList();                    
+                }
+               
             }
 
+            
+            facultyTemp = faculty;
+            StateHasChanged();
         }
         catch (Exception ex)
         {
             Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
         }
         finally
-        {
-            if(MainLayout.IsFacultyWithDepartment)
-            {
-                faculty = faculty.Where(x => x.Departments?.DepartmentId == MainLayout.FacultyDepartment?.DepartmentId).ToList();
-                facultyTemp = faculty;                
-            }
+        {           
             isLoading = false;
         }
     }
