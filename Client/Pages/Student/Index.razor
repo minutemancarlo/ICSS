@@ -140,7 +140,7 @@
     private string CurrentTime => DateTime.Now.ToString("h:mm:ss tt");
     protected override async Task OnInitializedAsync()
     {
-
+        await base.OnInitializedAsync();
         try
         {
 
@@ -161,6 +161,7 @@
                     if (section is not null)
                     {
                         mySection = section;
+                        StateHasChanged();
                     }
                     else
                     {
@@ -178,7 +179,7 @@
             }
             else
             {
-                var cachedData = await LocalStorage.GetItemAsync<Sections?>("mySection");
+                var cachedData = await LocalStorage.GetItemAsync<Sections>("mySection");
                 mySection = cachedData ?? new Sections();
             }
 
@@ -198,13 +199,13 @@
             }
 
         }
-        await base.OnInitializedAsync();
         while (true)
         {
             StateHasChanged();
             await Task.Delay(1000);
         }
-        
+     
+
     }
 
     private void OnSelectSchedule(int? value)
