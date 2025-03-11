@@ -1,6 +1,8 @@
 ﻿<MudNavMenu>
     <AuthorizeView Roles="Admin">
         <Authorized>
+            <MudText Typo="Typo.body2" Class="px-4 mud-text-secondary pt-3">Logged in as: <strong>Administrator</strong></MudText>
+            <MudDivider Class="my-2" />
             <MudText Typo="Typo.body2" Class="px-4 mud-text-secondary pt-3">General</MudText>
             <MudDivider Class="my-2" />
             <MudNavLink Href="/admin-dashboard" Icon="@Icons.Material.Filled.Store">Dashboard</MudNavLink>
@@ -22,6 +24,8 @@
     </AuthorizeView>
     <AuthorizeView Roles="Faculty">
         <Authorized>
+            <MudText Typo="Typo.body2" Class="px-4 mud-text-secondary pt-3">Logged in as: <strong>Faculty</strong></MudText>
+            <MudDivider Class="my-2" />
             <MudText Typo="Typo.body2" Class="px-4 mud-text-secondary pt-3">General</MudText>
             <MudDivider Class="my-2" />
             <MudNavLink Href="/faculty-dashboard" Icon="@Icons.Material.Filled.Store">Dashboard</MudNavLink>

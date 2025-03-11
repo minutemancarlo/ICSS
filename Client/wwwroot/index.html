@@ -90,10 +90,10 @@
         };
     </script>
     <script>
-        function downloadFile(fileName, mimeType, base64) {
-            const link = document.createElement("a");
+        function downloadFile(url, fileName) {
+            const link = document.createElement('a');
+            link.href = url;
             link.download = fileName;
-            link.href = `data:${mimeType};base64,${base64}`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);

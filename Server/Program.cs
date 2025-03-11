@@ -2,6 +2,7 @@ using Auth0Net.DependencyInjection;
 using ICSS.Server.HostedServices;
 using ICSS.Server.Logger;
 using ICSS.Server.Repository;
+using ICSS.Server.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.ResponseCompression;
 using System.Data;
@@ -57,6 +58,8 @@ builder.Services.AddTransient<DepartmentRepository>();
 builder.Services.AddTransient<FacultyRepository>();
 builder.Services.AddTransient<SectionRepository>();
 builder.Services.AddTransient<ScheduleRepository>();
+
+builder.Services.AddScoped<ScheduleService>();
 
 builder.Services.AddHostedService<StudentInfoUploader>();
 builder.Services.AddHostedService<ScheduleProcessor>();
