@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
@@ -28,6 +28,7 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\Reports\Individual\" />
+    <Folder Include="wwwroot\Reports\Multiple\" />
     <Folder Include="wwwroot\Templates\" />
   </ItemGroup>
 
@@ -40,6 +41,15 @@
     <Content Update="wwwroot\Reports\Individual\IndividualScheduleDataset.xsd">
       <Generator>MSDataSetGenerator</Generator>
       <LastGenOutput>IndividualScheduleDataset.Designer.cs</LastGenOutput>
+    </Content>
+    <Content Update="wwwroot\Reports\Multiple\MultipleScheduleDataset.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>MultipleScheduleDataset.xsd</DependentUpon>
+    </Content>
+    <Content Update="wwwroot\Reports\Multiple\MultipleScheduleDataset.xsd">
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>MultipleScheduleDataset.Designer.cs</LastGenOutput>
     </Content>
   </ItemGroup>
 

@@ -10,7 +10,7 @@
 
 #pragma warning disable 1591
 
-namespace ICSS.Server.wwwroot.Reports.Individual {
+namespace ICSS.Server.wwwroot.Reports.Multiple {
     
     
     /// <summary>
@@ -20,17 +20,17 @@ namespace ICSS.Server.wwwroot.Reports.Individual {
     [global::System.ComponentModel.DesignerCategoryAttribute("code")]
     [global::System.ComponentModel.ToolboxItem(true)]
     [global::System.Xml.Serialization.XmlSchemaProviderAttribute("GetTypedDataSetSchema")]
-    [global::System.Xml.Serialization.XmlRootAttribute("IndividualScheduleDataset")]
+    [global::System.Xml.Serialization.XmlRootAttribute("MultipleScheduleDataset")]
     [global::System.ComponentModel.Design.HelpKeywordAttribute("vs.data.DataSet")]
-    public partial class IndividualScheduleDataset : global::System.Data.DataSet {
+    public partial class MultipleScheduleDataset : global::System.Data.DataSet {
         
-        private IndividualScheduleDataTableDataTable tableIndividualScheduleDataTable;
+        private DataTable2DataTable tableDataTable2;
         
         private global::System.Data.SchemaSerializationMode _schemaSerializationMode = global::System.Data.SchemaSerializationMode.IncludeSchema;
         
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
-        public IndividualScheduleDataset() {
+        public MultipleScheduleDataset() {
             this.BeginInit();
             this.InitClass();
             global::System.ComponentModel.CollectionChangeEventHandler schemaChangedHandler = new global::System.ComponentModel.CollectionChangeEventHandler(this.SchemaChanged);
@@ -41,7 +41,7 @@ namespace ICSS.Server.wwwroot.Reports.Individual {
         
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
-        protected IndividualScheduleDataset(global::System.Runtime.Serialization.SerializationInfo info, global::System.Runtime.Serialization.StreamingContext context) : 
+        protected MultipleScheduleDataset(global::System.Runtime.Serialization.SerializationInfo info, global::System.Runtime.Serialization.StreamingContext context) : 
                 base(info, context, false) {
             if ((this.IsBinarySerialized(info, context) == true)) {
                 this.InitVars(false);
@@ -54,8 +54,8 @@ namespace ICSS.Server.wwwroot.Reports.Individual {
             if ((this.DetermineSchemaSerializationMode(info, context) == global::System.Data.SchemaSerializationMode.IncludeSchema)) {
                 global::System.Data.DataSet ds = new global::System.Data.DataSet();
                 ds.ReadXmlSchema(new global::System.Xml.XmlTextReader(new global::System.IO.StringReader(strSchema)));
-                if ((ds.Tables["IndividualScheduleDataTable"] != null)) {
-                    base.Tables.Add(new IndividualScheduleDataTableDataTable(ds.Tables["IndividualScheduleDataTable"]));
+                if ((ds.Tables["DataTable2"] != null)) {
+                    base.Tables.Add(new DataTable2DataTable(ds.Tables["DataTable2"]));
                 }
                 this.DataSetName = ds.DataSetName;
                 this.Prefix = ds.Prefix;
@@ -79,9 +79,9 @@ namespace ICSS.Server.wwwroot.Reports.Individual {
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
         [global::System.ComponentModel.Browsable(false)]
         [global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Content)]
-        public IndividualScheduleDataTableDataTable IndividualScheduleDataTable {
+        public DataTable2DataTable DataTable2 {
             get {
-                return this.tableIndividualScheduleDataTable;
+                return this.tableDataTable2;
             }
         }
         
@@ -127,7 +127,7 @@ namespace ICSS.Server.wwwroot.Reports.Individual {
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
         public override global::System.Data.DataSet Clone() {
-            IndividualScheduleDataset cln = ((IndividualScheduleDataset)(base.Clone()));
+            MultipleScheduleDataset cln = ((MultipleScheduleDataset)(base.Clone()));
             cln.InitVars();
             cln.SchemaSerializationMode = this.SchemaSerializationMode;
             return cln;
@@ -152,8 +152,8 @@ namespace ICSS.Server.wwwroot.Reports.Individual {
                 this.Reset();
                 global::System.Data.DataSet ds = new global::System.Data.DataSet();
                 ds.ReadXml(reader);
-                if ((ds.Tables["IndividualScheduleDataTable"] != null)) {
-                    base.Tables.Add(new IndividualScheduleDataTableDataTable(ds.Tables["IndividualScheduleDataTable"]));
+                if ((ds.Tables["DataTable2"] != null)) {
+                    base.Tables.Add(new DataTable2DataTable(ds.Tables["DataTable2"]));
                 }
                 this.DataSetName = ds.DataSetName;
                 this.Prefix = ds.Prefix;
@@ -188,10 +188,10 @@ namespace ICSS.Server.wwwroot.Reports.Individual {
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
         internal void InitVars(bool initTable) {
-            this.tableIndividualScheduleDataTable = ((IndividualScheduleDataTableDataTable)(base.Tables["IndividualScheduleDataTable"]));
+            this.tableDataTable2 = ((DataTable2DataTable)(base.Tables["DataTable2"]));
             if ((initTable == true)) {
-                if ((this.tableIndividualScheduleDataTable != null)) {
-                    this.tableIndividualScheduleDataTable.InitVars();
+                if ((this.tableDataTable2 != null)) {
+                    this.tableDataTable2.InitVars();
                 }
             }
         }
@@ -199,18 +199,18 @@ namespace ICSS.Server.wwwroot.Reports.Individual {
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
         private void InitClass() {
-            this.DataSetName = "IndividualScheduleDataset";
+            this.DataSetName = "MultipleScheduleDataset";
             this.Prefix = "";
-            this.Namespace = "http://tempuri.org/IndividualScheduleDataset.xsd";
+            this.Namespace = "http://tempuri.org/MultipleScheduleDataset.xsd";
             this.EnforceConstraints = true;
             this.SchemaSerializationMode = global::System.Data.SchemaSerializationMode.IncludeSchema;
-            this.tableIndividualScheduleDataTable = new IndividualScheduleDataTableDataTable();
-            base.Tables.Add(this.tableIndividualScheduleDataTable);
+            this.tableDataTable2 = new DataTable2DataTable();
+            base.Tables.Add(this.tableDataTable2);
         }
         
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
-        private bool ShouldSerializeIndividualScheduleDataTable() {
+        private bool ShouldSerializeDataTable2() {
             return false;
         }
         
@@ -225,7 +225,7 @@ namespace ICSS.Server.wwwroot.Reports.Individual {
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
         public static global::System.Xml.Schema.XmlSchemaComplexType GetTypedDataSetSchema(global::System.Xml.Schema.XmlSchemaSet xs) {
-            IndividualScheduleDataset ds = new IndividualScheduleDataset();
+            MultipleScheduleDataset ds = new MultipleScheduleDataset();
             global::System.Xml.Schema.XmlSchemaComplexType type = new global::System.Xml.Schema.XmlSchemaComplexType();
             global::System.Xml.Schema.XmlSchemaSequence sequence = new global::System.Xml.Schema.XmlSchemaSequence();
             global::System.Xml.Schema.XmlSchemaAny any = new global::System.Xml.Schema.XmlSchemaAny();
@@ -270,18 +270,16 @@ namespace ICSS.Server.wwwroot.Reports.Individual {
         }
         
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
-        public delegate void IndividualScheduleDataTableRowChangeEventHandler(object sender, IndividualScheduleDataTableRowChangeEvent e);
+        public delegate void DataTable2RowChangeEventHandler(object sender, DataTable2RowChangeEvent e);
         
         /// <summary>
         ///Represents the strongly named DataTable class.
         ///</summary>
         [global::System.Serializable()]
         [global::System.Xml.Serialization.XmlSchemaProviderAttribute("GetTypedTableSchema")]
-        public partial class IndividualScheduleDataTableDataTable : global::System.Data.TypedTableBase<IndividualScheduleDataTableRow> {
+        public partial class DataTable2DataTable : global::System.Data.TypedTableBase<DataTable2Row> {
             
             private global::System.Data.DataColumn columnSection;
-            
-            private global::System.Data.DataColumn columnSchoolYear;
             
             private global::System.Data.DataColumn columnSubjectCode;
             
@@ -293,18 +291,20 @@ namespace ICSS.Server.wwwroot.Reports.Individual {
             
             private global::System.Data.DataColumn columnSchedule;
             
+            private global::System.Data.DataColumn columnDays;
+            
             private global::System.Data.DataColumn columnRoom;
             
             private global::System.Data.DataColumn columnInstructor;
             
-            private global::System.Data.DataColumn columnDays;
+            private global::System.Data.DataColumn columnSchoolYear;
             
             private global::System.Data.DataColumn columnCollege;
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
-            public IndividualScheduleDataTableDataTable() {
-                this.TableName = "IndividualScheduleDataTable";
+            public DataTable2DataTable() {
+                this.TableName = "DataTable2";
                 this.BeginInit();
                 this.InitClass();
                 this.EndInit();
@@ -312,7 +312,7 @@ namespace ICSS.Server.wwwroot.Reports.Individual {
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
-            internal IndividualScheduleDataTableDataTable(global::System.Data.DataTable table) {
+            internal DataTable2DataTable(global::System.Data.DataTable table) {
                 this.TableName = table.TableName;
                 if ((table.CaseSensitive != table.DataSet.CaseSensitive)) {
                     this.CaseSensitive = table.CaseSensitive;
@@ -329,7 +329,7 @@ namespace ICSS.Server.wwwroot.Reports.Individual {
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
-            protected IndividualScheduleDataTableDataTable(global::System.Runtime.Serialization.SerializationInfo info, global::System.Runtime.Serialization.StreamingContext context) : 
+            protected DataTable2DataTable(global::System.Runtime.Serialization.SerializationInfo info, global::System.Runtime.Serialization.StreamingContext context) : 
                     base(info, context) {
                 this.InitVars();
             }
@@ -339,14 +339,6 @@ namespace ICSS.Server.wwwroot.Reports.Individual {
             public global::System.Data.DataColumn SectionColumn {
                 get {
                     return this.columnSection;
-                }
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
-            public global::System.Data.DataColumn SchoolYearColumn {
-                get {
-                    return this.columnSchoolYear;
                 }
             }
             
@@ -392,6 +384,14 @@ namespace ICSS.Server.wwwroot.Reports.Individual {
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
+            public global::System.Data.DataColumn DaysColumn {
+                get {
+                    return this.columnDays;
+                }
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
             public global::System.Data.DataColumn RoomColumn {
                 get {
                     return this.columnRoom;
@@ -408,9 +408,9 @@ namespace ICSS.Server.wwwroot.Reports.Individual {
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
-            public global::System.Data.DataColumn DaysColumn {
+            public global::System.Data.DataColumn SchoolYearColumn {
                 get {
-                    return this.columnDays;
+                    return this.columnSchoolYear;
                 }
             }
             
@@ -433,55 +433,55 @@ namespace ICSS.Server.wwwroot.Reports.Individual {
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
-            public IndividualScheduleDataTableRow this[int index] {
+            public DataTable2Row this[int index] {
                 get {
-                    return ((IndividualScheduleDataTableRow)(this.Rows[index]));
+                    return ((DataTable2Row)(this.Rows[index]));
                 }
             }
             
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
-            public event IndividualScheduleDataTableRowChangeEventHandler IndividualScheduleDataTableRowChanging;
+            public event DataTable2RowChangeEventHandler DataTable2RowChanging;
             
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
-            public event IndividualScheduleDataTableRowChangeEventHandler IndividualScheduleDataTableRowChanged;
+            public event DataTable2RowChangeEventHandler DataTable2RowChanged;
             
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
-            public event IndividualScheduleDataTableRowChangeEventHandler IndividualScheduleDataTableRowDeleting;
+            public event DataTable2RowChangeEventHandler DataTable2RowDeleting;
             
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
-            public event IndividualScheduleDataTableRowChangeEventHandler IndividualScheduleDataTableRowDeleted;
+            public event DataTable2RowChangeEventHandler DataTable2RowDeleted;
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
-            public void AddIndividualScheduleDataTableRow(IndividualScheduleDataTableRow row) {
+            public void AddDataTable2Row(DataTable2Row row) {
                 this.Rows.Add(row);
             }
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
-            public IndividualScheduleDataTableRow AddIndividualScheduleDataTableRow(string Section, string SchoolYear, string SubjectCode, string SubjectDescription, decimal Units, decimal LoadUnits, string Schedule, string Room, string Instructor, string Days, string College) {
-                IndividualScheduleDataTableRow rowIndividualScheduleDataTableRow = ((IndividualScheduleDataTableRow)(this.NewRow()));
+            public DataTable2Row AddDataTable2Row(string Section, string SubjectCode, string SubjectDescription, decimal Units, decimal LoadUnits, string Schedule, string Days, string Room, string Instructor, string SchoolYear, string College) {
+                DataTable2Row rowDataTable2Row = ((DataTable2Row)(this.NewRow()));
                 object[] columnValuesArray = new object[] {
                         Section,
-                        SchoolYear,
                         SubjectCode,
                         SubjectDescription,
                         Units,
                         LoadUnits,
                         Schedule,
+                        Days,
                         Room,
                         Instructor,
-                        Days,
+                        SchoolYear,
                         College};
-                rowIndividualScheduleDataTableRow.ItemArray = columnValuesArray;
-                this.Rows.Add(rowIndividualScheduleDataTableRow);
-                return rowIndividualScheduleDataTableRow;
+                rowDataTable2Row.ItemArray = columnValuesArray;
+                this.Rows.Add(rowDataTable2Row);
+                return rowDataTable2Row;
             }
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
             public override global::System.Data.DataTable Clone() {
-                IndividualScheduleDataTableDataTable cln = ((IndividualScheduleDataTableDataTable)(base.Clone()));
+                DataTable2DataTable cln = ((DataTable2DataTable)(base.Clone()));
                 cln.InitVars();
                 return cln;
             }
@@ -489,22 +489,22 @@ namespace ICSS.Server.wwwroot.Reports.Individual {
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
             protected override global::System.Data.DataTable CreateInstance() {
-                return new IndividualScheduleDataTableDataTable();
+                return new DataTable2DataTable();
             }
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
             internal void InitVars() {
                 this.columnSection = base.Columns["Section"];
-                this.columnSchoolYear = base.Columns["SchoolYear"];
                 this.columnSubjectCode = base.Columns["SubjectCode"];
                 this.columnSubjectDescription = base.Columns["SubjectDescription"];
                 this.columnUnits = base.Columns["Units"];
                 this.columnLoadUnits = base.Columns["LoadUnits"];
                 this.columnSchedule = base.Columns["Schedule"];
+                this.columnDays = base.Columns["Days"];
                 this.columnRoom = base.Columns["Room"];
                 this.columnInstructor = base.Columns["Instructor"];
-                this.columnDays = base.Columns["Days"];
+                this.columnSchoolYear = base.Columns["SchoolYear"];
                 this.columnCollege = base.Columns["College"];
             }
             
@@ -513,8 +513,6 @@ namespace ICSS.Server.wwwroot.Reports.Individual {
             private void InitClass() {
                 this.columnSection = new global::System.Data.DataColumn("Section", typeof(string), null, global::System.Data.MappingType.Element);
                 base.Columns.Add(this.columnSection);
-                this.columnSchoolYear = new global::System.Data.DataColumn("SchoolYear", typeof(string), null, global::System.Data.MappingType.Element);
-                base.Columns.Add(this.columnSchoolYear);
                 this.columnSubjectCode = new global::System.Data.DataColumn("SubjectCode", typeof(string), null, global::System.Data.MappingType.Element);
                 base.Columns.Add(this.columnSubjectCode);
                 this.columnSubjectDescription = new global::System.Data.DataColumn("SubjectDescription", typeof(string), null, global::System.Data.MappingType.Element);
@@ -525,40 +523,42 @@ namespace ICSS.Server.wwwroot.Reports.Individual {
                 base.Columns.Add(this.columnLoadUnits);
                 this.columnSchedule = new global::System.Data.DataColumn("Schedule", typeof(string), null, global::System.Data.MappingType.Element);
                 base.Columns.Add(this.columnSchedule);
+                this.columnDays = new global::System.Data.DataColumn("Days", typeof(string), null, global::System.Data.MappingType.Element);
+                base.Columns.Add(this.columnDays);
                 this.columnRoom = new global::System.Data.DataColumn("Room", typeof(string), null, global::System.Data.MappingType.Element);
                 base.Columns.Add(this.columnRoom);
                 this.columnInstructor = new global::System.Data.DataColumn("Instructor", typeof(string), null, global::System.Data.MappingType.Element);
                 base.Columns.Add(this.columnInstructor);
-                this.columnDays = new global::System.Data.DataColumn("Days", typeof(string), null, global::System.Data.MappingType.Element);
-                base.Columns.Add(this.columnDays);
+                this.columnSchoolYear = new global::System.Data.DataColumn("SchoolYear", typeof(string), null, global::System.Data.MappingType.Element);
+                base.Columns.Add(this.columnSchoolYear);
                 this.columnCollege = new global::System.Data.DataColumn("College", typeof(string), null, global::System.Data.MappingType.Element);
                 base.Columns.Add(this.columnCollege);
             }
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
-            public IndividualScheduleDataTableRow NewIndividualScheduleDataTableRow() {
-                return ((IndividualScheduleDataTableRow)(this.NewRow()));
+            public DataTable2Row NewDataTable2Row() {
+                return ((DataTable2Row)(this.NewRow()));
             }
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
             protected override global::System.Data.DataRow NewRowFromBuilder(global::System.Data.DataRowBuilder builder) {
-                return new IndividualScheduleDataTableRow(builder);
+                return new DataTable2Row(builder);
             }
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
             protected override global::System.Type GetRowType() {
-                return typeof(IndividualScheduleDataTableRow);
+                return typeof(DataTable2Row);
             }
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
             protected override void OnRowChanged(global::System.Data.DataRowChangeEventArgs e) {
                 base.OnRowChanged(e);
-                if ((this.IndividualScheduleDataTableRowChanged != null)) {
-                    this.IndividualScheduleDataTableRowChanged(this, new IndividualScheduleDataTableRowChangeEvent(((IndividualScheduleDataTableRow)(e.Row)), e.Action));
+                if ((this.DataTable2RowChanged != null)) {
+                    this.DataTable2RowChanged(this, new DataTable2RowChangeEvent(((DataTable2Row)(e.Row)), e.Action));
                 }
             }
             
@@ -566,8 +566,8 @@ namespace ICSS.Server.wwwroot.Reports.Individual {
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
             protected override void OnRowChanging(global::System.Data.DataRowChangeEventArgs e) {
                 base.OnRowChanging(e);
-                if ((this.IndividualScheduleDataTableRowChanging != null)) {
-                    this.IndividualScheduleDataTableRowChanging(this, new IndividualScheduleDataTableRowChangeEvent(((IndividualScheduleDataTableRow)(e.Row)), e.Action));
+                if ((this.DataTable2RowChanging != null)) {
+                    this.DataTable2RowChanging(this, new DataTable2RowChangeEvent(((DataTable2Row)(e.Row)), e.Action));
                 }
             }
             
@@ -575,8 +575,8 @@ namespace ICSS.Server.wwwroot.Reports.Individual {
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
             protected override void OnRowDeleted(global::System.Data.DataRowChangeEventArgs e) {
                 base.OnRowDeleted(e);
-                if ((this.IndividualScheduleDataTableRowDeleted != null)) {
-                    this.IndividualScheduleDataTableRowDeleted(this, new IndividualScheduleDataTableRowChangeEvent(((IndividualScheduleDataTableRow)(e.Row)), e.Action));
+                if ((this.DataTable2RowDeleted != null)) {
+                    this.DataTable2RowDeleted(this, new DataTable2RowChangeEvent(((DataTable2Row)(e.Row)), e.Action));
                 }
             }
             
@@ -584,14 +584,14 @@ namespace ICSS.Server.wwwroot.Reports.Individual {
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
             protected override void OnRowDeleting(global::System.Data.DataRowChangeEventArgs e) {
                 base.OnRowDeleting(e);
-                if ((this.IndividualScheduleDataTableRowDeleting != null)) {
-                    this.IndividualScheduleDataTableRowDeleting(this, new IndividualScheduleDataTableRowChangeEvent(((IndividualScheduleDataTableRow)(e.Row)), e.Action));
+                if ((this.DataTable2RowDeleting != null)) {
+                    this.DataTable2RowDeleting(this, new DataTable2RowChangeEvent(((DataTable2Row)(e.Row)), e.Action));
                 }
             }
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
-            public void RemoveIndividualScheduleDataTableRow(IndividualScheduleDataTableRow row) {
+            public void RemoveDataTable2Row(DataTable2Row row) {
                 this.Rows.Remove(row);
             }
             
@@ -600,7 +600,7 @@ namespace ICSS.Server.wwwroot.Reports.Individual {
             public static global::System.Xml.Schema.XmlSchemaComplexType GetTypedTableSchema(global::System.Xml.Schema.XmlSchemaSet xs) {
                 global::System.Xml.Schema.XmlSchemaComplexType type = new global::System.Xml.Schema.XmlSchemaComplexType();
                 global::System.Xml.Schema.XmlSchemaSequence sequence = new global::System.Xml.Schema.XmlSchemaSequence();
-                IndividualScheduleDataset ds = new IndividualScheduleDataset();
+                MultipleScheduleDataset ds = new MultipleScheduleDataset();
                 global::System.Xml.Schema.XmlSchemaAny any1 = new global::System.Xml.Schema.XmlSchemaAny();
                 any1.Namespace = "http://www.w3.org/2001/XMLSchema";
                 any1.MinOccurs = new decimal(0);
@@ -618,7 +618,7 @@ namespace ICSS.Server.wwwroot.Reports.Individual {
                 type.Attributes.Add(attribute1);
                 global::System.Xml.Schema.XmlSchemaAttribute attribute2 = new global::System.Xml.Schema.XmlSchemaAttribute();
                 attribute2.Name = "tableTypeName";
-                attribute2.FixedValue = "IndividualScheduleDataTableDataTable";
+                attribute2.FixedValue = "DataTable2DataTable";
                 type.Attributes.Add(attribute2);
                 type.Particle = sequence;
                 global::System.Xml.Schema.XmlSchema dsSchema = ds.GetSchemaSerializable();
@@ -662,15 +662,15 @@ namespace ICSS.Server.wwwroot.Reports.Individual {
         /// <summary>
         ///Represents strongly named DataRow class.
         ///</summary>
-        public partial class IndividualScheduleDataTableRow : global::System.Data.DataRow {
+        public partial class DataTable2Row : global::System.Data.DataRow {
             
-            private IndividualScheduleDataTableDataTable tableIndividualScheduleDataTable;
+            private DataTable2DataTable tableDataTable2;
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
-            internal IndividualScheduleDataTableRow(global::System.Data.DataRowBuilder rb) : 
+            internal DataTable2Row(global::System.Data.DataRowBuilder rb) : 
                     base(rb) {
-                this.tableIndividualScheduleDataTable = ((IndividualScheduleDataTableDataTable)(this.Table));
+                this.tableDataTable2 = ((DataTable2DataTable)(this.Table));
             }
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
@@ -678,31 +678,14 @@ namespace ICSS.Server.wwwroot.Reports.Individual {
             public string Section {
                 get {
                     try {
-                        return ((string)(this[this.tableIndividualScheduleDataTable.SectionColumn]));
+                        return ((string)(this[this.tableDataTable2.SectionColumn]));
                     }
                     catch (global::System.InvalidCastException e) {
-                        throw new global::System.Data.StrongTypingException("The value for column \'Section\' in table \'IndividualScheduleDataTable\' is DBNull.", e);
+                        throw new global::System.Data.StrongTypingException("The value for column \'Section\' in table \'DataTable2\' is DBNull.", e);
                     }
                 }
                 set {
-                    this[this.tableIndividualScheduleDataTable.SectionColumn] = value;
-                }
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
-            public string SchoolYear {
-                get {
-                    try {
-                        return ((string)(this[this.tableIndividualScheduleDataTable.SchoolYearColumn]));
-                    }
-                    catch (global::System.InvalidCastException e) {
-                        throw new global::System.Data.StrongTypingException("The value for column \'SchoolYear\' in table \'IndividualScheduleDataTable\' is DBNul" +
-                                "l.", e);
-                    }
-                }
-                set {
-                    this[this.tableIndividualScheduleDataTable.SchoolYearColumn] = value;
+                    this[this.tableDataTable2.SectionColumn] = value;
                 }
             }
             
@@ -711,15 +694,14 @@ namespace ICSS.Server.wwwroot.Reports.Individual {
             public string SubjectCode {
                 get {
                     try {
-                        return ((string)(this[this.tableIndividualScheduleDataTable.SubjectCodeColumn]));
+                        return ((string)(this[this.tableDataTable2.SubjectCodeColumn]));
                     }
                     catch (global::System.InvalidCastException e) {
-                        throw new global::System.Data.StrongTypingException("The value for column \'SubjectCode\' in table \'IndividualScheduleDataTable\' is DBNu" +
-                                "ll.", e);
+                        throw new global::System.Data.StrongTypingException("The value for column \'SubjectCode\' in table \'DataTable2\' is DBNull.", e);
                     }
                 }
                 set {
-                    this[this.tableIndividualScheduleDataTable.SubjectCodeColumn] = value;
+                    this[this.tableDataTable2.SubjectCodeColumn] = value;
                 }
             }
             
@@ -728,15 +710,14 @@ namespace ICSS.Server.wwwroot.Reports.Individual {
             public string SubjectDescription {
                 get {
                     try {
-                        return ((string)(this[this.tableIndividualScheduleDataTable.SubjectDescriptionColumn]));
+                        return ((string)(this[this.tableDataTable2.SubjectDescriptionColumn]));
                     }
                     catch (global::System.InvalidCastException e) {
-                        throw new global::System.Data.StrongTypingException("The value for column \'SubjectDescription\' in table \'IndividualScheduleDataTable\' " +
-                                "is DBNull.", e);
+                        throw new global::System.Data.StrongTypingException("The value for column \'SubjectDescription\' in table \'DataTable2\' is DBNull.", e);
                     }
                 }
                 set {
-                    this[this.tableIndividualScheduleDataTable.SubjectDescriptionColumn] = value;
+                    this[this.tableDataTable2.SubjectDescriptionColumn] = value;
                 }
             }
             
@@ -745,14 +726,14 @@ namespace ICSS.Server.wwwroot.Reports.Individual {
             public decimal Units {
                 get {
                     try {
-                        return ((decimal)(this[this.tableIndividualScheduleDataTable.UnitsColumn]));
+                        return ((decimal)(this[this.tableDataTable2.UnitsColumn]));
                     }
                     catch (global::System.InvalidCastException e) {
-                        throw new global::System.Data.StrongTypingException("The value for column \'Units\' in table \'IndividualScheduleDataTable\' is DBNull.", e);
+                        throw new global::System.Data.StrongTypingException("The value for column \'Units\' in table \'DataTable2\' is DBNull.", e);
                     }
                 }
                 set {
-                    this[this.tableIndividualScheduleDataTable.UnitsColumn] = value;
+                    this[this.tableDataTable2.UnitsColumn] = value;
                 }
             }
             
@@ -761,15 +742,14 @@ namespace ICSS.Server.wwwroot.Reports.Individual {
             public decimal LoadUnits {
                 get {
                     try {
-                        return ((decimal)(this[this.tableIndividualScheduleDataTable.LoadUnitsColumn]));
+                        return ((decimal)(this[this.tableDataTable2.LoadUnitsColumn]));
                     }
                     catch (global::System.InvalidCastException e) {
-                        throw new global::System.Data.StrongTypingException("The value for column \'LoadUnits\' in table \'IndividualScheduleDataTable\' is DBNull" +
-                                ".", e);
+                        throw new global::System.Data.StrongTypingException("The value for column \'LoadUnits\' in table \'DataTable2\' is DBNull.", e);
                     }
                 }
                 set {
-                    this[this.tableIndividualScheduleDataTable.LoadUnitsColumn] = value;
+                    this[this.tableDataTable2.LoadUnitsColumn] = value;
                 }
             }
             
@@ -778,48 +758,14 @@ namespace ICSS.Server.wwwroot.Reports.Individual {
             public string Schedule {
                 get {
                     try {
-                        return ((string)(this[this.tableIndividualScheduleDataTable.ScheduleColumn]));
+                        return ((string)(this[this.tableDataTable2.ScheduleColumn]));
                     }
                     catch (global::System.InvalidCastException e) {
-                        throw new global::System.Data.StrongTypingException("The value for column \'Schedule\' in table \'IndividualScheduleDataTable\' is DBNull." +
-                                "", e);
+                        throw new global::System.Data.StrongTypingException("The value for column \'Schedule\' in table \'DataTable2\' is DBNull.", e);
                     }
                 }
                 set {
-                    this[this.tableIndividualScheduleDataTable.ScheduleColumn] = value;
-                }
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
-            public string Room {
-                get {
-                    try {
-                        return ((string)(this[this.tableIndividualScheduleDataTable.RoomColumn]));
-                    }
-                    catch (global::System.InvalidCastException e) {
-                        throw new global::System.Data.StrongTypingException("The value for column \'Room\' in table \'IndividualScheduleDataTable\' is DBNull.", e);
-                    }
-                }
-                set {
-                    this[this.tableIndividualScheduleDataTable.RoomColumn] = value;
-                }
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
-            public string Instructor {
-                get {
-                    try {
-                        return ((string)(this[this.tableIndividualScheduleDataTable.InstructorColumn]));
-                    }
-                    catch (global::System.InvalidCastException e) {
-                        throw new global::System.Data.StrongTypingException("The value for column \'Instructor\' in table \'IndividualScheduleDataTable\' is DBNul" +
-                                "l.", e);
-                    }
-                }
-                set {
-                    this[this.tableIndividualScheduleDataTable.InstructorColumn] = value;
+                    this[this.tableDataTable2.ScheduleColumn] = value;
                 }
             }
             
@@ -828,14 +774,62 @@ namespace ICSS.Server.wwwroot.Reports.Individual {
             public string Days {
                 get {
                     try {
-                        return ((string)(this[this.tableIndividualScheduleDataTable.DaysColumn]));
+                        return ((string)(this[this.tableDataTable2.DaysColumn]));
                     }
                     catch (global::System.InvalidCastException e) {
-                        throw new global::System.Data.StrongTypingException("The value for column \'Days\' in table \'IndividualScheduleDataTable\' is DBNull.", e);
+                        throw new global::System.Data.StrongTypingException("The value for column \'Days\' in table \'DataTable2\' is DBNull.", e);
                     }
                 }
                 set {
-                    this[this.tableIndividualScheduleDataTable.DaysColumn] = value;
+                    this[this.tableDataTable2.DaysColumn] = value;
+                }
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
+            public string Room {
+                get {
+                    try {
+                        return ((string)(this[this.tableDataTable2.RoomColumn]));
+                    }
+                    catch (global::System.InvalidCastException e) {
+                        throw new global::System.Data.StrongTypingException("The value for column \'Room\' in table \'DataTable2\' is DBNull.", e);
+                    }
+                }
+                set {
+                    this[this.tableDataTable2.RoomColumn] = value;
+                }
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
+            public string Instructor {
+                get {
+                    try {
+                        return ((string)(this[this.tableDataTable2.InstructorColumn]));
+                    }
+                    catch (global::System.InvalidCastException e) {
+                        throw new global::System.Data.StrongTypingException("The value for column \'Instructor\' in table \'DataTable2\' is DBNull.", e);
+                    }
+                }
+                set {
+                    this[this.tableDataTable2.InstructorColumn] = value;
+                }
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
+            public string SchoolYear {
+                get {
+                    try {
+                        return ((string)(this[this.tableDataTable2.SchoolYearColumn]));
+                    }
+                    catch (global::System.InvalidCastException e) {
+                        throw new global::System.Data.StrongTypingException("The value for column \'SchoolYear\' in table \'DataTable2\' is DBNull.", e);
+                    }
+                }
+                set {
+                    this[this.tableDataTable2.SchoolYearColumn] = value;
                 }
             }
             
@@ -844,147 +838,147 @@ namespace ICSS.Server.wwwroot.Reports.Individual {
             public string College {
                 get {
                     try {
-                        return ((string)(this[this.tableIndividualScheduleDataTable.CollegeColumn]));
+                        return ((string)(this[this.tableDataTable2.CollegeColumn]));
                     }
                     catch (global::System.InvalidCastException e) {
-                        throw new global::System.Data.StrongTypingException("The value for column \'College\' in table \'IndividualScheduleDataTable\' is DBNull.", e);
+                        throw new global::System.Data.StrongTypingException("The value for column \'College\' in table \'DataTable2\' is DBNull.", e);
                     }
                 }
                 set {
-                    this[this.tableIndividualScheduleDataTable.CollegeColumn] = value;
+                    this[this.tableDataTable2.CollegeColumn] = value;
                 }
             }
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
             public bool IsSectionNull() {
-                return this.IsNull(this.tableIndividualScheduleDataTable.SectionColumn);
+                return this.IsNull(this.tableDataTable2.SectionColumn);
             }
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
             public void SetSectionNull() {
-                this[this.tableIndividualScheduleDataTable.SectionColumn] = global::System.Convert.DBNull;
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
-            public bool IsSchoolYearNull() {
-                return this.IsNull(this.tableIndividualScheduleDataTable.SchoolYearColumn);
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
-            public void SetSchoolYearNull() {
-                this[this.tableIndividualScheduleDataTable.SchoolYearColumn] = global::System.Convert.DBNull;
+                this[this.tableDataTable2.SectionColumn] = global::System.Convert.DBNull;
             }
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
             public bool IsSubjectCodeNull() {
-                return this.IsNull(this.tableIndividualScheduleDataTable.SubjectCodeColumn);
+                return this.IsNull(this.tableDataTable2.SubjectCodeColumn);
             }
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
             public void SetSubjectCodeNull() {
-                this[this.tableIndividualScheduleDataTable.SubjectCodeColumn] = global::System.Convert.DBNull;
+                this[this.tableDataTable2.SubjectCodeColumn] = global::System.Convert.DBNull;
             }
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
             public bool IsSubjectDescriptionNull() {
-                return this.IsNull(this.tableIndividualScheduleDataTable.SubjectDescriptionColumn);
+                return this.IsNull(this.tableDataTable2.SubjectDescriptionColumn);
             }
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
             public void SetSubjectDescriptionNull() {
-                this[this.tableIndividualScheduleDataTable.SubjectDescriptionColumn] = global::System.Convert.DBNull;
+                this[this.tableDataTable2.SubjectDescriptionColumn] = global::System.Convert.DBNull;
             }
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
             public bool IsUnitsNull() {
-                return this.IsNull(this.tableIndividualScheduleDataTable.UnitsColumn);
+                return this.IsNull(this.tableDataTable2.UnitsColumn);
             }
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
             public void SetUnitsNull() {
-                this[this.tableIndividualScheduleDataTable.UnitsColumn] = global::System.Convert.DBNull;
+                this[this.tableDataTable2.UnitsColumn] = global::System.Convert.DBNull;
             }
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
             public bool IsLoadUnitsNull() {
-                return this.IsNull(this.tableIndividualScheduleDataTable.LoadUnitsColumn);
+                return this.IsNull(this.tableDataTable2.LoadUnitsColumn);
             }
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
             public void SetLoadUnitsNull() {
-                this[this.tableIndividualScheduleDataTable.LoadUnitsColumn] = global::System.Convert.DBNull;
+                this[this.tableDataTable2.LoadUnitsColumn] = global::System.Convert.DBNull;
             }
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
             public bool IsScheduleNull() {
-                return this.IsNull(this.tableIndividualScheduleDataTable.ScheduleColumn);
+                return this.IsNull(this.tableDataTable2.ScheduleColumn);
             }
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
             public void SetScheduleNull() {
-                this[this.tableIndividualScheduleDataTable.ScheduleColumn] = global::System.Convert.DBNull;
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
-            public bool IsRoomNull() {
-                return this.IsNull(this.tableIndividualScheduleDataTable.RoomColumn);
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
-            public void SetRoomNull() {
-                this[this.tableIndividualScheduleDataTable.RoomColumn] = global::System.Convert.DBNull;
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
-            public bool IsInstructorNull() {
-                return this.IsNull(this.tableIndividualScheduleDataTable.InstructorColumn);
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
-            public void SetInstructorNull() {
-                this[this.tableIndividualScheduleDataTable.InstructorColumn] = global::System.Convert.DBNull;
+                this[this.tableDataTable2.ScheduleColumn] = global::System.Convert.DBNull;
             }
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
             public bool IsDaysNull() {
-                return this.IsNull(this.tableIndividualScheduleDataTable.DaysColumn);
+                return this.IsNull(this.tableDataTable2.DaysColumn);
             }
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
             public void SetDaysNull() {
-                this[this.tableIndividualScheduleDataTable.DaysColumn] = global::System.Convert.DBNull;
+                this[this.tableDataTable2.DaysColumn] = global::System.Convert.DBNull;
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
+            public bool IsRoomNull() {
+                return this.IsNull(this.tableDataTable2.RoomColumn);
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
+            public void SetRoomNull() {
+                this[this.tableDataTable2.RoomColumn] = global::System.Convert.DBNull;
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
+            public bool IsInstructorNull() {
+                return this.IsNull(this.tableDataTable2.InstructorColumn);
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
+            public void SetInstructorNull() {
+                this[this.tableDataTable2.InstructorColumn] = global::System.Convert.DBNull;
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
+            public bool IsSchoolYearNull() {
+                return this.IsNull(this.tableDataTable2.SchoolYearColumn);
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
+            public void SetSchoolYearNull() {
+                this[this.tableDataTable2.SchoolYearColumn] = global::System.Convert.DBNull;
             }
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
             public bool IsCollegeNull() {
-                return this.IsNull(this.tableIndividualScheduleDataTable.CollegeColumn);
+                return this.IsNull(this.tableDataTable2.CollegeColumn);
             }
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
             public void SetCollegeNull() {
-                this[this.tableIndividualScheduleDataTable.CollegeColumn] = global::System.Convert.DBNull;
+                this[this.tableDataTable2.CollegeColumn] = global::System.Convert.DBNull;
             }
         }
         
@@ -992,22 +986,22 @@ namespace ICSS.Server.wwwroot.Reports.Individual {
         ///Row event argument class
         ///</summary>
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
-        public class IndividualScheduleDataTableRowChangeEvent : global::System.EventArgs {
+        public class DataTable2RowChangeEvent : global::System.EventArgs {
             
-            private IndividualScheduleDataTableRow eventRow;
+            private DataTable2Row eventRow;
             
             private global::System.Data.DataRowAction eventAction;
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
-            public IndividualScheduleDataTableRowChangeEvent(IndividualScheduleDataTableRow row, global::System.Data.DataRowAction action) {
+            public DataTable2RowChangeEvent(DataTable2Row row, global::System.Data.DataRowAction action) {
                 this.eventRow = row;
                 this.eventAction = action;
             }
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "17.0.0.0")]
-            public IndividualScheduleDataTableRow Row {
+            public DataTable2Row Row {
                 get {
                     return this.eventRow;
                 }

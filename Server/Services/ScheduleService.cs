@@ -14,10 +14,9 @@ namespace ICSS.Server.Services
             _scheduleRepository = scheduleRepository;
         }
 
-        public async Task<DataTable> GetScheduleSingleByIdAsync(int? scheduleId)
+        public async Task<DataTable> GetScheduleSingleByIdAsync(int? scheduleId, int? departmentId)
         {
             DataTable dt = new DataTable();
-
             dt.Columns.Add("Section", typeof(string));
             dt.Columns.Add("SubjectCode", typeof(string));
             dt.Columns.Add("SubjectDescription", typeof(string));
@@ -28,8 +27,9 @@ namespace ICSS.Server.Services
             dt.Columns.Add("Room", typeof(string));
             dt.Columns.Add("Instructor", typeof(string));
             dt.Columns.Add("SchoolYear", typeof(string));
+            dt.Columns.Add("College", typeof(string));
 
-            var schedule = await _scheduleRepository.GetReportScheduleSingleAsync(scheduleId);
+            var schedule = await _scheduleRepository.GetReportScheduleAsync(scheduleId, departmentId);
 
             if (schedule != null)
             {
@@ -47,12 +47,13 @@ namespace ICSS.Server.Services
                     row["Room"] = item.Room;
                     row["Instructor"] = item.Instructor;
                     row["SchoolYear"] = item.SchoolYear;
+                    row["College"] = item.College;
 
                     dt.Rows.Add(row);
                 }
-                
-                    
-                
+
+
+
             }
 
             return dt;

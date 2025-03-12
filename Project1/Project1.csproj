@@ -45,9 +45,21 @@
     <None Include="Reports\Schedules\Individual\IndividualScheduleDataset.xss">
       <DependentUpon>IndividualScheduleDataset.xsd</DependentUpon>
     </None>
+    <None Include="Reports\Schedules\Multiple\MultipleScheduleDataset.xsc">
+      <DependentUpon>MultipleScheduleDataset.xsd</DependentUpon>
+    </None>
+    <None Include="Reports\Schedules\Multiple\MultipleScheduleDataset.xsd">
+      <SubType>Designer</SubType>
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>MultipleScheduleDataset.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="Reports\Schedules\Multiple\MultipleScheduleDataset.xss">
+      <DependentUpon>MultipleScheduleDataset.xsd</DependentUpon>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Reports\Schedules\Individual\IndividualSchedule.rdlc" />
+    <EmbeddedResource Include="Reports\Schedules\Multiple\MultipleSchedule.rdlc" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -60,6 +72,11 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>IndividualScheduleDataset.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="Reports\Schedules\Multiple\MultipleScheduleDataset.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>MultipleScheduleDataset.xsd</DependentUpon>
     </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -18,6 +18,7 @@ namespace ICSS.Shared
         public string? Days { get; set; }
         public string? Room { get; set; }
         public string? Instructor { get; set; }
+        public string? College { get; set; }
     }
 
 }

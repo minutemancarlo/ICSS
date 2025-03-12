@@ -50,26 +50,23 @@
                         </MudStack>
                     </MudStack>
                     <MudSpacer />
-                    @*   <MudSelect @bind-Value="selectedSchoolYear" Clearable Label="Select School Year" AdornmentIcon="fa-solid fa-calendar-day" Variant="Variant.Outlined" Margin="Margin.Dense" AdornmentColor="Color.Primary">
-                        @foreach (var item in schoolYear)
-                        {
-                            <MudSelectItem Value="@(item)">@item</MudSelectItem>
-                        }
-                    </MudSelect>
 
-                    <MudSelect T="YearLevel?" @bind-Value="selectedYearLevel" Label="Select Year Level" Clearable="true"
-                               AdornmentIcon="fa-solid fa-hashtag" Variant="Variant.Outlined"
-                               Margin="Margin.Dense" AdornmentColor="Color.Primary">
-                        @foreach (var item in yearLevel)
-                        {
-                            <MudSelectItem T="YearLevel?" Value="@item">@item.ToString().Replace("_", " ")</MudSelectItem>
-                        }
-                    </MudSelect>    *@                                   
                     <MudBreakpointProvider>
                         <MudHidden Breakpoint="Breakpoint.MdAndUp" Invert="true">
                             <MudButton Size="Size.Small" StartIcon="fa-solid fa-calendar-days" OnClick="OnGenerateSchedule" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Success" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
                                 Submit
                             </MudButton>
+                            <MudLoadingButton Variant="Variant.Filled"
+                            Color="Color.Info"
+                            Size="Size.Small"
+                            Loading="@(_loading)"
+                            StartIcon="fa-solid fa-file-pdf"
+                            OnClick="OnDownloadSchedules"
+                            Class="my-2 mx-1"
+                            ButtonType="ButtonType.Button">
+                                <LoadingContent>Generating File...</LoadingContent>
+                                <ChildContent>Export to PDF</ChildContent>
+                            </MudLoadingButton>
                             <MudButton Size="Size.Small" StartIcon="fa-solid fa-refresh" OnClick="OnGetScheduleList" IconSize="Size.Small" Variant="Variant.Filled" Color="Color.Primary" Class="my-2 mx-1" Disabled="!MainLayout.IsOnline">
                                 Refresh
                             </MudButton>
@@ -157,18 +154,7 @@
                         </CellTemplate>
                     </PropertyColumn>
                 </Columns>
-                @* <ChildRowContent>
-                    <MudCalendar Class="w-100" DayStartTime="@TimeOnly.Parse(" 08:00")" ShowMonth="false" ShowTodayButton="false" ShowDatePicker="false" ShowPrevNextButtons="false" ShowDay="false" ShowWeek="true"
-                    DayTimeInterval="CalendarTimeInterval.Minutes30" ShowCurrentTime="true" Use24HourClock="false" Items="@GetCalendarItems(context.Item.TimeSlots)" Context="tableContext"
-                    FirstDayOfWeek="DayOfWeek.Monday">
-                        <CellTemplate>
-                            <div style="width: 100%; height: 100%; border: 2px solid #594AE2">
-                                <div style="background-color: #594AE2"><MudText Style="color: #ffffff;" Typo="Typo.body1" Align="Align.Center">@(((CustomItem)tableContext).Title)</MudText></div>
-                                <div class="pa-2"><MudText Typo="Typo.body2">@tableContext.Text</MudText></div>
-                            </div>
-                        </CellTemplate>
-                    </MudCalendar>
-                </ChildRowContent> *@
+
                 <NoRecordsContent>
                     <MudText>No Records to show</MudText>
                 </NoRecordsContent>
@@ -193,7 +179,7 @@
     [Inject] private ApiRequestHelper ApiHelper { get; set; }
     [Inject] private NavigationManager navigationManager { get; set; }
     [Inject] IDialogService? DialogService { get; set; }
-
+    [Inject] IJSRuntime JSRuntime { get; set; }
     MudSelect<Course>? mudSelect;
 
     private List<ScheduleRequest> scheduleRequests = new();
@@ -207,7 +193,7 @@
     private List<string>? schoolYear = new();
     private List<YearLevel?>? yearLevel = new();
     private List<string>? sectionFilter = new();
-
+    private bool _loading = false;
     private int? selectedDepartment;
     public int? SelectedDepartment
     {
@@ -233,76 +219,45 @@
         await OnLoadDepartments();
         await GetUserDepartment();
         await OnGetCourses();
-        // await OnGetSections();
         await OnGetScheduleList();
         await base.OnInitializedAsync();
     }
 
-    // protected override void OnInitialized()
-    // {
-    //     scheduleRequests = new List<ScheduleRequest>
-    // {
-    //     new ScheduleRequest
-    //     {
-    //         ScheduleId = 1,
-    //         Course = new Course { CourseId = 101, CourseName = "Bachelor of Computer Science",CourseCode = "BSCS" },
-    //         YearLevel = YearLevel.First_Year,
-    //         Section = new SectionsModel {  SectionName = "A", SchoolYear="SY 2025-2026" },
-    //         Semester = Semester.First_Semester ,
-    //         Departments = new Departments { DepartmentName = "Information Technology" },
-    //         IsActive = true,
-    //         TaskStatus = TaskStatus.On_Queue,
-    //         TimeSlots = new List<ScheduleTimeSlot>
-    //         {
-    //             new ScheduleTimeSlot
-    //             {
-    //                 TimeSlotId = 1,
-    //                 Subject = new Subjects { SubjectId = 201 },
-    //                 Room = new Rooms {RoomId = 301 },
-    //                 Faculty = new FacultyModel {FacultyId = 401 },
-    //                 Day = DayOfWeek.Monday,
-    //                 StartTime = new TimeSpan(8, 0, 0),
-    //                 EndTime = new TimeSpan(10, 0, 0)
-    //             },
-    //             new ScheduleTimeSlot
-    //             {
-    //                 TimeSlotId = 2,
-    //                 Subject = new Subjects {SubjectId = 202 },
-    //                 Room = new Rooms {RoomId = 302 },
-    //                 Faculty = new FacultyModel {FacultyId = 402 },
-    //                 Day = DayOfWeek.Wednesday,
-    //                 StartTime = new TimeSpan(10, 0, 0),
-    //                 EndTime = new TimeSpan(12, 0, 0)
-    //             }
-    //         }
-    //     },
-    //     new ScheduleRequest
-    //     {
-    //         ScheduleId = 2,
-    //         Course = new Course { CourseId = 102, CourseName = "Bachelor of Business Administration", CourseCode = "BSBA" },
-    //         YearLevel = YearLevel.Second_Year,
-    //         Section = new SectionsModel {  SectionName = "B", SchoolYear="SY 2025-2026" },
-    //         Semester =Semester.Second_Semester,
-    //         Departments = new Departments { DepartmentName = "Business Administration" },
-    //         IsActive = true,
-    //         TaskStatus = TaskStatus.Processing,
-    //         TimeSlots = new List<ScheduleTimeSlot>
-    //         {
-    //             new ScheduleTimeSlot
-    //             {
-    //                 TimeSlotId = 3,
-    //                 Subject = new Subjects{ SubjectId = 203 },
-    //                 Room = new Rooms{ RoomId = 303 },
-    //                 Faculty = new FacultyModel {FacultyId = 403 },
-    //                 Day = DayOfWeek.Friday,
-    //                 StartTime = new TimeSpan(1, 0, 0),
-    //                 EndTime = new TimeSpan(2, 0, 0)
-    //             }
-    //         }
-    //     }
-    // };
-    // }
 
+    private async Task OnDownloadSchedules()
+    {
+        try
+        {
+            _loading = true;
+            if (selectedDepartment is null)
+            {
+                Snackbar.Add("Please select a department.", Severity.Error);
+                _loading = false;
+                return;
+            }
+            var response = await HttpClient.GetAsync($"ReportsManagement/GetReportScheduleById?Id=&departmentId={selectedDepartment}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                var pdfContent = await response.Content.ReadAsByteArrayAsync();
+                var blobUrl = $"data:application/pdf;base64,{Convert.ToBase64String(pdfContent)}";
+                var timestamp = DateTime.Now.ToString("MMddyyyyHHmmss");
+                var fileName = $"ScheduleReport_{timestamp}.pdf";
+
+                await JSRuntime.InvokeVoidAsync("downloadFile", blobUrl, fileName);
+            }
+            else
+            {
+                var errorMessage = await response.Content.ReadAsStringAsync();
+                Snackbar.Add($"Error generating pdf file: {response.StatusCode} - {errorMessage}", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An exception occured: {ex.Message}", Severity.Error);
+        }
+        await Task.Delay(2000);
+    }
 
     private async Task OnShowSchedules(SectionsModel? sections, Course? course, YearLevel? yearLevel, Semester? semester, int? scheduleId)
     {

@@ -10,33 +10,34 @@
     <DialogContent>
         <MudCalendar Class="w-100" DayStartTime="@TimeOnly.Parse(" 08:00")" ShowMonth="false" ShowTodayButton="false" ShowDatePicker="false" ShowPrevNextButtons="false" ShowDay="false" ShowWeek="true"
                      DayTimeInterval="CalendarTimeInterval.Minutes30" ShowCurrentTime="true" Use24HourClock="false" Items="items" DayCellHeight="100"
-        FirstDayOfWeek="DayOfWeek.Monday">
+                     FirstDayOfWeek="DayOfWeek.Monday">
             <CellTemplate>
                 <MudStack AlignItems="AlignItems.Stretch" Class="mud-cal-cell-template">
                     <div style="width: 100%; height: 100%;color: white; background-color: @GetColor(((CustomItem)context).Color); border-radius: 12px; padding: 8px;">
                         <MudText Typo="Typo.body2" Class="fw-bold py-3 text-center">@((((CustomItem)context).Room is not null ? ((CustomItem)context).Room?.RoomName : "TBD"))</MudText>
-                        <MudDivider/>
+                        <MudDivider />
                         <MudText Typo="Typo.body2" Class="py-3 text-center">@context.Text</MudText>
                         <MudDivider />
                         <MudText Typo="Typo.body2" Class="fw-bold py-3 text-center">@((((CustomItem)context).Faculty is not null ? ((CustomItem)context).Faculty?.FacultyName : "TBD"))</MudText>
                     </div>
-                </MudStack>                
+                </MudStack>
             </CellTemplate>
         </MudCalendar>
     </DialogContent>
     <DialogActions>
-        <MudButton Size="Size.Medium" Variant="Variant.Filled" StartIcon="fa-solid fa-file-pdf" OnClick="@(() => DownloadScheduleReportAsync(scheduleTimeSlots.FirstOrDefault().ScheduleId))" Color="Color.Info">Export to PDF</MudButton>
-        <MudSpacer/>
-        <MudButton  Size="Size.Medium" OnClick="Cancel">Close</MudButton>
-        @*    <MudLoadingButton Variant="Variant.Filled"
-                          Color="Color.Success"
+        <MudLoadingButton Variant="Variant.Filled"
+                          Color="Color.Info"
                           Size="Size.Medium"
                           Loading="@(_loading)"
-                          OnClick="@(async => OnSubmit())"
+                          StartIcon="fa-solid fa-file-pdf"
+                          OnClick="@(() => DownloadScheduleReportAsync(scheduleTimeSlots.FirstOrDefault().ScheduleId))"
                           ButtonType="ButtonType.Button">
-            <LoadingContent>Submitting...</LoadingContent>
-            <ChildContent>Submit</ChildContent> 
-        </MudLoadingButton>*@
+            <LoadingContent>Generating File...</LoadingContent>
+            <ChildContent>Export to PDF</ChildContent>
+        </MudLoadingButton>        
+        <MudSpacer />
+        <MudButton Size="Size.Medium" OnClick="Cancel">Close</MudButton>
+        @*   *@
     </DialogActions>
 </MudDialog>
 
@@ -52,6 +53,7 @@
     [Inject] IJSRuntime JSRuntime { get; set; }
     [Inject] private ISnackbar Snackbar { get; set; }
     private List<CustomItem> items = new();
+    private bool _loading = false;
     private string GetColor(Color color) => $"var(--mud-palette-{color.ToDescriptionString()})";
     private class CustomItem : CalendarItem
     {
@@ -81,7 +83,7 @@
                         Subject = slot.Subject,
                         Faculty = slot.Faculty,
                         Room = slot.Room,
-                        Day = slot.Day,                        
+                        Day = slot.Day,
                         StartTime = slot.StartTime,
                         EndTime = slot.EndTime,
                         Start = baseDate.Date.Add(slot.StartTime),
@@ -114,21 +116,34 @@
 
     public async Task DownloadScheduleReportAsync(int? scheduleId)
     {
-        var response = await HttpClient.GetAsync($"ReportsManagement/GetReportScheduleById/{scheduleId}");
-
-        if (response.IsSuccessStatusCode)
+        try
         {
-            var pdfContent = await response.Content.ReadAsByteArrayAsync();
-            var blobUrl = $"data:application/pdf;base64,{Convert.ToBase64String(pdfContent)}";
-            var timestamp = DateTime.Now.ToString("MMddyyyyHHmmss");
-            var fileName = $"IndividualScheduleReport_{timestamp}.pdf";
+            _loading = true;
+            var response = await HttpClient.GetAsync($"ReportsManagement/GetReportScheduleById?Id={scheduleId}&departmentId=");
 
-            await JSRuntime.InvokeVoidAsync("downloadFile", blobUrl, fileName);
+            if (response.IsSuccessStatusCode)
+            {
+                var pdfContent = await response.Content.ReadAsByteArrayAsync();
+                var blobUrl = $"data:application/pdf;base64,{Convert.ToBase64String(pdfContent)}";
+                var timestamp = DateTime.Now.ToString("MMddyyyyHHmmss");
+                var fileName = $"IndividualScheduleReport_{timestamp}.pdf";
+
+                await JSRuntime.InvokeVoidAsync("downloadFile", blobUrl, fileName);
+            }
+            else
+            {
+                var errorMessage = await response.Content.ReadAsStringAsync();
+                Snackbar.Add($"Error generating pdf file: {response.StatusCode} - {errorMessage}", Severity.Error);
+            }
+
         }
-        else
+        catch (Exception ex)
         {
-            var errorMessage = await response.Content.ReadAsStringAsync();
-            Snackbar.Add($"Error generating pdf file: {response.StatusCode} - {errorMessage}", Severity.Error);
+            Snackbar.Add($"An exception occured: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
         }
     }
 

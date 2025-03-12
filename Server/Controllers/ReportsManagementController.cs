@@ -22,19 +22,17 @@ namespace ICSS.Server.Controllers
         }
 
 
-        [HttpGet("GetReportScheduleById/{Id}")]
-        public async Task<IActionResult> GetReportScheduleById(int? Id)
+        [HttpGet("GetReportScheduleById")]
+        public async Task<IActionResult> GetReportScheduleById([FromQuery] int? Id = null, [FromQuery] int? departmentId = null)
         {
             try
             {
                 var dt = new DataTable();
-                dt = await _scheduleService.GetScheduleSingleByIdAsync(Id);
+                dt = await _scheduleService.GetScheduleSingleByIdAsync(Id, departmentId);
 
                 string mimeType = "";
-                int extenstion = 1;
-                //var path = $"{this._webHostEnvironment.WebRootPath}\\Reports\\Report1.rdlc";
-                var path = Path.Combine(_webHostEnvironment.WebRootPath, "Reports\\Individual", "IndividualSchedule.rdlc");
-                //var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "wwwroot", "Reports", "Report1.rdlc");
+                                                
+                var path = Path.Combine(_webHostEnvironment.WebRootPath,$"Reports\\{(Id == null ? "Multiple" : "Individual")}",$"{(Id == null ? "MultipleSchedule": "IndividualSchedule") }.rdlc");                
 
                 if (!System.IO.File.Exists(path))
                 {
@@ -45,13 +43,15 @@ namespace ICSS.Server.Controllers
                 {
                     Console.WriteLine("File exists");
                 }
-                LocalReport localReport = new(path);
-                localReport.AddDataSource(dataSetName: "IndividualScheduleDataset", dt);
+                LocalReport localReport = new(path);                
+                    
+                localReport.AddDataSource(dataSetName: Id == null?"MultipleScheduleDataset":"IndividualScheduleDataset", dt);
+                
                 var result = localReport.Execute(RenderType.Pdf);
 
                 var pdfStream = new MemoryStream(result.MainStream);
                 var timestamp = DateTime.Now.ToString("MMddyyyyHHmmss");
-                var fileName = $"IndividualSchedule_{timestamp}.pdf";
+                var fileName = $"Schedule_{timestamp}.pdf";
                 mimeType = "application/pdf";
 
                 return new FileStreamResult(pdfStream, mimeType)
@@ -60,7 +60,7 @@ namespace ICSS.Server.Controllers
                 };
 
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return StatusCode(500, new { Message = ex.Message });
             }
