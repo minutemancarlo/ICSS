@@ -84,8 +84,8 @@
                 </MudCard>
             </MudStack>
             <MudCalendar Class="w-100" DayStartTime="@TimeOnly.Parse(" 08:00")" ShowMonth="false" ShowTodayButton="false" ShowDatePicker="false" ShowPrevNextButtons="false" ShowDay="false" ShowWeek="true"
-                         DayTimeInterval="CalendarTimeInterval.Minutes30" ShowCurrentTime="true" Use24HourClock="false" Items="items" DayCellHeight="100"
-                         FirstDayOfWeek="DayOfWeek.Monday">
+            DayTimeInterval="CalendarTimeInterval.Minutes30" ShowCurrentTime="true" Use24HourClock="false" Items="items" DayCellHeight="100"
+            FirstDayOfWeek="DayOfWeek.Monday">
                 <ToolbarContent>
                     <MudStack Row Class="w-100">
                         <MudSelect Disabled="@(!MainLayout.IsOnline)" ValueChanged="OnSelectSchedule" T="int?" Clearable Label="Select Schedule" FullWidth AdornmentIcon="fa-solid fa-calendar-days" Variant="Variant.Outlined" Margin="Margin.Dense" AdornmentColor="Color.Primary">
@@ -94,8 +94,19 @@
                                 <MudSelectItem T="int?" Value="@(item.ScheduleId)">@($"{item.Course?.CourseCode} {item.Section?.SchoolYear}: Section {item.Section?.SectionName} - {item.Section?.YearLevel.ToString().Replace("_", " ")}/{item.Semester.ToString().Replace("_", " ")}")</MudSelectItem>
                             }
                         </MudSelect>
-                        <MudButton Size="Size.Medium" Variant="Variant.Filled" Disabled="!isEnabledExport" StartIcon="fa-solid fa-file-pdf" Class="my-2 mx-1" Color="Color.Info">Export to PDF</MudButton>
-
+                        
+                        <MudLoadingButton Variant="Variant.Filled"
+                                          Color="Color.Info"
+                                          Size="Size.Medium"
+                                          Disabled="!isEnabledExport"
+                                          Loading="@(_loading)"
+                                          Class="my-2 mx-1"
+                                          StartIcon="fa-solid fa-file-pdf"
+                                          OnClick="@(() => DownloadScheduleReportAsync(selectedScheduleId))"
+                                          ButtonType="ButtonType.Button">
+                            <LoadingContent>Generating File...</LoadingContent>
+                            <ChildContent>Export to PDF</ChildContent>
+                        </MudLoadingButton>
                     </MudStack>
                 </ToolbarContent>
                 <CellTemplate>
@@ -123,6 +134,8 @@
     [Inject] private ApiRequestHelper ApiHelper { get; set; }
     [Inject] IDialogService? DialogService { get; set; }
 
+    [Inject] IJSRuntime JSRuntime { get; set; }
+
     private Sections? mySection;
     private List<ScheduleTimeSlot>? scheduleTimeSlots = new();
     private List<ScheduleRequest>? scheduleRequests = new();
@@ -131,7 +144,7 @@
     private string GetColor(Color color) => $"var(--mud-palette-{color.ToDescriptionString()})";
     private List<CustomItem>? items = new();
     private bool isEnabledExport = false;
-
+    private bool _loading = false;
     private CustomItem? currentSchedule;
     private CustomItem? nextSchedule;
 
@@ -217,6 +230,39 @@
         }
      
 
+    }
+
+    public async Task DownloadScheduleReportAsync(int? scheduleId)
+    {
+        try
+        {
+            _loading = true;
+            var response = await HttpClient.GetAsync($"ReportsManagement/GetReportScheduleById?Id={scheduleId}&departmentId=");
+
+            if (response.IsSuccessStatusCode)
+            {
+                var pdfContent = await response.Content.ReadAsByteArrayAsync();
+                var blobUrl = $"data:application/pdf;base64,{Convert.ToBase64String(pdfContent)}";
+                var timestamp = DateTime.Now.ToString("MMddyyyyHHmmss");
+                var fileName = $"IndividualScheduleReport_{timestamp}.pdf";
+
+                await JSRuntime.InvokeVoidAsync("downloadFile", blobUrl, fileName);
+            }
+            else
+            {
+                var errorMessage = await response.Content.ReadAsStringAsync();
+                Snackbar.Add($"Error generating pdf file: {response.StatusCode} - {errorMessage}", Severity.Error);
+            }
+
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An exception occured: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
     }
 
     private void OnSelectSchedule(int? value)
