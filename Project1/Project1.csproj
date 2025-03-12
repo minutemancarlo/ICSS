@@ -34,6 +34,17 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="Reports\Schedules\Faculty\FacultyWorkloadDataset.xsc">
+      <DependentUpon>FacultyWorkloadDataset.xsd</DependentUpon>
+    </None>
+    <None Include="Reports\Schedules\Faculty\FacultyWorkloadDataset.xsd">
+      <SubType>Designer</SubType>
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>FacultyWorkloadDataset.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="Reports\Schedules\Faculty\FacultyWorkloadDataset.xss">
+      <DependentUpon>FacultyWorkloadDataset.xsd</DependentUpon>
+    </None>
     <None Include="Reports\Schedules\Individual\IndividualScheduleDataset.xsc">
       <DependentUpon>IndividualScheduleDataset.xsd</DependentUpon>
     </None>
@@ -58,6 +69,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Reports\Schedules\Faculty\FacultyWorkload.rdlc" />
     <EmbeddedResource Include="Reports\Schedules\Individual\IndividualSchedule.rdlc" />
     <EmbeddedResource Include="Reports\Schedules\Multiple\MultipleSchedule.rdlc" />
   </ItemGroup>
@@ -68,6 +80,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Reports\Schedules\Faculty\FacultyWorkloadDataset.cs">
+      <DependentUpon>FacultyWorkloadDataset.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="Reports\Schedules\Faculty\FacultyWorkloadDataset.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>FacultyWorkloadDataset.xsd</DependentUpon>
+    </Compile>
     <Compile Include="Reports\Schedules\Individual\IndividualScheduleDataset.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

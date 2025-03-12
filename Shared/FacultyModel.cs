@@ -16,6 +16,7 @@ namespace ICSS.Shared
         public string? MastersDegree { get; set; }
         public string? DoctorateDegree { get; set; }
         public bool IsDeleted { get; set; } = false;
+        public decimal RemainingUnits { get; set; } = 0.00M;
     }
 
     public class FacultyWorkload

@@ -204,13 +204,15 @@ namespace ICSS.Server.Repository
         }
 
 
-        public async Task<List<ReportSchedule>> GetReportScheduleAsync(int? scheduleId, int? departmentId)
+        public async Task<List<ReportSchedule>> GetReportScheduleAsync(int? scheduleId, int? departmentId, int? facultyId = null, int? roomId = null)
         {
           
 
             var parameter = new DynamicParameters();
             parameter.Add("@ScheduleId", scheduleId);
             parameter.Add("@DepartmentId", departmentId);
+            parameter.Add("@FacultyId", facultyId);
+            parameter.Add("@RoomId", roomId);
 
             var result = await _dbConnection.QueryAsync<ReportSchedule>(
                 "GetScheduleReport",

@@ -8,7 +8,7 @@
         </MudText>
     </TitleContent>
     <DialogContent>
-     
+
 
         <MudCalendar Class="w-100" DayStartTime="@TimeOnly.Parse(" 08:00")" ShowMonth="false" ShowTodayButton="false" ShowDatePicker="false" ShowPrevNextButtons="false" ShowDay="false" ShowWeek="true"
         DayTimeInterval="CalendarTimeInterval.Minutes30" ShowCurrentTime="true" Use24HourClock="false" Items="items" DayCellHeight="100"
@@ -27,7 +27,16 @@
         </MudCalendar>
     </DialogContent>
     <DialogActions>
-        <MudButton Size="Size.Medium" Variant="Variant.Filled" StartIcon="fa-solid fa-file-pdf" Color="Color.Info">Export to PDF</MudButton>
+        <MudLoadingButton Variant="Variant.Filled"
+                          Color="Color.Info"
+                          Size="Size.Medium"
+                          Loading="@(_loading)"
+                          StartIcon="fa-solid fa-file-pdf"
+                          OnClick="@(() => DownloadScheduleReportAsync(schedules?.FirstOrDefault().Faculty?.FacultyId))"
+                          ButtonType="ButtonType.Button">
+            <LoadingContent>Generating File...</LoadingContent>
+            <ChildContent>Export to PDF</ChildContent>
+        </MudLoadingButton>
         <MudSpacer />
         <MudButton Size="Size.Medium" OnClick="Cancel">Close</MudButton>
         @*    <MudLoadingButton Variant="Variant.Filled"
@@ -46,8 +55,12 @@
     [CascadingParameter] MudDialogInstance? MudDialog { get; set; }
 
     [Parameter] public List<FacultyWorkload>? schedules { get; set; }
-
+    [Inject] IJSRuntime JSRuntime { get; set; }
+    [Inject] private HttpClient HttpClient { get; set; }
+    [Inject] ISnackbar Snackbar { get; set; }
     private List<CustomItem> items = new();
+    private bool _loading = false;
+
     private string GetColor(Color color) => $"var(--mud-palette-{color.ToDescriptionString()})";
     private class CustomItem : CalendarItem
     {
@@ -109,6 +122,39 @@
             daysOffset -= 7;
 
         return today.AddDays(daysOffset);
+    }
+
+    public async Task DownloadScheduleReportAsync(int? facultyId)
+    {
+        try
+        {
+            _loading = true;
+            var response = await HttpClient.GetAsync($"ReportsManagement/GetReportScheduleByFacultyId?facultyId={facultyId}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                var pdfContent = await response.Content.ReadAsByteArrayAsync();
+                var blobUrl = $"data:application/pdf;base64,{Convert.ToBase64String(pdfContent)}";
+                var timestamp = DateTime.Now.ToString("MMddyyyyHHmmss");
+                var fileName = $"FacultyWorkloadReport_{timestamp}.pdf";
+
+                await JSRuntime.InvokeVoidAsync("downloadFile", blobUrl, fileName);
+            }
+            else
+            {
+                var errorMessage = await response.Content.ReadAsStringAsync();
+                Snackbar.Add($"Error generating pdf file: {response.StatusCode} - {errorMessage}", Severity.Error);
+            }
+
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An exception occured: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
     }
 
     void Cancel() => MudDialog.Cancel();

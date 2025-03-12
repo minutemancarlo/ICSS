@@ -3,6 +3,7 @@ using ICSS.Client.Pages.Admin;
 using ICSS.Server.Repository;
 using ICSS.Shared;
 using System.Linq;
+using System.Net.NetworkInformation;
 using Status = ICSS.Shared.TaskStatus;
 namespace ICSS.Server.HostedServices
 {
@@ -26,7 +27,7 @@ namespace ICSS.Server.HostedServices
             while (!stoppingToken.IsCancellationRequested)
             {
                 var availableRooms = new List<Rooms>();
-                var availableFaculty = new List<FacultyModel>();
+                List<FacultyModel>? availableFaculty = new List<FacultyModel>();
                 var scheduledClasses = new List<ScheduleTimeSlot>();
                 var random = new Random();
 
@@ -60,34 +61,44 @@ namespace ICSS.Server.HostedServices
 
         public async Task ProcessSchedules(int? scheduleId, List<Subjects> subjects, List<Rooms> availableRooms, List<FacultyModel> availableFaculty, List<ScheduleTimeSlot> scheduledClasses, Random random, int? departmentId)
         {
-            subjects = subjects.OrderBy(s => random.Next()).ToList();
-            TimeSpan currentStartTime = GetRandomStartTime(random);
-            TimeSpan currentLabStartTime = TimeSpan.FromHours(random.Next(8, 12));
-            foreach (var subject in subjects)
+            try
             {
-                availableFaculty = (await _scheduleRepository.GetFacultyForProcessByDepartment(subject.DepartmentId)).ToList();
-                availableRooms = (await _scheduleRepository.GetAvailableRoomsByDepartment(departmentId)).ToList();
-                if (subject.IsSaturdayClass)
+                subjects = subjects.OrderBy(s => random.Next()).ToList();
+                TimeSpan currentStartTime = GetRandomStartTime(random);
+                TimeSpan currentLabStartTime = TimeSpan.FromHours(random.Next(8, 12));
+                foreach (var subject in subjects)
                 {
-                    await AssignSchedule(scheduleId, subject, new TimeSpan(8, 0, 0), new TimeSpan(12, 0, 0), null, DayOfWeek.Saturday, null, scheduledClasses);
-                    continue;
-                }
+                    availableFaculty = (await _scheduleRepository.GetFacultyForProcessByDepartment(subject.DepartmentId)).ToList();
 
-                if (subject.Units == 3 && subject.LabHour > 0)
-                {
-                    currentStartTime = await ProcessLecture(scheduleId, subject, currentStartTime, new[] { DayOfWeek.Monday, DayOfWeek.Friday }, 1, availableRooms, availableFaculty, scheduledClasses, random);
-                    currentLabStartTime=await ProcessLab(scheduleId, subject, currentLabStartTime, new[] { DayOfWeek.Tuesday,DayOfWeek.Thursday }, 1.5, availableRooms, availableFaculty, scheduledClasses);
+                    availableFaculty = availableFaculty.Where(x => x.RemainingUnits >= subject.Units).ToList();
+
+                    availableRooms = (await _scheduleRepository.GetAvailableRoomsByDepartment(departmentId)).ToList();
+                    if (subject.IsSaturdayClass)
+                    {
+                        await AssignSchedule(scheduleId, subject, new TimeSpan(8, 0, 0), new TimeSpan(12, 0, 0), null, DayOfWeek.Saturday, null, scheduledClasses);
+                        continue;
+                    }
+
+                    if (subject.Units == 3 && subject.LabHour > 0)
+                    {
+                        currentStartTime = await ProcessLecture(scheduleId, subject, currentStartTime, new[] { DayOfWeek.Monday, DayOfWeek.Friday }, 1, availableRooms, availableFaculty, scheduledClasses, random);
+                        currentLabStartTime = await ProcessLab(scheduleId, subject, currentLabStartTime, new[] { DayOfWeek.Tuesday, DayOfWeek.Thursday }, 1.5, availableRooms, availableFaculty, scheduledClasses);
+                    }
+                    else if (subject.Units == 2)
+                    {
+                        currentLabStartTime = await ProcessLecture(scheduleId, subject, currentLabStartTime, new[] { DayOfWeek.Tuesday, DayOfWeek.Thursday }, 1, availableRooms, availableFaculty, scheduledClasses, random);
+                    }
+                    else if (subject.Units == 3 && subject.LabHour == 0)
+                    {
+                        currentStartTime = await ProcessLecture(scheduleId, subject, currentStartTime, new[] { DayOfWeek.Monday, DayOfWeek.Wednesday, DayOfWeek.Friday }, 1, availableRooms, availableFaculty, scheduledClasses, random, 3);
+                    }
+
                 }
-                else if (subject.Units == 2)
-                {
-                    currentLabStartTime = await ProcessLecture(scheduleId, subject, currentLabStartTime, new[] { DayOfWeek.Tuesday, DayOfWeek.Thursday }, 1, availableRooms, availableFaculty, scheduledClasses, random);
-                }
-                else if (subject.Units == 3 && subject.LabHour == 0)
-                {
-                    currentStartTime = await ProcessLecture(scheduleId, subject, currentStartTime, new[] { DayOfWeek.Monday, DayOfWeek.Wednesday, DayOfWeek.Friday }, 1, availableRooms, availableFaculty, scheduledClasses, random, 3);                    
-                }
-                
             }
+            catch(Exception ex)
+            {
+                Console.WriteLine($"Error in ProcessSchedules: {ex.Message}");
+            }           
         }
 
         private TimeSpan GetRandomStartTime(Random random)
@@ -95,8 +106,11 @@ namespace ICSS.Server.HostedServices
             return TimeSpan.FromHours(random.Next(8, 10));
         }
 
-        private FacultyModel? GetAvailableFaculty(List<FacultyModel> availableFaculty, List<ScheduleTimeSlot> scheduledClasses, TimeSpan startTime, TimeSpan endTime, DayOfWeek day)
+        private FacultyModel? GetAvailableFaculty(List<FacultyModel>? availableFaculty, List<ScheduleTimeSlot> scheduledClasses, TimeSpan startTime, TimeSpan endTime, DayOfWeek day)
         {
+            if (availableFaculty == null || availableFaculty.Count == 0)
+                return null;
+
             return availableFaculty.FirstOrDefault(f =>
                 !scheduledClasses.Any(s =>
                     s.Faculty?.FacultyId == f.FacultyId &&
@@ -107,8 +121,11 @@ namespace ICSS.Server.HostedServices
             );
         }
 
-        private Rooms? FindAvailableRoom(List<Rooms> availableRooms, List<ScheduleTimeSlot> scheduledClasses, TimeSpan startTime, TimeSpan endTime, DayOfWeek day)
+        private Rooms? FindAvailableRoom(List<Rooms>? availableRooms, List<ScheduleTimeSlot> scheduledClasses, TimeSpan startTime, TimeSpan endTime, DayOfWeek day)
         {
+            if (availableRooms == null || availableRooms.Count == 0)
+                return null;
+
             return availableRooms.FirstOrDefault(r =>
                 !scheduledClasses.Any(s =>
                     s.Room?.RoomId == r.RoomId &&

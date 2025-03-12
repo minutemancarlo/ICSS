@@ -33,6 +33,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Update="wwwroot\Reports\Faculty\FacultyWorkloadDataset.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>FacultyWorkloadDataset.xsd</DependentUpon>
+    </Content>
+    <Content Update="wwwroot\Reports\Faculty\FacultyWorkloadDataset.xsd">
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>FacultyWorkloadDataset.Designer.cs</LastGenOutput>
+    </Content>
     <Content Update="wwwroot\Reports\Individual\IndividualScheduleDataset.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
