@@ -164,6 +164,18 @@
                                     <MudTooltip Text="Edit Room Information">
                                         <MudIconButton Icon="fa-solid fa-edit" Size="Size.Medium" OnClick="@(() => OnShowUpdateRoomsDialog(context.Item))" Color="Color.Info" Variant="Variant.Filled" Disabled="@(!MainLayout.IsOnline)" />
                                     </MudTooltip>
+                                    <MudTooltip Text="Export Schedule">
+                                        <MudLoadingButton Variant="Variant.Filled"
+                                        Color="Color.Info"
+                                        Size="Size.Small"
+                                        Loading="@(_loading)"
+                                        StartIcon="fa-solid fa-file-pdf"
+                                        OnClick="@(() => DownloadScheduleReportAsync(context.Item.RoomId))"
+                                        Class="my-2 mx-1"
+                                        ButtonVariant="ButtonVariant.Fab"
+                                        ButtonType="ButtonType.Button">                                                                                        
+                                        </MudLoadingButton>
+                                    </MudTooltip>
                                 </CellTemplate>
                             </TemplateColumn>
                             <PropertyColumn Property="x => x.RoomCode" Title="Room Code" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
@@ -212,7 +224,8 @@
     [Inject] private ApiRequestHelper ApiHelper { get; set; }
     [Inject] private NavigationManager navigationManager { get; set; }
     [Inject] IDialogService? DialogService { get; set; }
-
+    
+    [Inject] IJSRuntime JSRuntime { get; set; }
     private List<Departments> departments = new();
     private List<Departments> departmentsTemp = new();
     private List<FacultyModel> faculty = new();
@@ -222,7 +235,7 @@
     ICollection<DepartmentMember> _startCollection = new List<DepartmentMember>();
 
     ICollection<DepartmentMember> _endCollection = new List<DepartmentMember>();
-
+    private bool _loading = false;
     private List<Rooms> rooms = new();
     private List<Rooms> roomsTemp = new();
 
@@ -425,6 +438,39 @@
         // If you want to perform any logic based on the selections, add it here
         // For example, checking if at least one item is selected:
         return (startToEnd ? valuesStart.Count > 0 : valuesEnd.Count > 0);
+    }
+
+    public async Task DownloadScheduleReportAsync(int? roomId)
+    {
+        try
+        {
+            _loading = true;
+            var response = await HttpClient.GetAsync($"ReportsManagement/GetReportScheduleByRoomId?roomId={roomId}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                var pdfContent = await response.Content.ReadAsByteArrayAsync();
+                var blobUrl = $"data:application/pdf;base64,{Convert.ToBase64String(pdfContent)}";
+                var timestamp = DateTime.Now.ToString("MMddyyyyHHmmss");
+                var fileName = $"RoomScheduleReport_{timestamp}.pdf";
+
+                await JSRuntime.InvokeVoidAsync("downloadFile", blobUrl, fileName);
+            }
+            else
+            {
+                var errorMessage = await response.Content.ReadAsStringAsync();
+                Snackbar.Add($"Error generating pdf file: {response.StatusCode} - {errorMessage}", Severity.Error);
+            }
+
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An exception occured: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
     }
 
 

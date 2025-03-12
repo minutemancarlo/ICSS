@@ -111,5 +111,50 @@ namespace ICSS.Server.Controllers
         }
 
 
+        [HttpGet("GetReportScheduleByRoomId")]
+        public async Task<IActionResult> GetReportScheduleByRoomId([FromQuery] int? roomId = null)
+        {
+            try
+            {
+                var dt = new DataTable();
+                dt = await _scheduleService.GetScheduleByRoomIdAsync(roomId);
+
+                string mimeType = "";
+
+                var path = Path.Combine(_webHostEnvironment.WebRootPath, "Reports\\Rooms", "RoomsSchedule.rdlc");
+
+                if (!System.IO.File.Exists(path))
+                {
+                    Console.WriteLine("File not found.");
+                    return NotFound("Report file not found.");
+                }
+                else
+                {
+                    Console.WriteLine("File exists");
+                }
+                LocalReport localReport = new(path);
+
+                localReport.AddDataSource(dataSetName: "RoomsScheduleDataset", dt);
+
+                var result = localReport.Execute(RenderType.Pdf);
+
+                var pdfStream = new MemoryStream(result.MainStream);
+                var timestamp = DateTime.Now.ToString("MMddyyyyHHmmss");
+                var fileName = $"Schedule_{timestamp}.pdf";
+                mimeType = "application/pdf";
+
+                return new FileStreamResult(pdfStream, mimeType)
+                {
+                    FileDownloadName = fileName
+                };
+
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
+        }
+
+
     }
 }

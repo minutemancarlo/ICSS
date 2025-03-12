@@ -60,6 +60,15 @@
       <Generator>MSDataSetGenerator</Generator>
       <LastGenOutput>MultipleScheduleDataset.Designer.cs</LastGenOutput>
     </Content>
+    <Content Update="wwwroot\Reports\Rooms\RoomsScheduleDataset.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>RoomsScheduleDataset.xsd</DependentUpon>
+    </Content>
+    <Content Update="wwwroot\Reports\Rooms\RoomsScheduleDataset.xsd">
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>RoomsScheduleDataset.Designer.cs</LastGenOutput>
+    </Content>
   </ItemGroup>
 
 </Project>
