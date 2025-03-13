@@ -7,7 +7,7 @@
     <MudGrid Style="--icon-opacity: 0.1">
         <div class="cover" style="position: relative; width: 100%; height: 300px; background: url('banner.jpg') no-repeat center center/cover;">
             <div class="overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.3);"></div>
-            <div class="card" style="position: absolute; bottom: 20px; left: 20px; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+            <div class="card" style="position: absolute; bottom: 20px; right: 20px; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
                 <h2 style="margin-bottom: 5px; font-size: 18px;">Hello @FirstName @LastName</h2>
                 <p style="font-size: 14px; color: gray;">Integrated Class Scheduling System &copy; @DateTime.Now.Year</p>
             </div>
@@ -32,7 +32,7 @@
                                 <MudText Typo="Typo.h3">@data?.ElementAtOrDefault(5)</MudText>
                             </MudStack>
                         </MudPaper>
-                     
+
                     </MudStack>
                 </MudCardContent>
             </MudCard>
@@ -140,11 +140,18 @@
             }
         }
         MainLayout.SubTitle = "Faculty Dashboard";
-        await LoadData();
+
         await base.OnInitializedAsync();
+
     }
 
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadData();
+        await base.OnParametersSetAsync();
+    }
 
+   
 
     private async Task LoadData()
     {
