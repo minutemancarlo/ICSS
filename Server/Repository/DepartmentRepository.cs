@@ -114,7 +114,17 @@ namespace ICSS.Server.Repository
             return await _dbConnection.ExecuteScalarAsync<int>("UpdateRoom", parameters, commandType: CommandType.StoredProcedure);
         }
 
+        public async Task<IEnumerable<int>> GetDepartmentStatisticsAsync(int? departmentId = null)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("@DepartmentId", departmentId, DbType.Int32, ParameterDirection.Input);
 
+            var result = await _dbConnection.QueryFirstOrDefaultAsync<(int ActiveStudents, int InactiveStudents, int WithScheduleFaculty, int WithoutScheduleFaculty, int UserCount,int Subjects)>(
+                "GetDepartmentStatistics", parameters, commandType: CommandType.StoredProcedure);
+
+            return new List<int> { result.ActiveStudents, result.InactiveStudents, result.WithScheduleFaculty, result.WithoutScheduleFaculty, result.UserCount,result.Subjects };
+               
+        }
 
     }
 }

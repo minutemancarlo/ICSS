@@ -5,50 +5,104 @@
 @using ICSS.Shared
 <MudContainer Class="py-4 py-sm-8 py-md-12 py-lg-16 py-xl-20">
     <MudGrid Style="--icon-opacity: 0.1">
-        <MudItem xs="12">
-            <MudGrid Class="mb-8">
-                <MudItem xs="12">
-                    <MudText Align="Align.Center" Typo="Typo.h2" Class="mud-typography-h4 mb-2">Hello @FirstName @LastName</MudText>
-                    <MudText Align="Align.Center" Typo="Typo.h6">Integrated Class Scheduling System &copy; @DateTime.Now.Year</MudText>
-                </MudItem>
-            </MudGrid>
-        </MudItem>
+        <div class="cover" style="position: relative; width: 100%; height: 300px; background: url('banner.jpg') no-repeat center center/cover;">
+            <div class="overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.3);"></div>
+            <div class="card" style="position: absolute; bottom: 20px; left: 20px; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                <h2 style="margin-bottom: 5px; font-size: 18px;">Hello @FirstName @LastName</h2>
+                <p style="font-size: 14px; color: gray;">Integrated Class Scheduling System &copy; @DateTime.Now.Year</p>
+            </div>
+        </div>
+
         <MudItem xs="12" sm="6" md="4">
-            <MudCard Style="background-color: var(--mud-palette-surface);" Elevation="4">
+            <MudCard Class="dashboard-card" Elevation="6">
                 <MudCardContent>
-                    <MudStack Row AlignItems="AlignItems.Baseline">
-                        <MudIconButton Icon="fa-solid fa-users" Color="Color.Primary" Size="Size.Medium" Ripple="false" Class="rounded-circle mb-2" Style="background-color: rgba(var(--mud-palette-primary-rgb), var(--icon-opacity)) !important; cursor: default;" />
-                        <MudText Typo="Typo.h6" Class="mb-2">Users</MudText>
+                    <MudStack Row AlignItems="AlignItems.Center" Class="mb-2">
+                        <MudIconButton Icon="fa-solid fa-users" Color="Color.Primary" Size="Size.Large" Ripple="false"
+                                       Class="icon-btn" />
+                        <MudText Typo="Typo.h5" Class="fw-bold">Users</MudText>
                     </MudStack>
-                    <MudAlert Severity="Severity.Success" Variant="Variant.Outlined" NoIcon="true" Class="my-2 fw-bold text-nowrap">Active: 100</MudAlert>
-                    <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" NoIcon="true" Class="my-2 fw-bold text-nowrap">Registered: 100</MudAlert>
+                    <MudStack Row Style="position: relative">
+                        <MudOverlay @bind-Visible="_loading" DarkBackground AutoClose="false" Absolute="true">
+                            <MudLoading @bind-Loading="_loading" Overlap="false" LoaderType="LoaderType.Circular" Darken="true"
+                                        Color="Color.Primary" />
+                        </MudOverlay>
+                        <MudPaper Class="w-100" Elevation="4" Style="background-color: var(--mud-palette-success-darken);color: var(--mud-palette-appbar-text);">
+                            <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center">
+                                <MudText Typo="Typo.h5" Class="fw-bold">Active</MudText>
+                                <MudText Typo="Typo.h3">@data?.ElementAtOrDefault(4)</MudText>
+                            </MudStack>
+                        </MudPaper>
+                        <MudPaper Class="w-100" Elevation="4" Style="background-color: var(--mud-palette-error-darken);color: var(--mud-palette-appbar-text);">
+                            <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center">
+                                <MudText Typo="Typo.h5" Class="fw-bold">Not Active</MudText>
+                                <MudText Typo="Typo.h3">@(userProperties.Count() - data?.ElementAtOrDefault(4))</MudText>
+                            </MudStack>
+                        </MudPaper>
+                    </MudStack>                  
                 </MudCardContent>
             </MudCard>
         </MudItem>
+
         <MudItem xs="12" sm="6" md="4">
-            <MudCard Style="background-color: var(--mud-palette-surface);" Elevation="4">
+            <MudCard Class="dashboard-card" Elevation="6">
                 <MudCardContent>
-                    <MudStack Row AlignItems="AlignItems.Baseline">
-                        <MudIconButton Icon="fa-solid fa-user-graduate" Color="Color.Primary" Size="Size.Medium" Ripple="false" Class="rounded-circle mb-2" Style="background-color: rgba(var(--mud-palette-primary-rgb), var(--icon-opacity)) !important; cursor: default;" />
-                        <MudText Typo="Typo.h6" Class="mb-2">Students</MudText>
+                    <MudStack Row AlignItems="AlignItems.Center" Class="mb-2">
+                        <MudIconButton Icon="fa-solid fa-user-graduate" Color="Color.Primary" Size="Size.Large" Ripple="false"
+                                       Class="icon-btn" />
+                        <MudText Typo="Typo.h5" Class="fw-bold">Students</MudText>
                     </MudStack>
-                    <MudAlert Severity="Severity.Success" Variant="Variant.Outlined" NoIcon="true" Class="my-2 fw-bold text-nowrap">Active: 100</MudAlert>
-                    <MudAlert Severity="Severity.Error" Variant="Variant.Outlined" NoIcon="true" Class="my-2 fw-bold text-nowrap">Not Active: 100</MudAlert>
+                    <MudStack Row Style="position: relative">
+                        <MudOverlay @bind-Visible="_loading" DarkBackground AutoClose="false" Absolute="true">
+                            <MudLoading @bind-Loading="_loading" Overlap="false" LoaderType="LoaderType.Circular" Darken="true"
+                                        Color="Color.Primary" />
+                        </MudOverlay>
+                        <MudPaper Class="w-100" Elevation="4" Style="background-color: var(--mud-palette-success-darken);color: var(--mud-palette-appbar-text);">
+                            <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center">
+                                <MudText Typo="Typo.h5" Class="fw-bold">Active</MudText>
+                                <MudText Typo="Typo.h3">@data?.ElementAtOrDefault(0)</MudText>
+                            </MudStack>
+                        </MudPaper>
+                        <MudPaper Class="w-100" Elevation="4" Style="background-color: var(--mud-palette-error-darken);color: var(--mud-palette-appbar-text);">
+                            <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center">
+                                <MudText Typo="Typo.h5" Class="fw-bold">Not Active</MudText>
+                                <MudText Typo="Typo.h3">@data?.ElementAtOrDefault(1)</MudText>
+                            </MudStack>
+                        </MudPaper>
+                    </MudStack>
                 </MudCardContent>
             </MudCard>
         </MudItem>
+
         <MudItem xs="12" sm="6" md="4">
-            <MudCard Style="background-color: var(--mud-palette-surface);" Elevation="4">
+            <MudCard Class="dashboard-card" Elevation="6">
                 <MudCardContent>
-                    <MudStack Row AlignItems="AlignItems.Baseline">
-                        <MudIconButton Icon="fa-solid fa-building-user" Color="Color.Primary" Size="Size.Medium" Ripple="false" Class="rounded-circle mb-2" Style="background-color: rgba(var(--mud-palette-primary-rgb), var(--icon-opacity)) !important; cursor: default;" />
-                        <MudText Typo="Typo.h6" Class="mb-2">Faculty</MudText>
+                    <MudStack Row AlignItems="AlignItems.Center" Class="mb-2">
+                        <MudIconButton Icon="fa-solid fa-building-user" Color="Color.Primary" Size="Size.Large" Ripple="false"
+                                       Class="icon-btn" />
+                        <MudText Typo="Typo.h5" Class="fw-bold">Faculty</MudText>
                     </MudStack>
-                    <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" NoIcon="true" Class="my-2 fw-bold text-nowrap">With Schedule: 100</MudAlert>
-                    <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" NoIcon="true" Class="my-2 fw-bold text-nowrap">Without Schedule: 0</MudAlert>
+                    <MudStack Row Style="position: relative">
+                        <MudOverlay @bind-Visible="_loading" DarkBackground AutoClose="false" Absolute="true">
+                            <MudLoading @bind-Loading="_loading" Overlap="false" LoaderType="LoaderType.Circular" Darken="true"
+                                        Color="Color.Primary" />
+                        </MudOverlay>
+                        <MudPaper Class="w-100" Elevation="4" Style="background-color: var(--mud-palette-success-darken);color: var(--mud-palette-appbar-text);">
+                            <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center">
+                                <MudText Typo="Typo.h5" Class="fw-bold">With Schedule</MudText>
+                                <MudText Typo="Typo.h3">@data?.ElementAtOrDefault(2)</MudText>
+                            </MudStack>
+                        </MudPaper>
+                        <MudPaper Class="w-100" Elevation="4" Style="background-color: var(--mud-palette-error-darken);color: var(--mud-palette-appbar-text);">
+                            <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center">
+                                <MudText Typo="Typo.h5" Class="fw-bold">W/O Schedule</MudText>
+                                <MudText Typo="Typo.h3">@data?.ElementAtOrDefault(3)</MudText>
+                            </MudStack>
+                        </MudPaper>
+                    </MudStack>
                 </MudCardContent>
             </MudCard>
         </MudItem>
+
 
     </MudGrid>
 </MudContainer>
@@ -59,10 +113,16 @@
     private Task<AuthenticationState>? authenticationState { get; set; }
     [CascadingParameter]
     public MainLayout MainLayout { get; private set; }
+    [Inject] private ISnackbar Snackbar { get; set; }
+    [Inject] private ILocalStorageService LocalStorage { get; set; }
     [Inject] private HttpClient HttpClient { get; set; }
     [Inject] private ApiRequestHelper ApiHelper { get; set; }
+    private List<UserProperties> userProperties = new();
+    private bool _loading = true;
+    private List<int>? data;
     public List<Claim> UserClaims { get; set; } = new List<Claim>();
     private string FirstName, LastName;
+    private string IconBackground => "background-color: rgba(var(--mud-palette-primary-rgb), 0.2);";
     protected override async Task OnInitializedAsync()
     {
         if (authenticationState is not null)
@@ -85,19 +145,88 @@
             }
         }
         MainLayout.SubTitle = "Admin Dashboard";
+        await LoadUserData();
+        await LoadData();        
         await base.OnInitializedAsync();
     }
 
 
 
-    private async Task OnLoadData()
+    private async Task LoadData()
+    {
+        _loading = true;
+
+        try
+        {
+            if (MainLayout.IsOnline)
+            {
+                var response = await ApiHelper.GetAsync<List<int>>($"DepartmentManagement/GetDashboardStatistics?departmentId={MainLayout.FacultyDepartment.DepartmentId ?? null}");
+                if (response.IsSuccess)
+                {
+                    data = response.Data;                    
+                    await LocalStorage.SetItemAsync("dashboardData", data);
+                    StateHasChanged();
+                }
+                else
+                {
+                    Snackbar.Add($"Failed to load dashboard data: {response.Message}", Severity.Error);
+                }
+            }
+            else
+            {
+                var cachedData = await LocalStorage.GetItemAsync<List<int>>("dashboardData");
+                data = cachedData ?? new List<int>();                
+                StateHasChanged();
+            }
+
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task LoadUserData()
     {
         try
         {
+            _loading = true;
 
-        }catch(Exception ex)
+            if (MainLayout.IsOnline)
+            {
+                var response = await ApiHelper.GetAsync<List<UserProperties>>("UserManagement/UsersList");
+
+                if (response.IsSuccess)
+                {
+                    userProperties = response.Data;                    
+                    await LocalStorage.SetItemAsync("userProperties", userProperties);
+                    StateHasChanged();
+                }
+                else
+                {
+                    Snackbar.Add($"Error: {response.Message}", Severity.Error);
+                }
+            }
+            else
+            {
+                var cachedData = await LocalStorage.GetItemAsync<List<UserProperties>>("userProperties");
+                userProperties = cachedData ?? new List<UserProperties>();
+                
+            }
+        }
+        catch (Exception ex)
         {
-
+            Snackbar.Add($"Error loading user data: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+            await InvokeAsync(StateHasChanged);
         }
     }
 

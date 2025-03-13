@@ -98,6 +98,15 @@
             link.click();
             document.body.removeChild(link);
         }
+
+        function downloadExceFile(fileName, mimeType, base64) {
+            const link = document.createElement("a");
+            link.download = fileName;
+            link.href = `data:${mimeType};base64,${base64}`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
     </script>
 
 

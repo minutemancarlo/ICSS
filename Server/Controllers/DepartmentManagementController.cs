@@ -183,5 +183,21 @@ namespace ICSS.Server.Controllers
             }
         }
 
+        [HttpGet("GetDashboardStatistics")]
+        public async Task<ActionResult<IEnumerable<int>>> GetDashboardStatistics([FromQuery]int? departmentId=null)
+        {
+            try
+            {
+
+                var result = await _departmentRepository.GetDepartmentStatisticsAsync(departmentId);
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
+        }
+
     }
 }
