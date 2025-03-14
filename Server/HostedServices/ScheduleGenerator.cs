@@ -156,6 +156,9 @@ namespace ICSS.Server.HostedServices
                 if (faculty != null && room != null)
                     break;
 
+                if (faculty == null && room != null)
+                    return startTime;
+
                 startTime = startTime.Add(TimeSpan.FromMinutes(30));
                 if (startTime > new TimeSpan(17, 0, 0))
                     return startTime;
