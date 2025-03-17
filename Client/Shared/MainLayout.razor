@@ -63,14 +63,15 @@
     bool _drawerOpen = true;
     private string currentUserId;
     private string subTitle;
+    private bool isAdmin = false;
     private Departments facultyDepartment = new();
     private bool isFacultyWithDepartment = false;
     private bool isOnline;
 
     private bool _isDarkMode = false;
-    
 
-  
+
+
 
     private async Task ShowInstallPrompt()
     {
@@ -107,10 +108,12 @@
             {
                 var users = authenticationState.Result.User;
 
-                if (users.IsInRole("Faculty"))
+                if (users.IsInRole("Faculty") || users.IsInRole("Admin"))
                 {
                     await GetUserDepartment();
                 }
+
+                IsAdmin = users.IsInRole("Admin");
 
             }
         }
@@ -124,6 +127,16 @@
         set
         {
             subTitle = value;
+            InvokeAsync(() => StateHasChanged());
+        }
+    }
+
+    public bool IsAdmin
+    {
+        get => isAdmin;
+        set
+        {
+            isAdmin = value;
             InvokeAsync(() => StateHasChanged());
         }
     }

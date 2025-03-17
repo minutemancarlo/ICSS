@@ -13,6 +13,13 @@ namespace ICSS.Server.Repository
             _dbConnection = dbConnection;
         }
 
+        public async Task<int> UpdateFacultyStatusAsync(int facultyId)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("@FacultyId", facultyId);
+            return await _dbConnection.ExecuteScalarAsync<int>("UpdateFacultyStatus", parameters, commandType: CommandType.StoredProcedure);
+        }
+
         public async Task<IEnumerable<DepartmentMember>> GetFacultyAsync()
         {
             var result = await _dbConnection.QueryAsync<FacultyModel, Departments, DepartmentMember>(

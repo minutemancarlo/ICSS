@@ -50,8 +50,8 @@
                                 <MudTooltip Text="Edit Faculty Information">
                                     <MudIconButton Icon="fa-solid fa-edit" Size="Size.Medium" Color="Color.Info" Variant="Variant.Filled" Disabled="@(!MainLayout.IsOnline)" OnClick="@(() => OnShowUpdateFacultyDialog(context.Item.FacultyModel))" />
                                 </MudTooltip>
-                                <MudTooltip Text="Delete Faculty Information">
-                                    <MudIconButton Icon="fa-solid fa-trash-can" Size="Size.Medium" Color="Color.Error" Variant="Variant.Filled" Disabled="@(!MainLayout.IsOnline)" OnClick="@(() => OnShowUpdateFacultyDialog(context.Item.FacultyModel))" />
+                                <MudTooltip Text="@(context.Item.FacultyModel.IsDeleted?"Enable Faculty":"Disable Faculty")">
+                                    <MudIconButton Icon="@(context.Item.FacultyModel.IsDeleted?"fa-solid fa-circle-check":"fa-solid fa-ban")" Size="Size.Medium" Color="@(context.Item.FacultyModel.IsDeleted?Color.Success:Color.Error)" Variant="Variant.Filled" Disabled="@(!MainLayout.IsOnline)" OnClick="@(() => OnChangeFacultyStatus(context.Item.FacultyModel.FacultyId))" />
                                 </MudTooltip>
                                 <MudTooltip Text="Faculty Workload">
                                     <MudIconButton Icon="fa-solid fa-chalkboard-user" Size="Size.Medium" Color="Color.Info" Variant="Variant.Filled" Disabled="@(!MainLayout.IsOnline)" OnClick="@(() => OnShowSchedules(context.Item.FacultyModel?.FacultyId))" />
@@ -61,13 +61,13 @@
                     </TemplateColumn>
                     <PropertyColumn Property="x => x.FacultyModel.FacultyName" Title="Name" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
                     <PropertyColumn Property="x => x.FacultyModel.AcademicRank" Title="Academic Rank" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
-                    <PropertyColumn Property="x => x.Departments.DepartmentId" Title="Department" Sortable="true" HeaderClass="data-grid text-nowrap text-white">
+                    <PropertyColumn Property="x => x.Departments.DepartmentId" Title="Department" Sortable="false" Filterable="false" HeaderClass="data-grid text-nowrap text-white">
                         <CellTemplate>
                             <MudStack Spacing="0">
                                 <MudText Typo="Typo.body2">
                                     @(context.Item.Departments?.DepartmentId == null
-                                                    ? "Unassigned"
-                                                    : departments.FirstOrDefault(x => x.DepartmentId == context.Item.Departments.DepartmentId)?.DepartmentName ?? "Unassigned")
+                                        ? "Unassigned"
+                                        : departments.FirstOrDefault(x => x.DepartmentId == context.Item.Departments.DepartmentId)?.DepartmentName ?? "Unassigned")
                                 </MudText>
                             </MudStack>
                         </CellTemplate>
@@ -132,7 +132,7 @@
     private List<Departments> departments = new();
     private List<Departments> departmentsTemp = new();
 
-    private List<FacultyWorkload> workload= new();
+    private List<FacultyWorkload> workload = new();
 
 
     private bool isLoading = false;
@@ -145,6 +145,40 @@
         await OnLoadFaculty();
         await base.OnInitializedAsync();
     }
+
+    private async Task OnChangeFacultyStatus(int? facultyId)
+    {
+        try
+        {
+            var response = await HttpClient.PostAsJsonAsync($"FacultyManagement/UpdateFacultyStatus?facultyId={facultyId}", new { });
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<ApiResponse<int>>();
+
+                if (result != null && result.IsSuccess)
+                {
+                    Snackbar.Add("Faculty status updated successfully.", Severity.Success);
+                    await OnLoadDepartments();
+                    await OnLoadFaculty();
+                    StateHasChanged();
+                }
+                else
+                {
+                    Snackbar.Add($"Error: {result?.Message ?? "Unknown error"}", Severity.Error);
+                }
+            }
+            else
+            {
+                Snackbar.Add($"HTTP Error: {response.StatusCode}", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
+        }
+    }
+
 
     #region Dialogs
     private async Task OnShowAddFacultyDialog()
@@ -176,7 +210,7 @@
             if (!result.Canceled)
             {
                 await OnLoadDepartments();
-                await OnLoadFaculty();                
+                await OnLoadFaculty();
                 StateHasChanged();
             }
         }
@@ -216,7 +250,7 @@
             if (!result.Canceled)
             {
                 await OnLoadDepartments();
-                await OnLoadFaculty();                
+                await OnLoadFaculty();
                 StateHasChanged();
             }
         }
@@ -241,9 +275,9 @@
                     faculty = response.Data;
                     if (MainLayout.IsFacultyWithDepartment)
                     {
-                        faculty = faculty.Where(x => x.Departments?.DepartmentId == MainLayout.FacultyDepartment?.DepartmentId).ToList();                        
-                    }                    
-                    await LocalStorage.SetItemAsync("faculty", faculty);                                        
+                        faculty = faculty.Where(x => x.Departments?.DepartmentId == MainLayout.FacultyDepartment?.DepartmentId).ToList();
+                    }
+                    await LocalStorage.SetItemAsync("faculty", faculty);
                 }
                 else
                 {
@@ -256,12 +290,12 @@
                 faculty = cachedData ?? new List<DepartmentMember>();
                 if (MainLayout.IsFacultyWithDepartment)
                 {
-                    faculty = faculty.Where(x => x.Departments?.DepartmentId == MainLayout.FacultyDepartment?.DepartmentId).ToList();                    
+                    faculty = faculty.Where(x => x.Departments?.DepartmentId == MainLayout.FacultyDepartment?.DepartmentId).ToList();
                 }
-               
+
             }
 
-            
+
             facultyTemp = faculty;
             StateHasChanged();
         }
@@ -270,7 +304,7 @@
             Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
         }
         finally
-        {           
+        {
             isLoading = false;
         }
     }
@@ -330,7 +364,7 @@
            }).ToList();
     }
 
-   
+
 
 
     private async Task OnShowSchedules(int? facultyId)
@@ -349,7 +383,7 @@
                 };
 
             var response = await ApiHelper.GetAsync<List<FacultyWorkload>>($"ScheduleManagement/GetScheduleByFacultyId/{facultyId}");
-            
+
             if (response.IsSuccess)
             {
                 workload = response.Data;
@@ -361,7 +395,7 @@
 
 
             var parameters = new DialogParameters<FacultyWorkloadDialog>
-            {               
+            {
                 { x => x.schedules, workload}
 
             };

@@ -36,6 +36,28 @@ namespace ICSS.Server.Controllers
             }
         }
 
+        [HttpPost("UpdateFacultyStatus")]
+        public async Task<IActionResult> UpdateFacultyStatus([FromQuery] int facultyId)
+        {
+            try
+            {
+                var result = await _facultyRepository.UpdateFacultyStatusAsync(facultyId);
+
+                if (result > 0)
+                {
+                    return Ok(new ApiResponse<int> { IsSuccess = true, Data = result, Message = "Faculty status updated successfully." });
+                }
+                else
+                {
+                    return BadRequest(new ApiResponse<int> { IsSuccess = false, Message = "Failed to update faculty status." });
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse<int> { IsSuccess = false, Message = $"An error occurred: {ex.Message}" });
+            }
+        }
+
         [HttpPut("UpdateFaculty")]
         public async Task<IActionResult> UpdateFaculty([FromBody] FacultyModel faculty)
         {

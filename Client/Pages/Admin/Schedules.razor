@@ -210,7 +210,7 @@
     private string? selectedSchoolYear;
     private Course? selectedCourse;
 
-    private bool isLoading = false;
+    private bool isLoading = true;
     private bool isUserHasDepartment = false;
 
     protected override async Task OnInitializedAsync()
@@ -556,7 +556,7 @@
 
         try
         {
-
+            isLoading = true;
             if (MainLayout.IsOnline)
             {
                 var response = await ApiHelper.GetAsync<List<ScheduleRequest>>("ScheduleManagement/GetScheduleList");
@@ -590,6 +590,8 @@
         catch (Exception ex)
         {
             Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
+        }finally{
+            isLoading = false;
         }
 
     }

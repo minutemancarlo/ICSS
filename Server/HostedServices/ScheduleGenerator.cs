@@ -46,6 +46,8 @@ namespace ICSS.Server.HostedServices
                         _ = await _scheduleRepository.UpdateScheduleStatus(request.ScheduleId, Status.Processing);
                         var subjects = (await _scheduleRepository.GetSubjectForProcess(request)).ToList();
                         scheduledClasses = (await _scheduleRepository.GetScheduleByIdAsync(null, request.Departments?.DepartmentId)).ToList();
+                        scheduledClasses=scheduledClasses.Where(x => activeRequests.Select(ar => ar.ScheduleId).Contains(x.ScheduleId)).ToList();
+
                         await ProcessSchedules(request.ScheduleId, subjects, availableRooms, availableFaculty, scheduledClasses, random, request.Departments?.DepartmentId);
 
                     }
@@ -65,7 +67,7 @@ namespace ICSS.Server.HostedServices
             {
                 subjects = subjects.OrderBy(s => random.Next()).ToList();
                 TimeSpan currentStartTime = GetRandomStartTime(random);
-                TimeSpan currentLabStartTime = TimeSpan.FromHours(random.Next(8, 12));
+                TimeSpan currentLabStartTime = TimeSpan.FromHours(random.Next(8, 11));
                 foreach (var subject in subjects)
                 {
                     availableFaculty = (await _scheduleRepository.GetFacultyForProcessByDepartment(subject.DepartmentId)).ToList();
@@ -143,6 +145,8 @@ namespace ICSS.Server.HostedServices
             Rooms? room;            
             availableRooms = availableRooms.Where(s => !s.IsLab).OrderBy(_ => random.Next()).ToList();
 
+       
+
             while (true)
             {
                 if (startTime >= new TimeSpan(12, 0, 0) && startTime < new TimeSpan(13, 0, 0))
@@ -155,13 +159,13 @@ namespace ICSS.Server.HostedServices
 
                 if (faculty != null && room != null)
                     break;
-
-                if (faculty == null && room != null)
-                    return startTime;
-
+           
                 startTime = startTime.Add(TimeSpan.FromMinutes(30));
+
                 if (startTime > new TimeSpan(17, 0, 0))
+                {                 
                     return startTime;
+                }
             }
 
             foreach (var day in days)
@@ -184,7 +188,7 @@ namespace ICSS.Server.HostedServices
             FacultyModel? faculty;
             Rooms? room;
             availableRooms = availableRooms.Where(s => s.IsLab).OrderBy(_ => new Random().Next()).ToList();
-
+       
             while (true)
             {
                 if (startTime >= new TimeSpan(12, 0, 0) && startTime < new TimeSpan(13, 0, 0))
@@ -197,9 +201,15 @@ namespace ICSS.Server.HostedServices
                 if (faculty != null && room != null)
                     break;
 
+              
+
                 startTime = startTime.Add(TimeSpan.FromMinutes(30));
                 if (startTime > new TimeSpan(17, 0, 0))
+                {
+                   
                     return startTime;
+                }
+
             }
 
             foreach (var day in days)

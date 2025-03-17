@@ -94,16 +94,16 @@
                                 <MudSelectItem T="int?" Value="@(item.ScheduleId)">@($"{item.Course?.CourseCode} {item.Section?.SchoolYear}: Section {item.Section?.SectionName} - {item.Section?.YearLevel.ToString().Replace("_", " ")}/{item.Semester.ToString().Replace("_", " ")}")</MudSelectItem>
                             }
                         </MudSelect>
-                        
+
                         <MudLoadingButton Variant="Variant.Filled"
-                                          Color="Color.Info"
-                                          Size="Size.Medium"
-                                          Disabled="!isEnabledExport"
-                                          Loading="@(_loading)"
-                                          Class="my-2 mx-1"
-                                          StartIcon="fa-solid fa-file-pdf"
-                                          OnClick="@(() => DownloadScheduleReportAsync(selectedScheduleId))"
-                                          ButtonType="ButtonType.Button">
+                        Color="Color.Info"
+                        Size="Size.Medium"
+                        Disabled="!isEnabledExport"
+                        Loading="@(_loading)"
+                        Class="my-2 mx-1"
+                        StartIcon="fa-solid fa-file-pdf"
+                        OnClick="@(() => DownloadScheduleReportAsync(selectedScheduleId))"
+                        ButtonType="ButtonType.Button">
                             <LoadingContent>Generating File...</LoadingContent>
                             <ChildContent>Export to PDF</ChildContent>
                         </MudLoadingButton>
@@ -162,9 +162,9 @@
 
     private string CurrentDate => DateTime.Now.ToString("MMMM d, yyyy");
     private string CurrentTime => DateTime.Now.ToString("h:mm:ss tt");
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnParametersSetAsync()
     {
-        await base.OnInitializedAsync();
+        await base.OnParametersSetAsync();
         try
         {
 
@@ -228,7 +228,7 @@
             StateHasChanged();
             await Task.Delay(1000);
         }
-     
+
 
     }
 
@@ -415,7 +415,7 @@
                 scheduleRequests = cachedData ?? new List<ScheduleRequest>();
             }
 
-
+            scheduleRequests = scheduleRequests.Where(x => x.IsActive == true).ToList();
 
 
         }
