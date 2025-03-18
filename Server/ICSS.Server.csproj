@@ -4,8 +4,11 @@
     <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <InvariantGlobalization>true</InvariantGlobalization>
   </PropertyGroup>
-
+  <PropertyGroup>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="AspNetCore.Reporting" Version="2.1.0" />
     <PackageReference Include="Auth0.AuthenticationApi" Version="7.31.0" />
@@ -20,6 +23,13 @@
     <PackageReference Include="System.Data.SqlClient" Version="4.9.0" />
     <PackageReference Include="System.Security.Permissions" Version="7.0.0" />
   </ItemGroup>
+  <ItemGroup>
+    <None Update="wwwroot\_framework\**\*.resources.dll">
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </None>
+  </ItemGroup>
+
+
 
   <ItemGroup>
     <ProjectReference Include="..\Client\ICSS.Client.csproj" />
