@@ -62,8 +62,7 @@ namespace ICSS.Server.Repository
 
         public async Task<bool> UpdateTaskStatusAsync(int? taskId, TaskStatus status)
         {
-            var timeZone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Manila");
-            var manilaTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZone);
+            var manilaTime = DateTime.UtcNow.AddHours(8);
 
             var query = "UPDATE Tasks SET Status = @Status, UpdatedOn = @UpdatedOn WHERE TaskId = @TaskId";
 

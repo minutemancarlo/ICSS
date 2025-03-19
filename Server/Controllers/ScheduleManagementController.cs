@@ -108,7 +108,7 @@ namespace ICSS.Server.Controllers
                     return BadRequest("No sections data.");
                 }
 
-                var filteredSections = sections.Where(s => s.Course != null && s.Course.CourseId == request.Course?.CourseId).ToList();
+                var filteredSections = sections.Where(s => s.Course != null && s.Course.CourseId == request.Course?.CourseId && !s.IsDeleted).ToList();
 
                 if (!filteredSections.Any())
                 {

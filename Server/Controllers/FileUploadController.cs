@@ -34,8 +34,7 @@ namespace ICSS.Server.Controllers
 
             try
             {
-                var manilaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Manila");
-                var manilaTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, manilaTimeZone);
+                var manilaTime = DateTime.UtcNow.AddHours(8);
                 var timestamp = manilaTime.ToString("MMddyyHHmmss");
                 var fileName = $"StudentImport_{timestamp}{Path.GetExtension(file.FileName)}";
 

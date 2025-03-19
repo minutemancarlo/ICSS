@@ -9,6 +9,7 @@ namespace ICSS.Shared
     public class FacultyModel : BaseModel
     {
         public int? FacultyId { get; set; }
+        public string? Email { get; set; }
         public string FacultyName { get; set; }
         public string AcademicRank { get; set; }        
         public decimal? TotalLoadUnits { get; set; }

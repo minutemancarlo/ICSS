@@ -20,6 +20,19 @@ namespace ICSS.Server.Repository
             return await _dbConnection.ExecuteScalarAsync<int>("UpdateFacultyStatus", parameters, commandType: CommandType.StoredProcedure);
         }
 
+        public async Task<int> GetFacultyIdAsync(string? id)
+        {
+            var query = "SELECT TOP 1 B.FacultyId FROM Users A INNER JOIN Faculty B ON A.Email = B.Email WHERE A.SystemId = @Id";
+
+            var parameters = new DynamicParameters();
+            parameters.Add("@Id", id);
+
+            var result = await _dbConnection.QueryFirstOrDefaultAsync<int>(query, parameters);
+
+            return result;
+        }
+
+
         public async Task<IEnumerable<DepartmentMember>> GetFacultyAsync()
         {
             var result = await _dbConnection.QueryAsync<FacultyModel, Departments, DepartmentMember>(
@@ -92,6 +105,7 @@ namespace ICSS.Server.Repository
             var parameters = new DynamicParameters();
             parameters.Add("@FacultyId", faculty.FacultyId, DbType.Int32);
             parameters.Add("@FacultyName", faculty.FacultyName, DbType.String);
+            parameters.Add("@Email", faculty.Email, DbType.String);
             parameters.Add("@AcademicRank", faculty.AcademicRank, DbType.String);            
             parameters.Add("@TotalLoadUnits", faculty.TotalLoadUnits, DbType.Decimal);
             parameters.Add("@BachelorsDegree", faculty.BachelorsDegree, DbType.String);
