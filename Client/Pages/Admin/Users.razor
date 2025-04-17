@@ -48,7 +48,7 @@
                                     <MudIconButton Icon="fa-solid fa-user-shield" Size="Size.Medium" Color="Color.Info" Variant="Variant.Filled" Disabled="@(context.Item.User_Id==MainLayout.CurrentUserId||!MainLayout.IsOnline)" OnClick="@(async () => await OnShowUpdateRole(context.Item.Role,context.Item.User_Id,context.Item.Departments?.DepartmentId,$"{context.Item.FirstName} {context.Item.LastName}",context.Item.Email))" />
                                 </MudTooltip>
                                 <MudTooltip Text="@(context.Item.Blocked?"Enable Access":"Disable Access")">
-                                    <MudIconButton Icon="@(!context.Item.Blocked?"fa-solid fa-user-slash":"fa-solid fa-user")" Size="Size.Medium" Color="@(context.Item.Blocked?Color.Success:Color.Error)" Variant="Variant.Filled" Disabled="@(context.Item.User_Id==MainLayout.CurrentUserId||!MainLayout.IsOnline)" OnClick="@(() => OnUpdateUserAccess(context.Item.User_Id,context.Item.Blocked?"enable":"disable"))" />
+                                    <MudIconButton Icon="@(!context.Item.Blocked?"fa-solid fa-user":"fa-solid fa-user-slash")" Size="Size.Medium" Color="@(context.Item.Blocked?Color.Error:Color.Success)" Variant="Variant.Filled" Disabled="@(context.Item.User_Id==MainLayout.CurrentUserId||!MainLayout.IsOnline)" OnClick="@(() => OnUpdateUserAccess(context.Item.User_Id,context.Item.Blocked?"enable":"disable"))" />
                                 </MudTooltip>
                             </MudStack>
                         </CellTemplate>

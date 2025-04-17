@@ -16,6 +16,8 @@ namespace ICSS.Shared
         public bool IsDeleted { get; set; } = false;
         public int? StudentCount { get; set; }
 
+        public int? ClassSize { get; set; }
+
         public int? CourseId { get; set; }
         public Course? Course { get; set; }
     }

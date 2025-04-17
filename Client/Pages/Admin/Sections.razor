@@ -19,7 +19,7 @@
         <MudItem xs="12">
             <MudTabs Elevation="2" Rounded="true" Outlined="true" Color="Color.Tertiary">
                 <MudTabPanel Text="Sections" Icon="fa-solid fa-house-user">
-                    <MudDataGrid Items="sections" Dense Hover Filterable Striped Virtualize ShowColumnOptions Hideable ShowMenuIcon Loading="isLoading" Class="my-5" RowsPerPage="100">
+                    <MudDataGrid Items="sections" Dense Hover Filterable Striped Virtualize ShowColumnOptions Hideable ShowMenuIcon Loading="isLoading" Class="my-5" >
                         <ToolBarContent>
                             <MudBreakpointProvider>
                                 <MudHidden Breakpoint="Breakpoint.MdAndUp" Invert="true">
@@ -45,7 +45,7 @@
                                             <MudIconButton Icon="fa-solid fa-edit" OnClick="@(() => OnShowUpdateSectionDialog(context.Item))" Size="Size.Medium" Color="Color.Info" Variant="Variant.Filled" Disabled="@(!MainLayout.IsOnline)"  />
                                         </MudTooltip> *@
                                         <MudTooltip Text="@(context.Item.IsDeleted?"Enable Section":"Disable Section")">
-                                            <MudIconButton Icon="@(context.Item.IsDeleted?"fa-solid fa-circle-check":"fa-solid fa-ban")" Size="Size.Medium" Color="@(context.Item.IsDeleted?Color.Success:Color.Error)" OnClick="@(() => OnDisableSection(context.Item,(!context.Item.IsDeleted)))" Variant="Variant.Filled" Disabled="@(!MainLayout.IsOnline)" />
+                                            <MudIconButton Icon="@(context.Item.IsDeleted?"fa-solid fa-ban":"fa-solid fa-circle-check")" Size="Size.Medium" Color="@(context.Item.IsDeleted?Color.Error:Color.Success)" OnClick="@(() => OnDisableSection(context.Item,(!context.Item.IsDeleted)))" Variant="Variant.Filled" Disabled="@(!MainLayout.IsOnline)" />
                                         </MudTooltip>
                                     </MudStack>
                                 </CellTemplate>
@@ -63,6 +63,7 @@
                                     <MudChip Variant="Variant.Filled" Size="Size.Small" Color="@(context.Item.IsSummer?Color.Info:Color.Success)">@(context.Item.IsSummer ? "Summer Class" : "Non Summer Class")</MudChip>
                                 </CellTemplate>
                             </PropertyColumn>
+                            <PropertyColumn Property="x => x.ClassSize" Title="Student Maximum Count" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
                             <PropertyColumn Property="x => x.StudentCount" Title="Student Count" Sortable="true" HeaderClass="data-grid text-nowrap text-white" />
 
                             <PropertyColumn Property="x => x.CreatedBy" Title="Created By" Sortable="true" Hideable="true" HeaderClass="data-grid text-nowrap text-white" Hidden>

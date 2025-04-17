@@ -53,6 +53,7 @@ namespace ICSS.Server.Repository
             parameters.Add("@IsDeleted", section.IsDeleted);
             parameters.Add("@CourseId", section.CourseId);
             parameters.Add("@SchoolYear", section.SchoolYear);
+            parameters.Add("@ClassSize", section.ClassSize);
             parameters.Add("@CreatedBy", userId);
 
             int affectedRows = await _dbConnection.ExecuteAsync("InsertSection", parameters, commandType: CommandType.StoredProcedure);
@@ -70,6 +71,7 @@ namespace ICSS.Server.Repository
             parameters.Add("@IsDeleted", section.IsDeleted);
             parameters.Add("@CourseId", section.CourseId);
             parameters.Add("@SchoolYear", section.SchoolYear);
+            parameters.Add("@ClassSize", section.ClassSize);
             parameters.Add("@UpdatedBy", userId);
 
             int affectedRows = await _dbConnection.ExecuteAsync("UpdateSection", parameters, commandType: CommandType.StoredProcedure);

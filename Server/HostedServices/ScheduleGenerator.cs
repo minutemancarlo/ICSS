@@ -49,7 +49,7 @@ namespace ICSS.Server.HostedServices
                         scheduledClasses=scheduledClasses.Where(x => activeRequests.Select(ar => ar.ScheduleId).Contains(x.ScheduleId)).ToList();
 
                         await ProcessSchedules(request.ScheduleId, subjects, availableRooms, availableFaculty, scheduledClasses, random, request.Departments?.DepartmentId);
-
+                        _ = await _scheduleRepository.UpdateScheduleStatus(request.ScheduleId, Status.Success);
                     }
 
                     await Task.Delay(TimeSpan.FromSeconds(2), stoppingToken);
@@ -237,7 +237,7 @@ namespace ICSS.Server.HostedServices
 
             scheduledClasses.Add(scheduleSlot);
             _ = await _scheduleRepository.InsertScheduleTimeSlot(scheduleSlot);
-            _ = await _scheduleRepository.UpdateScheduleStatus(scheduleId, Status.Success);
+            
         }
     }
 

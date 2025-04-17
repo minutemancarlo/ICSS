@@ -24,20 +24,33 @@ namespace ICSS.Server.Controllers
         }
 
         [HttpGet("UsersList")]
-        //[Authorize(Roles = "Admin")]
         public async Task<ActionResult<IEnumerable<UserProperties>>> UsersList()
         {
             try
             {
+                // Step 1: Fetch all users at once
                 var users = await _managementApiClient.Users.GetAllAsync(new GetUsersRequest(), new PaginationInfo());
-                
-                List<UserProperties> userslist = new List<UserProperties>();
+
+                // Step 2: Fetch all roles once (avoid making multiple API calls)
+                var roles = await _managementApiClient.Roles.GetAllAsync(new GetRolesRequest(), new PaginationInfo());
+                var userRolesDict = new Dictionary<string, string>();
+
+                foreach (var role in roles)
+                {
+                    var assignedUsers = await _managementApiClient.Roles.GetUsersAsync(role.Id, new PaginationInfo());
+                    foreach (var user in assignedUsers)
+                    {
+                        userRolesDict[user.UserId] = role.Name;
+                    }
+                }
+
+                var userslist = new List<UserProperties>();
 
                 foreach (var user in users)
                 {
-                    var roles = await _managementApiClient.Users.GetRolesAsync(user.UserId, new PaginationInfo());
-                    var role = roles.FirstOrDefault()?.Name;
-                    var department = await _userRepository.CheckUserDepartment(user.UserId);
+                    var role = userRolesDict.ContainsKey(user.UserId) ? userRolesDict[user.UserId] : "Unknown";
+                    var department = await _userRepository.CheckUserDepartment(user.UserId); // Sequential execution
+
                     userslist.Add(new UserProperties
                     {
                         Email = user.Email,
@@ -48,10 +61,10 @@ namespace ICSS.Server.Controllers
                         Verified = user.EmailVerified,
                         Last_Login = user.LastLogin,
                         Provider = user.UserId.ToLower().Contains("auth0") ? "Email-Password Auth" :
-                                   user.UserId.ToLower().Contains("facebook") ? "Facebook" :
-                                   user.UserId.ToLower().Contains("windows") ? "Microsoft" :
-                                   user.UserId.ToLower().Contains("google-oauth2") ? "Google" :
-                                   "Unknown Provider",
+                                    user.UserId.ToLower().Contains("facebook") ? "Facebook" :
+                                    user.UserId.ToLower().Contains("windows") ? "Microsoft" :
+                                    user.UserId.ToLower().Contains("google-oauth2") ? "Google" :
+                                    "Unknown Provider",
                         Picture = user.Picture,
                         Role = role,
                         Departments = department
@@ -65,6 +78,7 @@ namespace ICSS.Server.Controllers
                 return BadRequest($"Exception Occurred: {ex.Message}");
             }
         }
+
 
         [HttpGet("GetAllRoles")]
         public async Task<ActionResult<List<RolesProperty>>> GetAllRoles()

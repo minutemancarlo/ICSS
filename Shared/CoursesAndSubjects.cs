@@ -36,6 +36,12 @@ namespace ICSS.Shared
 
     }
 
+    public class SubjectsAssignment
+    {
+        public int? SubjectId { get; set; }
+        public int? FacultyId { get; set; }
+    }
+
 
     public enum Semester
     {

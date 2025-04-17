@@ -34,6 +34,8 @@
                     }
                 </MudSelect>
 
+                <MudNumericField Variant="Variant.Outlined" Label="Section Maximum Capacity" @bind-Value="section.ClassSize" HideSpinButtons Min="1" Max="70" Margin="Margin.Dense" Disabled="@(Action == "Update"?true:false)" />
+
                 <MudSelect Disabled="@(Action == "Update"?true:false)" T="YearLevel?" @bind-Value="section.YearLevel" Label="Select Year Level" Clearable="true"
                 AdornmentIcon="fa-solid fa-hashtag" Variant="Variant.Outlined"
                 Margin="Margin.Dense" AdornmentColor="Color.Primary">
@@ -119,6 +121,7 @@
                         IsDeleted = false,
                         IsSummer = section.IsSummer,
                         SchoolYear = section.SchoolYear,
+                        ClassSize = section.ClassSize,
                         YearLevel = section.YearLevel
                     };
                 payload.Add(item);

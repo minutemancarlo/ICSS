@@ -1,6 +1,8 @@
 ﻿using Dapper;
+using ICSS.Client.Pages.Admin;
 using ICSS.Shared;
 using System.Data;
+using System.Text;
 
 namespace ICSS.Server.Repository
 {
@@ -86,6 +88,61 @@ namespace ICSS.Server.Repository
 
             return result;
         }
+
+        public async Task<IEnumerable<Subjects>> GetSubjectsAvailableForAssignmentAsync(int facultyId)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("@FacultyId", facultyId);
+
+            return await _dbConnection.QueryAsync<Subjects>("GetAvailableSubjectsForAssignment", parameters, commandType: CommandType.StoredProcedure);
+
+
+        }
+
+
+        public async Task<IEnumerable<Subjects>> GetSubjectsAssignedAsync(int facultyId)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("@FacultyId", facultyId);
+
+            return await _dbConnection.QueryAsync<Subjects>("GetSubjectsAssigned", parameters, commandType: CommandType.StoredProcedure);
+
+
+        }
+
+        public async Task SaveAssignedSubjectsAsync(List<SubjectsAssignment> subjects, string action)
+        {
+            var query = new StringBuilder();
+            var parameters = new DynamicParameters();
+
+            for (int i = 0; i < subjects.Count; i++)
+            {
+                if (action.Equals("insert", StringComparison.OrdinalIgnoreCase))
+                {
+                    query.AppendLine($@"
+            INSERT INTO SubjectAssigned (FacultyId, SubjectId)
+            VALUES (@FacultyId{i}, @SubjectId{i});");
+
+                    parameters.Add($"FacultyId{i}", subjects[i].FacultyId);
+                    parameters.Add($"SubjectId{i}", subjects[i].SubjectId);
+                }
+                else if (action.Equals("delete", StringComparison.OrdinalIgnoreCase))
+                {
+                    query.AppendLine($@"
+            DELETE FROM SubjectAssigned 
+            WHERE FacultyId = @FacultyId{i} AND SubjectId = @SubjectId{i};");
+
+                    parameters.Add($"FacultyId{i}", subjects[i].FacultyId);
+                    parameters.Add($"SubjectId{i}", subjects[i].SubjectId);
+                }
+            }
+
+            await _dbConnection.ExecuteAsync(query.ToString(), parameters);
+        }
+
+
+
+
 
     }
 }

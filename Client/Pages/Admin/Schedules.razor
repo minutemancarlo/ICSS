@@ -30,7 +30,7 @@
                 Note: You are generating schedule for all departments.
             </MudAlert> *@
 
-            <MudDataGrid Items="scheduleRequests" Dense Hover Filterable Striped Virtualize ShowColumnOptions Hideable ShowMenuIcon Loading="isLoading" RowsPerPage="100">
+            <MudDataGrid Items="scheduleRequests" Dense Hover Filterable Striped Virtualize ShowColumnOptions Hideable ShowMenuIcon Loading="isLoading" >
                 <ToolBarContent>
                     <MudStack>
                         <MudStack Row Spacing="1">
@@ -390,6 +390,7 @@
         if (courses.Any())
         {
             coursesTemp = courses.Where(c => c.Departments?.DepartmentId == value).GroupBy(c => c.CourseName).Select(g => g.First()).ToList();
+            selectedCourse = coursesTemp.FirstOrDefault();
         }
 
     }

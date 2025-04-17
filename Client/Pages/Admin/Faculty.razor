@@ -23,7 +23,7 @@
             <MudDivider />
         </MudItem>
         <MudItem xs="12">
-            <MudDataGrid Items="facultyTemp" Dense Hover Filterable Striped Virtualize ShowColumnOptions Hideable ShowMenuIcon Loading="isLoading" RowsPerPage="100">
+            <MudDataGrid Items="facultyTemp" Dense Hover Filterable Striped Virtualize ShowColumnOptions Hideable ShowMenuIcon Loading="isLoading" >
                 <ToolBarContent>
                     @if (MainLayout.IsAdmin)
                     {
@@ -53,13 +53,16 @@
                         <CellTemplate>
                             <MudStack Row>
                                 <MudTooltip Text="Edit Faculty Information">
-                                    <MudIconButton Icon="fa-solid fa-edit" Size="Size.Medium" Color="Color.Info" Variant="Variant.Filled" Disabled="@(!MainLayout.IsOnline)" OnClick="@(() => OnShowUpdateFacultyDialog(context.Item.FacultyModel))" />
+                                    <MudIconButton Icon="fa-solid fa-edit" Size="Size.Small" Color="Color.Info" Variant="Variant.Filled" Disabled="@(!MainLayout.IsOnline)" OnClick="@(() => OnShowUpdateFacultyDialog(context.Item.FacultyModel))" />
+                                </MudTooltip>
+                                <MudTooltip Text="Faculty Subjects">
+                                    <MudIconButton Icon="fa-solid fa-book-atlas" Size="Size.Small" Color="Color.Secondary" Variant="Variant.Filled" Disabled="@(!MainLayout.IsOnline)" OnClick="@(() => OnShowUpdateAssignedSubjects(context.Item.FacultyModel))" />
                                 </MudTooltip>
                                 <MudTooltip Text="@(context.Item.FacultyModel.IsDeleted?"Enable Faculty":"Disable Faculty")">
-                                    <MudIconButton Icon="@(context.Item.FacultyModel.IsDeleted?"fa-solid fa-circle-check":"fa-solid fa-ban")" Size="Size.Medium" Color="@(context.Item.FacultyModel.IsDeleted?Color.Success:Color.Error)" Variant="Variant.Filled" Disabled="@(!MainLayout.IsOnline)" OnClick="@(() => OnChangeFacultyStatus(context.Item.FacultyModel.FacultyId))" />
+                                    <MudIconButton Icon="@(context.Item.FacultyModel.IsDeleted?"fa-solid fa-circle-check":"fa-solid fa-ban")" Size="Size.Small" Color="@(context.Item.FacultyModel.IsDeleted?Color.Success:Color.Error)" Variant="Variant.Filled" Disabled="@(!MainLayout.IsOnline)" OnClick="@(() => OnChangeFacultyStatus(context.Item.FacultyModel.FacultyId))" />
                                 </MudTooltip>
                                 <MudTooltip Text="Faculty Workload">
-                                    <MudIconButton Icon="fa-solid fa-chalkboard-user" Size="Size.Medium" Color="Color.Info" Variant="Variant.Filled" Disabled="@(!MainLayout.IsOnline)" OnClick="@(() => OnShowSchedules(context.Item.FacultyModel?.FacultyId))" />
+                                    <MudIconButton Icon="fa-solid fa-chalkboard-user" Size="Size.Small" Color="Color.Info" Variant="Variant.Filled" Disabled="@(!MainLayout.IsOnline)" OnClick="@(() => OnShowSchedules(context.Item.FacultyModel?.FacultyId))" />
                                 </MudTooltip>
                             </MudStack>
                         </CellTemplate>
@@ -71,8 +74,8 @@
                             <MudStack Spacing="0">
                                 <MudText Typo="Typo.body2">
                                     @(context.Item.Departments?.DepartmentId == null
-                                                        ? "Unassigned"
-                                                        : departments.FirstOrDefault(x => x.DepartmentId == context.Item.Departments.DepartmentId)?.DepartmentName ?? "Unassigned")
+                                                            ? "Unassigned"
+                                                            : departments.FirstOrDefault(x => x.DepartmentId == context.Item.Departments.DepartmentId)?.DepartmentName ?? "Unassigned")
                                 </MudText>
                             </MudStack>
                         </CellTemplate>
@@ -207,6 +210,42 @@
 
 
     #region Dialogs
+
+    private async Task OnShowUpdateAssignedSubjects(FacultyModel? faculty)
+    {
+        try
+        {
+            var options = new DialogOptions
+                {
+                    CloseOnEscapeKey = false,
+                    FullWidth = false,
+                    MaxWidth = MaxWidth.Medium,
+                    BackdropClick = false,
+                    CloseButton = false,
+                    BackgroundClass = "blurred"
+
+                };
+
+            var parameters = new DialogParameters<AssignFacultySubject>
+            {                                
+                {x => x.faculty, faculty},
+                { x => x.currentUserId, MainLayout.CurrentUserId }                
+            };
+
+            var dialog = await DialogService.ShowAsync<AssignFacultySubject>("", parameters, options);
+            var result = await dialog.Result;
+            if (!result.Canceled)
+            {                
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
+        }
+    
+    }
+
     private async Task OnShowAddFacultyDialog()
     {
         try

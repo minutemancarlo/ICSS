@@ -1,0 +1,133 @@
+﻿@using ICSS.Shared
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@($"fa-solid fa-book-atlas")"></MudIcon>
+            Update Faculty Subjects
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudTransferList Class="w-100" @ref="_transferList" T="Subjects" @bind-StartCollection="_startCollection" @bind-EndCollection="_endCollection" Color="Color.Primary"
+        StyleListCommon="background-color: var(--mud-palette-background-gray); width: 100%" MultiSelection="true" MaxItems="10" SelectAllType="SelectAllType.Buttons"
+        ClassStartList="w-100" ClassEndList="w-100" ToStringFunc="@(e => e?.SubjectName)"
+        ButtonVariant="Variant.Filled"
+        AllowDoubleClick="false" SearchBoxStart SearchBoxEnd
+        StartTitle="Available Subjects" EndTitle="Added Subjects" />       
+    </DialogContent>
+    <DialogActions>
+        <MudButton Disabled="_loading" Size="Size.Medium" OnClick="Cancel">Cancel</MudButton>
+        <MudLoadingButton Variant="Variant.Filled"
+        Color="Color.Success"
+        Size="Size.Medium"
+        Loading="@(_loading)"
+        OnClick="@(async => OnSubmit())"
+        ButtonType="ButtonType.Button">
+            <LoadingContent>Submitting...</LoadingContent>
+            <ChildContent>Submit</ChildContent>
+        </MudLoadingButton>
+    </DialogActions>
+</MudDialog>
+
+@code{
+    [CascadingParameter] MudDialogInstance? MudDialog { get; set; }
+    [Inject] HttpClient? httpClient { get; set; }
+    [Inject] ISnackbar Snackbar { get; set; }
+    [Inject] private ApiRequestHelper ApiHelper { get; set; }
+
+    MudForm? _form;
+    private bool _loading = false;
+
+    MudTransferList<Subjects> _transferList = new();
+    ICollection<Subjects> _startCollection = new List<Subjects>();
+
+    ICollection<Subjects> _endCollection = new List<Subjects>();
+
+    [Parameter] public string? currentUserId { get; set; }
+    [Parameter] public FacultyModel? faculty { get; set; }
+
+    void Cancel() => MudDialog.Cancel();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await OnGetSubjectsUnAssigned();
+        await OnGetSubjectsAssigned();
+        await base.OnParametersSetAsync();
+    }
+  
+    private async Task OnGetSubjectsUnAssigned()
+    {
+        try
+        {
+            var response = await ApiHelper.GetAsync<List<Subjects>>($"CourseAndSubject/GetAvailableSubjectsForAssignment?facultyId={faculty.FacultyId}");
+            if (response.IsSuccess)
+            {
+                _startCollection = response.Data;
+                StateHasChanged();
+            }
+            else
+            {
+                Snackbar.Add($"Failed to load unassigned subjects: {response.Message}", Severity.Error);
+            }
+        }catch(Exception ex)
+        {
+            Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task OnGetSubjectsAssigned()
+    {
+        try
+        {
+            var response = await ApiHelper.GetAsync<List<Subjects>>($"CourseAndSubject/GetSubjectsAssigned?facultyId={faculty.FacultyId}");
+            if (response.IsSuccess)
+            {
+                _endCollection = response.Data;
+                StateHasChanged();
+            }
+            else
+            {
+                Snackbar.Add($"Failed to load unassigned subjects: {response.Message}", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task OnSubmit()
+    {
+        try
+        {
+            List<SubjectsAssignment> assignments = new List<SubjectsAssignment>();
+            foreach (var item in _endCollection)
+            {
+                var assignment = new SubjectsAssignment
+                    {
+                        FacultyId = faculty.FacultyId,
+                        SubjectId = item.SubjectId                        
+                    };
+                assignments.Add(assignment);
+            }
+
+            var response = await ApiHelper.PostAsync<List<SubjectsAssignment>, ApiResponse<int>>("CourseAndSubject/SaveAssignedSubjects", assignments);
+
+            if (response.IsSuccess)
+            {
+                Snackbar.Add("Faculty subjects updated.", Severity.Success);    
+                MudDialog.Close(DialogResult.Ok(true));
+            }
+            else
+            {
+                Snackbar.Add($"Error: {response.Message}", Severity.Error);
+            }
+
+
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
+        }
+    }
+}

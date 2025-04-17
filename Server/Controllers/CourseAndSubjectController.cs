@@ -141,5 +141,78 @@ namespace ICSS.Server.Controllers
             }
         }
 
+
+        [HttpGet("GetAvailableSubjectsForAssignment")]
+        public async Task<ActionResult<IEnumerable<Subjects>>> GetAvailableSubjectsForAssignment([FromQuery] int facultyId)
+        {
+            try
+            {
+                var subjects = await _courseAndSubjectRepository.GetSubjectsAvailableForAssignmentAsync(facultyId);
+                return Ok(subjects);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
+        }
+
+        [HttpGet("GetSubjectsAssigned")]
+        public async Task<ActionResult<IEnumerable<Subjects>>> GetSubjectsAssigned([FromQuery] int facultyId)
+        {
+            try
+            {
+                var subjects = await _courseAndSubjectRepository.GetSubjectsAssignedAsync(facultyId);
+                return Ok(subjects);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
+        }
+
+        [HttpPost("SaveAssignedSubjects")]
+        public async Task<IActionResult> SaveAssignedSubjects([FromBody] List<SubjectsAssignment> assignedSubjects)
+        {
+            try
+            {
+                if (assignedSubjects == null || !assignedSubjects.Any())
+                {
+                    return BadRequest("Invalid subject assignment data or no subjects provided.");
+                }
+
+                var facultyId = (int)assignedSubjects.First().FacultyId;
+                var currentSubjects = await _courseAndSubjectRepository.GetSubjectsAssignedAsync(facultyId);
+
+                var newSubjectIds = assignedSubjects.Select(s => s.SubjectId).ToList();
+                var existingSubjectIds = currentSubjects.Select(s => s.SubjectId).ToList();
+
+                var subjectsToDelete = existingSubjectIds
+                    .Where(existing => !newSubjectIds.Contains(existing))
+                    .Select(subjectId => new SubjectsAssignment
+                    {
+                        FacultyId = facultyId,
+                        SubjectId = subjectId
+                    })
+                    .ToList();
+
+                if (subjectsToDelete.Any())
+                    await _courseAndSubjectRepository.SaveAssignedSubjectsAsync(subjectsToDelete, "delete");
+
+                var subjectsToInsert = assignedSubjects
+                    .Where(s => !existingSubjectIds.Contains(s.SubjectId))
+                    .ToList();
+
+                if (subjectsToInsert.Any())
+                    await _courseAndSubjectRepository.SaveAssignedSubjectsAsync(subjectsToInsert, "insert");
+
+                return Ok(new { Message = "Subjects assigned successfully." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred while assigning subjects. Error: {ex.Message}");
+            }
+        }
+
+
     }
 }

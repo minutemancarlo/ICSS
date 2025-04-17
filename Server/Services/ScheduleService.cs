@@ -33,8 +33,11 @@ namespace ICSS.Server.Services
 
             if (schedule != null)
             {
-
-                foreach (var item in schedule)
+                var sortedSchedule = schedule
+            .OrderBy(item => GetDayOrder(item.Days)) // Sort by Days (M -> T -> W -> Th -> F -> Sat)
+            .ThenBy(item => ParseFirstTime(item.Schedule)) // Sort by the first time in the range
+            .ToList();
+                foreach (var item in sortedSchedule)
                 {
                     DataRow row = dt.NewRow();
                     row["Section"] = item.Section;
@@ -77,8 +80,11 @@ namespace ICSS.Server.Services
 
             if (schedule != null)
             {
-
-                foreach (var item in schedule)
+                var sortedSchedule = schedule
+           .OrderBy(item => GetDayOrder(item.Days)) // Sort by Days (M -> T -> W -> Th -> F -> Sat)
+           .ThenBy(item => ParseFirstTime(item.Schedule)) // Sort by the first time in the range
+           .ToList();
+                foreach (var item in sortedSchedule)
                 {
                     DataRow row = dt.NewRow();
                     row["Section"] = item.Section;
@@ -122,8 +128,11 @@ namespace ICSS.Server.Services
 
             if (schedule != null)
             {
-
-                foreach (var item in schedule)
+                var sortedSchedule = schedule
+           .OrderBy(item => GetDayOrder(item.Days)) // Sort by Days (M -> T -> W -> Th -> F -> Sat)
+           .ThenBy(item => ParseFirstTime(item.Schedule)) // Sort by the first time in the range
+           .ToList();
+                foreach (var item in sortedSchedule)
                 {
                     DataRow row = dt.NewRow();
                     row["Section"] = item.Section;
@@ -146,6 +155,36 @@ namespace ICSS.Server.Services
             }
 
             return dt;
+        }
+
+
+        // Helper method to map day names to sorting order
+        private int GetDayOrder(string day)
+        {
+            return day switch
+            {
+                "M" => 1,
+                "T" => 2,
+                "W" => 3,
+                "Th" => 4,
+                "F" => 5,
+                "Sat" => 6,
+                _ => 7  // Unknown days go last
+            };
+        }
+
+        // Helper method to parse time from Schedule column
+        private TimeSpan ParseFirstTime(string schedule)
+        {
+            if (!string.IsNullOrWhiteSpace(schedule))
+            {
+                var firstTimeString = schedule.Split('-').FirstOrDefault()?.Trim(); // Extract the first time
+                if (DateTime.TryParse(firstTimeString, out DateTime time))
+                {
+                    return time.TimeOfDay; // Convert to TimeSpan for sorting
+                }
+            }
+            return TimeSpan.MaxValue; // If parsing fails, place it at the end
         }
 
 
